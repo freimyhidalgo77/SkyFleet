@@ -9,22 +9,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import com.google.firebase.auth.FirebaseAuth
+import androidx.navigation.NavHostController
+import edu.ucne.skyplanerent.presentation.navigation.Screen
 
 @Composable
-
-fun FisrtScreen(onLoginScreen:()->Unit, onRegisterScreen:()->Unit){
+fun FirstScreen(navController: NavHostController){
 
     Column(
         modifier = Modifier
@@ -38,7 +31,7 @@ fun FisrtScreen(onLoginScreen:()->Unit, onRegisterScreen:()->Unit){
 
         Button(
             onClick = {
-              onLoginScreen()
+              navController.navigate(Screen.Login(0))
             },
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -49,7 +42,7 @@ fun FisrtScreen(onLoginScreen:()->Unit, onRegisterScreen:()->Unit){
 
         Button(
             onClick = {
-              onRegisterScreen()
+              navController.navigate(Screen.Register)
             },
             modifier = Modifier.fillMaxWidth()
         ) {
