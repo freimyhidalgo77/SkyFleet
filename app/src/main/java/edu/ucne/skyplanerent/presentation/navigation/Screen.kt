@@ -8,6 +8,12 @@ sealed interface Screen {
     object Home : Screen
 
     @Serializable
+    object FirstScreen : Screen
+
+    @Serializable
+    object Register : Screen
+
+    @Serializable
     data class Login(val loginId: Int) : Screen
 
 }
