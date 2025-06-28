@@ -7,7 +7,6 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
     alias(libs.plugins.kotlinx.serialization)
 
-
     id("com.google.gms.google-services")
 
 
@@ -54,6 +53,8 @@ dependencies {
     //navigation
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
+
+    
 
     //room
     implementation("androidx.room:room-runtime:2.6.1")
