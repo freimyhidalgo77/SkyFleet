@@ -70,6 +70,7 @@ fun LoginScreen(
                         }
                     }
             },
+            enabled = email.isNotBlank() && password.isNotBlank(),
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Iniciar sesión")
