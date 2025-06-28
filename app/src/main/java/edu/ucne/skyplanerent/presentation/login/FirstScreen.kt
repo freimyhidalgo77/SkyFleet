@@ -25,7 +25,7 @@ fun FirstScreen(navController: NavHostController){
             .padding(24.dp),
         verticalArrangement = Arrangement.Center
     ) {
-        Text(text = "Iniciar sesión", style = MaterialTheme.typography.headlineMedium)
+        Text(text = "Reserva tu avion con solo unos clicks!", style = MaterialTheme.typography.headlineMedium)
 
         Spacer(modifier = Modifier.height(16.dp))
 
