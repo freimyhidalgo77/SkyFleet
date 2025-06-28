@@ -37,7 +37,6 @@ fun LoginScreen(
             .padding(24.dp),
         verticalArrangement = Arrangement.Center
     ) {
-        Text(text = "Iniciar sesión", style = MaterialTheme.typography.headlineMedium)
 
         Spacer(modifier = Modifier.height(16.dp))
 
