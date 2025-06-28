@@ -10,22 +10,27 @@ import edu.ucne.skyplanerent.presentation.login.LoginScreen
 
 @Composable
 fun AppNavigation() {
-    val navController = rememberNavController()
     val auth = FirebaseAuth.getInstance()
+    val navController = rememberNavController()
 
-    NavHost(navController = navController, startDestination = if (auth.currentUser != null) "home" else "login") {
-        composable("login") {
-            LoginScreen(
-                onLoginSuccess = { navController.navigate("home") }
-            )
-        }
-        composable("home") {
+    NavHost(
+        navController = navController,
+        startDestination = Screen.Home
+    ) {
+        composable<Screen.Home> {
             HomeScreen(
                 onLogout = {
-                    auth.signOut()
-                    navController.navigate("login") {
-                        popUpTo("home") { inclusive = true }
+                    navController.navigate(Screen.Login(0)) {
+                        popUpTo(Screen.Home) { inclusive = true }
                     }
+                }
+            )
+        }
+
+        composable<Screen.Login> {
+            LoginScreen(
+                onLoginSuccess = {
+                    navController.navigate(Screen.Home)
                 }
             )
         }
