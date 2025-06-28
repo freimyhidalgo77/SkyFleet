@@ -8,6 +8,7 @@ import com.google.firebase.auth.FirebaseAuth
 import edu.ucne.skyplanerent.HomeScreen
 import edu.ucne.skyplanerent.presentation.login.FirstScreen
 import edu.ucne.skyplanerent.presentation.login.LoginScreen
+import edu.ucne.skyplanerent.presentation.login.RegisterScreen
 
 @Composable
 fun AppNavigation() {
@@ -36,6 +37,15 @@ fun AppNavigation() {
             LoginScreen(
                 onLoginSuccess = {
                     navController.navigate(Screen.Home)
+                }
+            )
+        }
+        composable<Screen.Register> {
+            RegisterScreen(
+                onRegisterSuccess = {
+                    navController.navigate(Screen.Login(0)) {
+                        popUpTo(Screen.Register) { inclusive = true }
+                    }
                 }
             )
         }
