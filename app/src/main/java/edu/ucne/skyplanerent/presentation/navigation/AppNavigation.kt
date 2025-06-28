@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
 import edu.ucne.skyplanerent.HomeScreen
+import edu.ucne.skyplanerent.presentation.login.FirstScreen
 import edu.ucne.skyplanerent.presentation.login.LoginScreen
 
 @Composable
@@ -15,12 +16,16 @@ fun AppNavigation() {
 
     NavHost(
         navController = navController,
-        startDestination = Screen.Home
+        startDestination = Screen.FirstScreen
     ) {
+
+        composable<Screen.FirstScreen> {
+            FirstScreen(navController)
+        }
         composable<Screen.Home> {
             HomeScreen(
                 onLogout = {
-                    navController.navigate(Screen.Login(0)) {
+                    navController.navigate(Screen.FirstScreen) {
                         popUpTo(Screen.Home) { inclusive = true }
                     }
                 }
