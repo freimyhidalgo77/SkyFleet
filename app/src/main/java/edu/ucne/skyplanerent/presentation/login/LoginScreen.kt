@@ -44,7 +44,7 @@ fun LoginScreen(
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
-            label = { Text("Correo electrónico") },
+            label = { Text("Correo electronico") },
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
@@ -77,22 +77,6 @@ fun LoginScreen(
         }
 
         Spacer(modifier = Modifier.height(8.dp))
-
-        Button(
-            onClick = {
-                auth.createUserWithEmailAndPassword(email, password)
-                    .addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            onLoginSuccess()
-                        } else {
-                            errorMessage = task.exception?.message
-                        }
-                    }
-            },
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Registrarse")
-        }
 
         errorMessage?.let {
             Spacer(modifier = Modifier.height(16.dp))
