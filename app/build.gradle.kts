@@ -6,14 +6,19 @@ plugins {
     id("com.google.dagger.hilt.android")
     id("org.jetbrains.kotlin.plugin.compose")
     alias(libs.plugins.kotlinx.serialization)
+
+
+    id("com.google.gms.google-services")
+
+
 }
 
 android {
-    namespace = "edu.ucne.registrotecnico"
+    namespace = "edu.ucne.skyplanerent"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "edu.ucne.registrotecnico"
+        applicationId = "edu.ucne.skyplanerent"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
@@ -68,7 +73,6 @@ dependencies {
     implementation("androidx.compose.material:material:1.3.1") // Usa la última versión
 
 
-
     //Hilt
     implementation("com.google.dagger:hilt-android:2.51")
     ksp("com.google.dagger:hilt-android-compiler:2.51")
@@ -79,6 +83,16 @@ dependencies {
     implementation("com.squareup.moshi:moshi-kotlin:1.14.0")
     implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+
+    //Firebase
+    implementation("com.google.firebase:firebase-auth-ktx:22.3.1")
+    implementation ("androidx.compose.material3:material3:1.2.1")
+    implementation ("androidx.navigation:navigation-compose:2.7.7")
+    implementation ("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
+    implementation(platform("com.google.firebase:firebase-bom:33.16.0"))
+    implementation(platform("com.google.firebase:firebase-analytics"))
+
+
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
