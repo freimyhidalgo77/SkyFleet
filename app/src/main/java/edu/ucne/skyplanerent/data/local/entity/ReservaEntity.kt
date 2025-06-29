@@ -14,6 +14,7 @@ data class ReservaEntity(
     val tipoVueloId:Int? = null,
     val categoriaId:Int? = null,
     val rutaId:Int? = null,
+    val pasajeros:Int? = null,
     val fecha: Date?,
     val impuesto: Double,
     val tarifa:Double
