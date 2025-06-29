@@ -13,9 +13,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.google.firebase.FirebaseApp
+import dagger.hilt.android.AndroidEntryPoint
 import edu.ucne.skyplanerent.presentation.navigation.AppNavigation
 import edu.ucne.skyplanerent.ui.theme.SkyPlaneRentTheme
 
+
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
