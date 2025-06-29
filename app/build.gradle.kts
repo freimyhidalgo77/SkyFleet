@@ -54,7 +54,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
 
-    
+
 
     //room
     implementation("androidx.room:room-runtime:2.6.1")
