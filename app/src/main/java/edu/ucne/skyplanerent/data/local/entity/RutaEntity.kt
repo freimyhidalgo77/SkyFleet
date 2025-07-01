@@ -9,7 +9,7 @@ import java.util.Date
 data class RutaEntity(
     @PrimaryKey(autoGenerate = true)
     val rutaId:Int? = null,
-    val aeronaveId:Int? = null,
+    val aeronaveId: Int = 0,
     val origen:String? = null,
     val destino:String? = null,
     val distancia:String? = null,
