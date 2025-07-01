@@ -10,9 +10,9 @@ data class RutaEntity(
     @PrimaryKey(autoGenerate = true)
     val rutaId:Int? = null,
     val aeronaveId: Int = 0,
-    val origen:String? = null,
-    val destino:String? = null,
-    val distancia:String? = null,
-    val duracionEstimada:String? = null,
+    val origen:String = "",
+    val destino:String = "",
+    val distancia:String = "",
+    val duracionEstimada:String = "",
 
 )
