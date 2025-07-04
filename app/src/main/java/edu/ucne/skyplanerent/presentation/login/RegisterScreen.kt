@@ -8,7 +8,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -46,7 +48,7 @@ fun RegisterScreen(
         painter = painterResource(id = R.drawable.logoskyfleet),
         contentDescription = "Logo de Skyfleet",
         modifier = Modifier
-            .height(200.dp)
+            .height(100.dp)
             .fillMaxSize()
     )
 
@@ -55,39 +57,56 @@ fun RegisterScreen(
             value = nombre,
             onValueChange = { nombre = it },
             label = { Text("Nombre") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp)
         )
+
+
+        Spacer(modifier = Modifier.height(25.dp))
 
         OutlinedTextField(
             value = apellido,
             onValueChange = { apellido = it },
             label = { Text("Apellido") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp)
         )
+
+
+        Spacer(modifier = Modifier.height(25.dp))
 
         OutlinedTextField(
             value = correo,
             onValueChange = { correo = it },
             label = { Text("Correo electronico") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp)
         )
+
+
+        Spacer(modifier = Modifier.height(25.dp))
 
         OutlinedTextField(
             value = contrasena,
             onValueChange = { contrasena = it },
             label = { Text("Contraseña") },
             visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp)
         )
+
+
+        Spacer(modifier = Modifier.height(25.dp))
 
         OutlinedTextField(
             value = telefono,
             onValueChange = { telefono = it },
             label = { Text("Telefono") },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp)
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(25.dp))
 
         Button(
             onClick = {
@@ -101,7 +120,11 @@ fun RegisterScreen(
                     }
             },
             enabled = correo.isNotBlank() && contrasena.isNotBlank(),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF0A80ED),
+                contentColor = Color.White
+            )
         ) {
             Text("Registrar")
         }
