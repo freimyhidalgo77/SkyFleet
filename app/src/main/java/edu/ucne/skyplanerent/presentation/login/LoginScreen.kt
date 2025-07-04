@@ -1,5 +1,6 @@
 package edu.ucne.skyplanerent.presentation.login
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -18,9 +19,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.google.firebase.auth.FirebaseAuth
+import edu.ucne.skyplanerent.R
 import edu.ucne.skyplanerent.presentation.navigation.Screen
 
 @Composable
@@ -36,8 +39,16 @@ fun LoginScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(24.dp),
-        verticalArrangement = Arrangement.Center
+        verticalArrangement = Arrangement.Top
     ) {
+
+        Image(
+            painter = painterResource(id = R.drawable.logoskyfleet),
+            contentDescription = "Logo de SkyFleet",
+            modifier = Modifier
+                .height(100.dp)
+                .fillMaxSize()
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -46,8 +57,11 @@ fun LoginScreen(
             onValueChange = { email = it },
             label = { Text("Correo electronico") },
             singleLine = true,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+
         )
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
             value = password,
@@ -58,7 +72,7 @@ fun LoginScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(50.dp))
 
         Button(
             onClick = {
@@ -73,6 +87,7 @@ fun LoginScreen(
             },
             enabled = email.isNotBlank() && password.isNotBlank(),
             modifier = Modifier.fillMaxWidth()
+
         ) {
             Text("Iniciar sesión")
         }
