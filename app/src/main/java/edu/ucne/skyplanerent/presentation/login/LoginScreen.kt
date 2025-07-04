@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.google.firebase.auth.FirebaseAuth
+import edu.ucne.skyplanerent.presentation.navigation.Screen
 
 @Composable
 fun LoginScreen(
