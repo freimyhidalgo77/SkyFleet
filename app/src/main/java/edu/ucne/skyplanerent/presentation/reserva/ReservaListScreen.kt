@@ -78,7 +78,7 @@ fun ReservaBodyListScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "Reservas",
+                        text = "Mis Reservas",
                         fontWeight = FontWeight.Bold,
                         fontSize = 24.sp,
                         color = Color.White
