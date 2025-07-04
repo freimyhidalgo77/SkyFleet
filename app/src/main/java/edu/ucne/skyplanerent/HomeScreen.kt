@@ -21,33 +21,65 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Scaffold
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import edu.ucne.skyplanerent.presentation.navigation.BottomNavItem
+import edu.ucne.skyplanerent.presentation.navigation.Screen
 
 @Composable
 fun HomeScreen(
     onLogout: () -> Unit,
-    onNavigateToReserva: () -> Unit
+    onNavigateToReserva: () -> Unit,
+    navController: NavController
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text("Bienvenido!", style = MaterialTheme.typography.headlineMedium)
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = onLogout) {
-            Text("Cerrar sesion")
+    val items = listOf(
+        BottomNavItem("Inicio", Icons.Default.Home, Screen.Home),
+        BottomNavItem("Reservas", Icons.Default.List, Screen.Reserva),
+        BottomNavItem("Perfil", Icons.Default.Person, Screen.Perfil)
+    )
+
+    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+
+    Scaffold(
+        bottomBar = {
+            NavigationBar {
+                items.forEach { item ->
+                    NavigationBarItem(
+                        icon = { Icon(item.icon, contentDescription = item.title) },
+                        label = { Text(item.title) },
+                        selected = currentRoute == item.route.toString(),
+                        onClick = {
+                            if (currentRoute != item.route.toString()) {
+                                navController.navigate(item.route) {
+                                    popUpTo(Screen.Home) { inclusive = false }
+                                }
+                            }
+                        }
+                    )
+                }
+            }
+        }
+    ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .padding(24.dp),
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text("Bienvenido!", style = MaterialTheme.typography.headlineMedium)
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(onClick = onLogout) {
+                Text("Cerrar sesión")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(onClick = onNavigateToReserva) {
+                Text("Ver Reservas")
+            }
         }
     }
-
-    Button(onClick = onNavigateToReserva) {
-        Text("Ver Reservas")
-    }
-
-
-
 }
 
 
