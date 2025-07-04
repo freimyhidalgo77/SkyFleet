@@ -74,13 +74,12 @@ fun HomeScreen(
                 Text("Cerrar sesión")
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = onNavigateToReserva) {
-                Text("Ver Reservas")
-            }
         }
+
     }
-}
+
+    }
+
 
 
 
