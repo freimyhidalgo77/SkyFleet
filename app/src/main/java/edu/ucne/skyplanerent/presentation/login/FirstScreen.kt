@@ -34,8 +34,8 @@ fun FirstScreen(navController: NavHostController) {
     )
     {
         Image(
-            painter = painterResource(id = R.drawable.c172hd),
-            contentDescription = "Logo Cessna 172 HD",
+            painter = painterResource(id = R.drawable.logoskyfleet),
+            contentDescription = "Logo de Skyfleet",
             modifier = Modifier
                 .height(200.dp)
                 .fillMaxSize()
@@ -47,21 +47,24 @@ fun FirstScreen(navController: NavHostController) {
                 style = MaterialTheme.typography.headlineMedium
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(15.dp))
 
-            Row(
+            Column (
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
 
                 Button(
                     onClick = {
                         navController.navigate(Screen.Login(0))
                     },
-                    modifier = Modifier.width(135.dp)
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Iniciar sesión")
+                    Text("Iniciar sesión",
+                        style = MaterialTheme.typography.labelLarge
+                    )
+
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -70,9 +73,11 @@ fun FirstScreen(navController: NavHostController) {
                     onClick = {
                         navController.navigate(Screen.Register)
                     },
-                    modifier = Modifier.width(135.dp)
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Registrarse")
+                    Text("Registrarse",
+                        style = MaterialTheme.typography.labelLarge
+                        )
                 }
             }
         }
