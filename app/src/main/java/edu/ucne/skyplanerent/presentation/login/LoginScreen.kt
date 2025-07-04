@@ -100,6 +100,17 @@ fun LoginScreen(
             Text("Iniciar sesión")
         }
 
+        Spacer(modifier = Modifier.weight(1f))
+
+        Text(
+            text = "¿No tienes una cuenta?  ¡Regístrate!",
+            modifier = Modifier
+                .fillMaxWidth(),
+            color = Color.Gray.copy(alpha = 0.6f),
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
+
         Spacer(modifier = Modifier.height(8.dp))
 
         errorMessage?.let {

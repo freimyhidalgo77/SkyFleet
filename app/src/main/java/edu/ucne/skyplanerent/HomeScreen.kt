@@ -34,9 +34,11 @@ fun HomeScreen(
     navController: NavController
 ) {
     val items = listOf(
-        BottomNavItem("Inicio", Icons.Default.Home, Screen.Home),
         BottomNavItem("Reservas", Icons.Default.List, Screen.Reserva),
-        BottomNavItem("Perfil", Icons.Default.Person, Screen.Perfil)
+        BottomNavItem("Aronaves", Icons.Default.List, Screen.Aeronaves),
+        BottomNavItem("Rutas y Viajes", Icons.Default.List, Screen.Rutas_y_viajes),
+        BottomNavItem("Perfil", Icons.Default.Person, Screen.Perfil),
+        //BottomNavItem("Inicio", Icons.Default.Home, Screen.Home),
     )
 
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
