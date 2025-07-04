@@ -1,9 +1,11 @@
 package edu.ucne.skyplanerent
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
@@ -22,6 +24,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Scaffold
+import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import edu.ucne.skyplanerent.presentation.navigation.BottomNavItem
@@ -66,21 +69,46 @@ fun HomeScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
-                .padding(24.dp),
-            verticalArrangement = Arrangement.Center
+                .padding(innerPadding),
+            verticalArrangement = Arrangement.Top
         ) {
-            Text("Bienvenido!", style = MaterialTheme.typography.headlineMedium)
+            Image(
+                painter = painterResource(id = R.drawable.logoskyfleet),
+                contentDescription = "Logo de SkyFleet",
+                modifier = Modifier
+                    .fillMaxWidth() // ✅ solo ancho completo
+                    .height(85.dp)
+            )
+
+            Spacer(modifier = Modifier.height(15.dp))
+
+            Image(
+                painter = painterResource(id = R.drawable.c172welcome),
+                contentDescription = "Logo de bienvenida!",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp)
+            )
+
+            Spacer(modifier = Modifier.height(25.dp))
+
+            Text(
+                "Bienvenido!",
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier.padding(horizontal = 7.dp)
+            )
+
             Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = onLogout) {
+
+            Button(onClick = onLogout)
+            {
                 Text("Cerrar sesión")
             }
 
+
         }
-
     }
-
-    }
+}
 
 
 
