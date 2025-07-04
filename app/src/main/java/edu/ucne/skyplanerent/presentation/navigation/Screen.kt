@@ -16,4 +16,16 @@ sealed interface Screen {
     @Serializable
     data class Login(val loginId: Int) : Screen
 
+    @Serializable
+     object  Reserva : Screen
+
+    @Serializable
+    object Aeronaves : Screen
+
+    @Serializable
+    object Rutas_y_viajes : Screen
+
+    @Serializable
+    object Perfil : Screen
+
 }
