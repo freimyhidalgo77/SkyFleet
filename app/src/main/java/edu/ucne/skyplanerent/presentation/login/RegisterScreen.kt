@@ -1,5 +1,6 @@
 package edu.ucne.skyplanerent.presentation.login
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -17,9 +18,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.google.firebase.auth.FirebaseAuth
+import edu.ucne.skyplanerent.R
 
 @Composable
 fun RegisterScreen(
@@ -36,8 +39,18 @@ fun RegisterScreen(
     Column(modifier = Modifier
         .fillMaxSize()
         .padding(24.dp),
-        verticalArrangement = Arrangement.Center
-    ) {
+        verticalArrangement = Arrangement.Top
+    ){
+
+    Image(
+        painter = painterResource(id = R.drawable.logoskyfleet),
+        contentDescription = "Logo de Skyfleet",
+        modifier = Modifier
+            .height(200.dp)
+            .fillMaxSize()
+    )
+
+
         OutlinedTextField(
             value = nombre,
             onValueChange = { nombre = it },
