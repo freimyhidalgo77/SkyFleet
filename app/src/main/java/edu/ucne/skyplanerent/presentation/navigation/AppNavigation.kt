@@ -32,6 +32,7 @@ fun AppNavigation() {
 
         composable<Screen.Home> {
             HomeScreen(
+                navController = navController,
                 onLogout = {
                     navController.navigate(Screen.FirstScreen) {
                         popUpTo(Screen.Home) { inclusive = true }
@@ -42,6 +43,7 @@ fun AppNavigation() {
                 }
             )
         }
+
 
         composable<Screen.Login> {
             LoginScreen(
