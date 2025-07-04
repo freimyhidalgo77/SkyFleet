@@ -1,19 +1,25 @@
 package edu.ucne.skyplanerent.presentation.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
 import edu.ucne.skyplanerent.HomeScreen
 import edu.ucne.skyplanerent.presentation.login.FirstScreen
 import edu.ucne.skyplanerent.presentation.login.LoginScreen
 import edu.ucne.skyplanerent.presentation.login.RegisterScreen
+import edu.ucne.skyplanerent.presentation.reserva.ReservaListScreen
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.coroutineScope
 
 @Composable
 fun AppNavigation() {
     val auth = FirebaseAuth.getInstance()
     val navController = rememberNavController()
+    val scope = rememberCoroutineScope()
 
     NavHost(
         navController = navController,
@@ -23,12 +29,16 @@ fun AppNavigation() {
         composable<Screen.FirstScreen> {
             FirstScreen(navController)
         }
+
         composable<Screen.Home> {
             HomeScreen(
                 onLogout = {
                     navController.navigate(Screen.FirstScreen) {
                         popUpTo(Screen.Home) { inclusive = true }
                     }
+                },
+                onNavigateToReserva = {
+                    navController.navigate(Screen.Reserva)
                 }
             )
         }
@@ -40,6 +50,7 @@ fun AppNavigation() {
                 }
             )
         }
+
         composable<Screen.Register> {
             RegisterScreen(
                 onRegisterSuccess = {
@@ -47,6 +58,16 @@ fun AppNavigation() {
                         popUpTo(Screen.Register) { inclusive = true }
                     }
                 }
+            )
+        }
+
+
+        composable<Screen.Reserva> {
+            ReservaListScreen(
+                scope = scope,
+                onCreate = { /* navController.navigate(...) */ },
+                onEdit = { /* navController.navigate(...) */ },
+                onDelete = { /* lógica */ }
             )
         }
     }
