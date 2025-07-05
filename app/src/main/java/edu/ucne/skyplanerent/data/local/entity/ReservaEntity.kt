@@ -12,7 +12,7 @@ data class ReservaEntity(
     val formularioId:Int? = null,
     val metodoPagoId:Int? = null,
     val tipoVueloId:Int? = null,
-    val categoriaId:Int? = null,
+    val categoriaId:Int? = null, // Categoria de aeronave
     val rutaId:Int? = null,
     val pasajeros:Int? = null,
     val fecha: Date?,
