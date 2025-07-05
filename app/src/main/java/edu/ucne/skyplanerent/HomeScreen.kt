@@ -76,11 +76,11 @@ fun HomeScreen(
                 painter = painterResource(id = R.drawable.logoskyfleet),
                 contentDescription = "Logo de SkyFleet",
                 modifier = Modifier
-                    .fillMaxWidth() // ✅ solo ancho completo
-                    .height(85.dp)
+                    .fillMaxWidth()
+                    .height(60.dp)
             )
 
-            Spacer(modifier = Modifier.height(15.dp))
+            Spacer(modifier = Modifier.height(9.dp))
 
             Image(
                 painter = painterResource(id = R.drawable.c172welcome),
