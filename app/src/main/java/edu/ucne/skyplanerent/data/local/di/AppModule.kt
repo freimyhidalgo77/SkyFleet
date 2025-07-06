@@ -29,5 +29,13 @@ object AppModule {
     @Singleton
     fun provideReservaDb(appDataDb: SkyPlaneRentDB) = appDataDb.reservaDao()
 
+    @Provides
+    @Singleton
+    fun provideRutaDb(appDataDb: SkyPlaneRentDB) = appDataDb.rutaDao()
+
+    @Provides
+    @Singleton
+    fun provideTipoVieloDb(appDataDb: SkyPlaneRentDB) = appDataDb.tipoVueloDao()
+
 
 }
