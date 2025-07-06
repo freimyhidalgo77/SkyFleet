@@ -4,6 +4,8 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import edu.ucne.skyplanerent.data.local.dao.ReservaDao
+import edu.ucne.skyplanerent.data.local.dao.RutaDao
+import edu.ucne.skyplanerent.data.local.dao.TipoVueloDao
 import edu.ucne.skyplanerent.data.local.entity.ReservaEntity
 
 @Database(
@@ -17,5 +19,7 @@ import edu.ucne.skyplanerent.data.local.entity.ReservaEntity
 @TypeConverters(DateConverter::class)
 abstract class SkyPlaneRentDB : RoomDatabase() {
     abstract fun reservaDao(): ReservaDao
+    abstract fun rutaDao(): RutaDao
+    abstract fun tipoVueloDao(): TipoVueloDao
 
 }
