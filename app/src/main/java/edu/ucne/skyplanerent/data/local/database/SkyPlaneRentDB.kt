@@ -3,6 +3,7 @@ package edu.ucne.skyplanerent.data.local.database
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import edu.ucne.skyplanerent.data.local.dao.FormularioDao
 import edu.ucne.skyplanerent.data.local.dao.ReservaDao
 import edu.ucne.skyplanerent.data.local.dao.RutaDao
 import edu.ucne.skyplanerent.data.local.dao.TipoVueloDao
@@ -21,5 +22,6 @@ abstract class SkyPlaneRentDB : RoomDatabase() {
     abstract fun reservaDao(): ReservaDao
     abstract fun rutaDao(): RutaDao
     abstract fun tipoVueloDao(): TipoVueloDao
+    abstract fun formularioDao():FormularioDao
 
 }
