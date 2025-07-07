@@ -44,7 +44,7 @@ class FormularioViewModel @Inject constructor(
         getFormulario()
     }
 
-    private fun save() {
+     fun saveFormulario() {
         viewModelScope.launch {
             if (_uiState.value.nombre.isBlank() || _uiState.value.apellido.isBlank() ||
                 _uiState.value.telefono.isBlank() || _uiState.value.correo.isBlank() ||
@@ -60,7 +60,7 @@ class FormularioViewModel @Inject constructor(
         }
     }
 
-    private fun nuevoFormulario() {
+     fun nuevoFormulario() {
         _uiState.update {
             it.copy(
                 formularioId = null,
@@ -94,13 +94,13 @@ class FormularioViewModel @Inject constructor(
         }
     }
 
-    private fun delete() {
+     fun deleteFormulario() {
         viewModelScope.launch {
             formularioRepository.deleteFormulario(_uiState.value.toEntity())
         }
     }
 
-    private fun getFormulario() {
+     fun getFormulario() {
         viewModelScope.launch {
             formularioRepository.getAll().collect { formulario ->
                 _uiState.update {
@@ -110,43 +110,43 @@ class FormularioViewModel @Inject constructor(
         }
     }
 
-    private fun onFormularioChange(formularioId: Int) {
+     fun onFormularioChange(formularioId: Int) {
         _uiState.update {
             it.copy(formularioId = formularioId)
         }
     }
 
-    private fun onNombreChange(nombre: String) {
+     fun onNombreChange(nombre: String) {
         _uiState.update {
             it.copy(nombre = nombre)
         }
     }
 
-    private fun onApellidoChange(apellido: String) {
+    fun onApellidoChange(apellido: String) {
         _uiState.update {
             it.copy(apellido = apellido)
         }
     }
 
-    private fun onCorreoChange(correo: String) {
+     fun onCorreoChange(correo: String) {
         _uiState.update {
             it.copy(correo = correo)
         }
     }
 
-    private fun onTelefonoChange(telefono: String) {
+      fun onTelefonoChange(telefono: String) {
         _uiState.update {
             it.copy(telefono = telefono)
         }
     }
 
-    private fun onPasaporteChange(pasaporte: String) {
+      fun onPasaporteChange(pasaporte: String) {
         _uiState.update {
             it.copy(pasaporte = pasaporte)
         }
     }
 
-    private fun onCiudadResidenciaChange(ciudad: String) {
+      fun onCiudadResidenciaChange(ciudad: String) {
         _uiState.update {
             it.copy(ciudadResidencia = ciudad)
         }
