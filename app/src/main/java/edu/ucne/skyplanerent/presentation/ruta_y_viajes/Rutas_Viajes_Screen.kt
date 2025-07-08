@@ -1,82 +1,63 @@
 package edu.ucne.skyplanerent.presentation.ruta_y_viajes
 
-import androidx.compose.foundation.Image
+import android.app.DatePickerDialog
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import edu.ucne.skyplanerent.R
 import edu.ucne.skyplanerent.data.local.entity.ReservaEntity
-import edu.ucne.skyplanerent.data.local.entity.RutaEntity
 import edu.ucne.skyplanerent.data.local.entity.TipoVueloEntity
 import edu.ucne.skyplanerent.presentation.reserva.ReservaViewModel
 import edu.ucne.skyplanerent.presentation.reserva.UiState
-import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaEvent
-import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaUiState
-import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaViewModel
-import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloEvent
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloViewModel
 import kotlinx.coroutines.CoroutineScope
+import java.text.SimpleDateFormat
+import java.util.*
 
 @Composable
-fun Rutas_Viajes_Screen (
+fun Rutas_Viajes_Screen(
     reservaViewModel: ReservaViewModel = hiltViewModel(),
     tipoVueloViewModel: TipoVueloViewModel = hiltViewModel(),
     scope: CoroutineScope,
-    onCreate:()-> Unit,
-    onEdit:(Int)-> Unit,
-    onDelete:(Int)-> Unit
-){
+    onCreate: () -> Unit,
+    onEdit: (Int) -> Unit,
+    onDelete: (Int) -> Unit
+) {
     val reservaUiState by reservaViewModel.uiState.collectAsStateWithLifecycle()
     val tipoVueloUiState by tipoVueloViewModel.uiState.collectAsStateWithLifecycle()
 
     Vuelos_RutasBodyListScreen(
         uiState = reservaUiState,
-        tiposDeVuelo = tipoVueloUiState.tipovuelo, // <- Aquí pasa la lista de tipos
+        tiposDeVuelo = tipoVueloUiState.tipovuelo,
         scope = scope,
         onCreate = onCreate,
         onEdit = onEdit,
-        onDelete = onDelete
+        onDelete = onDelete,
+        onReserva = { fecha ->
+            // Aquí puedes guardar la reserva usando el ViewModel
+            val reserva = ReservaEntity(
+                tipoVueloId = 1, // Por ejemplo: vuelo seleccionado
+                rutaId = 1,      // ruta seleccionada
+                fecha = fecha,
+                pasajeros = 1,
+                impuesto = 0.0,
+                tarifa = 1000.0,
+                precioTotal = 0.0
+            )
+            reservaViewModel.saveReserva()
+        }
     )
 }
 
@@ -86,10 +67,13 @@ fun Vuelos_RutasBodyListScreen(
     uiState: UiState,
     tiposDeVuelo: List<TipoVueloEntity>,
     scope: CoroutineScope,
-    onCreate:()-> Unit,
-    onEdit:(Int)-> Unit,
-    onDelete:(Int)-> Unit
+    onCreate: () -> Unit,
+    onEdit: (Int) -> Unit,
+    onDelete: (Int) -> Unit,
+    onReserva: (Date) -> Unit
 ) {
+    var fechaSeleccionada by remember { mutableStateOf<Date?>(null) }
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -114,7 +98,29 @@ fun Vuelos_RutasBodyListScreen(
                 .padding(8.dp)
                 .fillMaxSize()
         ) {
-            // Mostrar la lista de tipos de vuelo
+            // Selector de fecha
+            FechaSelector(
+                fechaSeleccionada = fechaSeleccionada,
+                onFechaSeleccionada = { nuevaFecha ->
+                    fechaSeleccionada = nuevaFecha
+                }
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Button(
+                onClick = {
+                    fechaSeleccionada?.let {
+                        onReserva(it)
+                    }
+                },
+                enabled = fechaSeleccionada != null
+            ) {
+                Text("Reservar con fecha")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             ListaDeTiposDeVuelo(tiposDeVuelo = tiposDeVuelo)
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -124,16 +130,17 @@ fun Vuelos_RutasBodyListScreen(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 items(uiState.reservas) { reserva ->
-
-                   // Vuelos_RutasRow(tipoVuelo, reserva.ruta, onEdit, onDelete)
+                    Text("Reserva ID: ${reserva.reservaId} - Fecha: ${
+                        reserva.fecha?.let {
+                            SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(it)
+                        } ?: ""
+                    }")
                 }
             }
         }
     }
 }
 
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListaDeTiposDeVuelo(
     tiposDeVuelo: List<TipoVueloEntity>
@@ -186,69 +193,37 @@ fun TipoVueloCard(vuelo: TipoVueloEntity) {
     }
 }
 
-
 @Composable
-fun Vuelos_RutasRow(
-    tipoVuelo:TipoVueloEntity,
-    ruta:RutaEntity,
-    onEdit: (Int) -> Unit,
-    onDelete: (Int) -> Unit
-
+fun FechaSelector(
+    fechaSeleccionada: Date?,
+    onFechaSeleccionada: (Date) -> Unit
 ) {
-    var expanded by remember { mutableStateOf(false) }
+    val contexto = LocalContext.current
+    val calendario = Calendar.getInstance()
+    val datePickerDialog = DatePickerDialog(
+        contexto,
+        { _, year, month, day ->
+            val nuevaFecha = Calendar.getInstance()
+            nuevaFecha.set(year, month, day)
+            onFechaSeleccionada(nuevaFecha.time)
+        },
+        calendario.get(Calendar.YEAR),
+        calendario.get(Calendar.MONTH),
+        calendario.get(Calendar.DAY_OF_MONTH)
+    )
 
-    Card(
-        shape = MaterialTheme.shapes.medium,
-        modifier = Modifier
-            .padding(horizontal = 16.dp)
-            .fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(6.dp)
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = "Fecha seleccionada: ${
+                fechaSeleccionada?.let {
+                    SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(it)
+                } ?: "No seleccionada"
+            }",
+            style = MaterialTheme.typography.bodyLarge
+        )
 
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-                .background(MaterialTheme.colorScheme.surfaceVariant),
-            horizontalArrangement = Arrangement.SpaceBetween
-
-        ) {
-            Column(
-                modifier = Modifier.weight(5f),
-                verticalArrangement = Arrangement.Center
-            ) {
-
-                Text(
-                    text = "Ruta: ${ruta.rutaId}",
-                    style = androidx.compose.ui.text.TextStyle(
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.onSurface
-
-                    )
-                )
-
-              /*  Text(
-                    text = "Aeronave: ${ruta.rutaId}",
-                    style = androidx.compose.ui.text.TextStyle(
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.onSurface
-
-                    )
-                )
-
-                Text(
-                    text = "Piloto?: ${ruta.rutaId}",
-                    style = androidx.compose.ui.text.TextStyle(
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.onSurface
-
-                    )
-                )*/
-
-
-
-            }
+        Button(onClick = { datePickerDialog.show() }) {
+            Text("Seleccionar fecha del vuelo")
         }
     }
 }
