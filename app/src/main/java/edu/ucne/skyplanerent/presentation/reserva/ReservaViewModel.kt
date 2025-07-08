@@ -164,7 +164,8 @@ class ReservaViewModel @Inject constructor(
         categoriaId = categoriaId,
         fecha = fecha,
         impuesto = impuesto?:0.0,
-        tarifa = tarifa?:0.0
+        tarifa = tarifa?:0.0,
+        precioTotal = precioTotal
 
     )
 
