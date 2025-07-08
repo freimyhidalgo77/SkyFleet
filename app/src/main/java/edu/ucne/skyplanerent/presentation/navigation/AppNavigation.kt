@@ -12,6 +12,7 @@ import edu.ucne.skyplanerent.presentation.login.FirstScreen
 import edu.ucne.skyplanerent.presentation.login.LoginScreen
 import edu.ucne.skyplanerent.presentation.login.RegisterScreen
 import edu.ucne.skyplanerent.presentation.reserva.ReservaListScreen
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.Rutas_Viajes_Screen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 
@@ -40,6 +41,10 @@ fun AppNavigation() {
                 },
                 onNavigateToReserva = {
                     navController.navigate(Screen.Reserva)
+                },
+
+                onNavigateToRutas_Viajes = {
+                    navController.navigate(Screen.Rutas_y_viajes)
                 }
             )
         }
@@ -72,5 +77,15 @@ fun AppNavigation() {
                 onDelete = { /* lógica */ }
             )
         }
+
+        composable<Screen.Rutas_y_viajes> {
+            Rutas_Viajes_Screen (
+                scope = scope,
+                onCreate = { /* navController.navigate(...) */ },
+                onEdit = { /* navController.navigate(...) */ },
+                onDelete = { /* lógica */ }
+            )
+        }
+
     }
 }
