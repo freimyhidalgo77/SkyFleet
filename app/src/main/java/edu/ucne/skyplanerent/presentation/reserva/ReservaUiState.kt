@@ -15,6 +15,7 @@ data class UiState (
     val impuesto: Double = 0.0,
     val tarifa:Double = 0.0,
     val pasajeros:Int? = 0,
+    val precioTotal:Double = 0.0,
     val successMessage:String? = "",
     val errorMessage:String? = "",
     val reservas:List<ReservaEntity> = emptyList()
