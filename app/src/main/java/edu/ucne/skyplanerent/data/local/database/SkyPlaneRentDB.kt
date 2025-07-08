@@ -7,13 +7,19 @@ import edu.ucne.skyplanerent.data.local.dao.FormularioDao
 import edu.ucne.skyplanerent.data.local.dao.ReservaDao
 import edu.ucne.skyplanerent.data.local.dao.RutaDao
 import edu.ucne.skyplanerent.data.local.dao.TipoVueloDao
+import edu.ucne.skyplanerent.data.local.entity.FormularioEntity
 import edu.ucne.skyplanerent.data.local.entity.ReservaEntity
+import edu.ucne.skyplanerent.data.local.entity.RutaEntity
+import edu.ucne.skyplanerent.data.local.entity.TipoVueloEntity
 
 @Database(
     entities = [
         ReservaEntity::class,
+        RutaEntity::class,
+        TipoVueloEntity::class,
+        FormularioEntity::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 
