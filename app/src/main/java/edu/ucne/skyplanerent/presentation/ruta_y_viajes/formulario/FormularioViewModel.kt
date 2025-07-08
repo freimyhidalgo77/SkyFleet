@@ -1,4 +1,4 @@
-package edu.ucne.skyplanerent.presentation.formulario
+package edu.ucne.skyplanerent.presentation.ruta_y_viajes.formulario
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

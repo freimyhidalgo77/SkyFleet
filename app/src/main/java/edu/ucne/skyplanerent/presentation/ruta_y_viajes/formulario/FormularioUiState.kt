@@ -1,4 +1,4 @@
-package edu.ucne.skyplanerent.presentation.formulario
+package edu.ucne.skyplanerent.presentation.ruta_y_viajes.formulario
 
 import edu.ucne.skyplanerent.data.local.entity.FormularioEntity
 import edu.ucne.skyplanerent.data.local.entity.ReservaEntity

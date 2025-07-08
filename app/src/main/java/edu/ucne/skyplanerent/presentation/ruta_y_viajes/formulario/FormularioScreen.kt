@@ -1,4 +1,4 @@
-package edu.ucne.skyplanerent.presentation.formulario
+package edu.ucne.skyplanerent.presentation.ruta_y_viajes.formulario
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -147,7 +147,7 @@ fun FormularioBodyScreen(
             )
 
         ) {
-            Text("Guardar")
+            Text("Siguiente")
         }
 
         Spacer(modifier = Modifier.weight(1f))
