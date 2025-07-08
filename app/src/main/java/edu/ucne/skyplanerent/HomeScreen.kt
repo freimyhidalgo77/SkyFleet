@@ -34,6 +34,7 @@ import edu.ucne.skyplanerent.presentation.navigation.Screen
 fun HomeScreen(
     onLogout: () -> Unit,
     onNavigateToReserva: () -> Unit,
+    onNavigateToRutas_Viajes: () -> Unit,
     navController: NavController
 ) {
     val items = listOf(
@@ -104,8 +105,6 @@ fun HomeScreen(
             {
                 Text("Cerrar sesión")
             }
-
-
         }
     }
 }
