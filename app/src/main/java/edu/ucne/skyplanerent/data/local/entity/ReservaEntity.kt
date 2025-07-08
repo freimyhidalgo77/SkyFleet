@@ -17,6 +17,17 @@ data class ReservaEntity(
     val pasajeros:Int? = null,
     val fecha: Date?,
     val impuesto: Double,
-    val tarifa:Double
+    val tarifa:Double,
+    val precioTotal:Double
 
-)
+){
+    /*val costoVuelo: Double
+        get() = precioPorHora * horas
+
+    val impuesto: Double
+        get() = costoVuelo * impuestoPorcentaje
+
+    val total: Double
+        get() = costoVuelo + impuesto*/
+
+}
