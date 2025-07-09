@@ -8,10 +8,12 @@ import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
 import edu.ucne.skyplanerent.HomeScreen
+import edu.ucne.skyplanerent.data.local.entity.RutaEntity
 import edu.ucne.skyplanerent.presentation.login.FirstScreen
 import edu.ucne.skyplanerent.presentation.login.LoginScreen
 import edu.ucne.skyplanerent.presentation.login.RegisterScreen
 import edu.ucne.skyplanerent.presentation.reserva.ReservaListScreen
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.RutaScreenDetails
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.Rutas_Viajes_Screen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
@@ -21,6 +23,7 @@ fun AppNavigation() {
     val auth = FirebaseAuth.getInstance()
     val navController = rememberNavController()
     val scope = rememberCoroutineScope()
+
 
     NavHost(
         navController = navController,
@@ -85,6 +88,12 @@ fun AppNavigation() {
                 onEdit = { /* navController.navigate(...) */ },
                 onDelete = { /* lógica */ }
             )
+        }
+
+
+        composable("ruta_detalles/{rutaId}") { backStackEntry ->
+            val rutaId = backStackEntry.arguments?.getString("rutaId")?.toIntOrNull() ?: 0
+            RutaScreenDetails(rutaId = rutaId)
         }
 
     }
