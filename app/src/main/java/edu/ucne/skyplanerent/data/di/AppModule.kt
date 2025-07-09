@@ -1,4 +1,4 @@
-package edu.ucne.skyplanerent.data.local.di
+package edu.ucne.skyplanerent.data.di
 
 import android.content.Context
 import androidx.room.Room
