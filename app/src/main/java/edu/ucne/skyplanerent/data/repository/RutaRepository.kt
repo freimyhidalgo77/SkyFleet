@@ -1,4 +1,4 @@
-package edu.ucne.skyplanerent.data.local.repository
+package edu.ucne.skyplanerent.data.repository
 
 import edu.ucne.skyplanerent.data.local.dao.RutaDao
 import edu.ucne.skyplanerent.data.local.entity.RutaEntity
