@@ -5,8 +5,8 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.ucne.skyplanerent.data.local.entity.FormularioEntity
 import edu.ucne.skyplanerent.data.local.entity.RutaEntity
-import edu.ucne.skyplanerent.data.local.repository.FormularioRepository
-import edu.ucne.skyplanerent.data.local.repository.RutaRepository
+import edu.ucne.skyplanerent.data.repository.FormularioRepository
+import edu.ucne.skyplanerent.data.repository.RutaRepository
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaEvent
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaUiState
 import kotlinx.coroutines.flow.MutableStateFlow
