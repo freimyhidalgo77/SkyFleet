@@ -13,7 +13,7 @@ class RutasDataSource @Inject constructor(
 
     suspend fun getRuta(id: Int) = rutaManagerApi.getRuta(id)
 
-    suspend fun PostRuta(rutaDTO: RutaDTO) = rutaManagerApi.saveRuta(rutaDTO)
+    suspend fun postRuta(rutaDTO: RutaDTO) = rutaManagerApi.saveRuta(rutaDTO)
 
     suspend fun putRuta(id: Int, rutaDTO: RutaDTO) = rutaManagerApi.actualizarRuta(id, rutaDTO)
 

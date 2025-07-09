@@ -4,9 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.ucne.skyplanerent.data.local.entity.RutaEntity
-import edu.ucne.skyplanerent.data.local.repository.RutaRepository
+import edu.ucne.skyplanerent.data.remote.Resource
+import edu.ucne.skyplanerent.data.remote.dto.RutaDTO
+import edu.ucne.skyplanerent.data.repository.RutaRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -37,15 +40,31 @@ class RutaViewModel @Inject constructor(
         getRuta()
     }
 
-    //saveRuta
-    private fun save() {
+
+    fun saveRuta() {
         viewModelScope.launch {
-            if (_uiState.value.aeronaveId < 0 || _uiState.value.origen.isNullOrBlank() || _uiState.value.destino.isNullOrBlank() || _uiState.value.distancia.isNullOrBlank() || _uiState.value.duracionEstimada.isNullOrBlank()) {
+            if(_uiState.value.origen.isBlank() || _uiState.value.destino.isBlank() || _uiState.value.distancia!! == null || _uiState.value.duracionEstimada!! == null){
                 _uiState.update {
-                    it.copy(errorMessage = "Campo vacios")
+                    it.copy(
+                        errorMessage = "Los campos deben estar llenos!", successMessage = null
+                    )
                 }
-            } else {
-                rutasRepository.saveRuta(_uiState.value.toEntity())
+                return@launch
+            }
+            try{
+                rutasRepository.save(_uiState.value.toDTO())
+                _uiState.update {
+                    it.copy(
+                        successMessage = "La ruta se ha guardado con exito!", errorMessage = null
+                    )
+                }
+                nuevo()
+            }catch(e:Exception){
+                _uiState.update {
+                    it.copy(
+                        errorMessage = "Hubo un error al guardar la ruta", successMessage = null
+                    )
+                }
             }
         }
     }
@@ -57,48 +76,71 @@ class RutaViewModel @Inject constructor(
                 aeronaveId = 0,
                 origen = "",
                 destino = "",
-                distancia = "",
-                duracionEstimada = "",
+                distancia = 0.0,
+                duracionEstimada = 0,
                 errorMessage = null
             )
         }
     }
 
-    //findRuta
-    fun selectedRuta(rutaId: Int) {
+    fun findRuta(rutaId: Int) {
         viewModelScope.launch {
             if (rutaId > 0) {
-                val ruta = rutasRepository.findRuta(rutaId)
-                _uiState.update {
-                    it.copy(
-                        rutaId = ruta?.rutaId,
-                        aeronaveId = ruta?.aeronaveId ?: 0,
-                        origen = ruta?.origen ?: "",
-                        destino = ruta?.destino ?: "",
-                        distancia = ruta?.distancia ?: "",
-                        duracionEstimada = ruta?.duracionEstimada ?: "",
-                    )
+                val rutaDto = rutasRepository.find(rutaId)
+                if (rutaDto.RutaId!= 0) {
+                    _uiState.update {
+                        it.copy(
+                            rutaId = rutaDto.RutaId,
+                            origen = rutaDto.origen,
+                            destino = rutaDto.destino,
+                            distancia = rutaDto.distancia?:0.0,
+                            duracionEstimada = rutaDto.duracion
+                        )
+                    }
                 }
             }
         }
     }
 
     //deleteRuta
-    private fun delete() {
+    private fun delete(id:Int) {
         viewModelScope.launch {
-            rutasRepository.deleteRuta(_uiState.value.toEntity())
+            rutasRepository.delete(id)
         }
     }
 
-    private fun getRuta() {
+
+    fun getRuta() {
         viewModelScope.launch {
-            rutasRepository.getAll().collect { rutas ->
-                _uiState.update {
-                    it.copy(rutas = rutas)
+            rutasRepository.getRuta().collectLatest { getting ->
+                when (getting) {
+                    is Resource.Loading -> {
+                        _uiState.update { it.copy(isLoading = true) }
+                    }
+
+                    is Resource.Success -> {
+                        _uiState.update {
+                            it.copy(
+                                rutas = getting.data ?: emptyList(),
+                                isLoading = false
+                            )
+                        }
+                    }
+
+                    is Resource.Error -> {
+                        _uiState.update {
+                            it.copy(
+                                errorMessage = getting.message
+                                    ?: "Hubo un error al cargar la retencion",
+                                isLoading = false
+                            )
+                        }
+                    }
                 }
             }
         }
     }
+
 
     private fun onAeronaveChange(aeronaveId: Int) {
         _uiState.update {
@@ -118,25 +160,24 @@ class RutaViewModel @Inject constructor(
         }
     }
 
-    private fun onDistanciaChange(distancia: String) {
+    private fun onDistanciaChange(distancia: Double) {
         _uiState.update {
             it.copy(distancia = distancia)
         }
     }
 
-    private fun onDuracionEstimadaChange(duracionEstimada: String) {
+    private fun onDuracionEstimadaChange(duracionEstimada: Int) {
         _uiState.update {
             it.copy(duracionEstimada = duracionEstimada)
         }
     }
 
 
-    fun RutaUiState.toEntity() = RutaEntity(
-        rutaId = rutaId,
-        aeronaveId = aeronaveId ?: 0,
+    fun RutaUiState.toDTO() = RutaDTO(
+        RutaId =  rutaId,
         origen = origen ?: "",
         destino = destino ?: "",
-        distancia = distancia ?: "",
-        duracionEstimada = duracionEstimada ?: ""
+        distancia = distancia?: 0.0,
+        duracion = duracionEstimada?:0
     )
 }
