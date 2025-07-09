@@ -13,7 +13,7 @@ class TipoVueloDataSource @Inject constructor(
 
     suspend fun getTipoVuelo(id: Int) = tipoVueloManagerApi.getTipoVuelo(id)
 
-    suspend fun PostTipoVuelo(tipoVueloDTO: TipoVueloDTO) = tipoVueloManagerApi.saveTipoVuelo(tipoVueloDTO)
+    suspend fun postTipoVuelo(tipoVueloDTO: TipoVueloDTO) = tipoVueloManagerApi.saveTipoVuelo(tipoVueloDTO)
 
     suspend fun putTipoVuelo(id: Int, tipoVueloDTO: TipoVueloDTO) = tipoVueloManagerApi.actualizarTipoVuelo(id, tipoVueloDTO)
 

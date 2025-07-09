@@ -1,13 +1,14 @@
 package edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo
 
 import edu.ucne.skyplanerent.data.local.entity.TipoVueloEntity
+import edu.ucne.skyplanerent.data.remote.dto.TipoVueloDTO
 
 data class TipoVueloUiState(
-    val vueloId: Int? = null,
-    val rutaId: Int = 0,
-    val tipoclienteId: Int = 0,
+    val tipoVueloId: Int? = null,
+    val nombreVuelo: String = "",
     val descripcionTipoVuelo: String = "",
-    val precio: Double = 0.0,
+    val isLoading: Boolean = false,
+    val successMessage: String? = null,
     val errorMessage: String? = null,
-    val tipovuelo: List<TipoVueloEntity> = emptyList()
+    val tipovuelo: List<TipoVueloDTO> = emptyList()
 )
