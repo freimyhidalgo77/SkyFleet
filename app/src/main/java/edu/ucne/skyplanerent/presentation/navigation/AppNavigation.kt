@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.google.firebase.auth.FirebaseAuth
 import edu.ucne.skyplanerent.HomeScreen
 import edu.ucne.skyplanerent.data.local.entity.RutaEntity
@@ -86,15 +87,21 @@ fun AppNavigation() {
                 scope = scope,
                 onCreate = { /* navController.navigate(...) */ },
                 onEdit = { /* navController.navigate(...) */ },
-                onDelete = { /* lógica */ }
+                onDelete = { /* lógica */ },
+                goBackDetails = {
+                    navController.navigate(Screen.RutaDetails(0))
+                }
             )
         }
 
-
-        composable("ruta_detalles/{rutaId}") { backStackEntry ->
-            val rutaId = backStackEntry.arguments?.getString("rutaId")?.toIntOrNull() ?: 0
-            RutaScreenDetails(rutaId = rutaId)
+        composable<Screen.RutaDetails> {
+            val args = it.toRoute<Screen.RutaDetails>()
+            RutaScreenDetails(
+                rutaId = args.rutaId,
+                goBack = {
+                    navController.navigateUp()
+                }
+            )
         }
-
     }
 }
