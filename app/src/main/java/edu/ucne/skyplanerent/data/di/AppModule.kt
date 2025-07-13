@@ -41,4 +41,8 @@ object AppModule {
     @Singleton
     fun provideFormularioDb(appDataDb: SkyPlaneRentDB) = appDataDb.formularioDao()
 
+    @Provides
+    @Singleton
+    fun provideAeronaveDb(appDataDb: SkyPlaneRentDB) = appDataDb.aeronaveDao()
+
 }
