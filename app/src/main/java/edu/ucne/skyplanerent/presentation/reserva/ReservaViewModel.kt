@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.ucne.skyplanerent.data.local.entity.ReservaEntity
-import edu.ucne.skyplanerent.data.local.repository.ReservaRepository
+import edu.ucne.skyplanerent.data.repository.ReservaRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
