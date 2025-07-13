@@ -66,6 +66,7 @@ fun Rutas_Viajes_Screen(
 
 
 
+
     Vuelos_RutasBodyListScreen(
         uiState = rutaUiState,
         uiStateA = aeronavesUiState,
@@ -108,6 +109,17 @@ fun Vuelos_RutasBodyListScreen(
     var fechaSeleccionada by remember { mutableStateOf<Date?>(null) }
     val navController = rememberNavController()
     var selectedAeronave by remember { mutableStateOf<AeronaveDTO?>(null) }
+
+    LaunchedEffect(uiStateA.Aeronaves) {
+        println("Aeronaves disponibles: ${uiStateA.Aeronaves.size}")
+        uiStateA.Aeronaves.forEach {
+            println("Aeronave: ${it.ModeloAvion}")
+        }
+    }
+
+
+
+
 
     Scaffold(
         topBar = {
@@ -184,39 +196,46 @@ fun Vuelos_RutasBodyListScreen(
 
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AeronaveDropdown(
     aeronaves: List<AeronaveDTO>,
     selectedAeronave: AeronaveDTO?,
-    onAeronaveSelected: (AeronaveDTO) -> Unit
+    onAeronaveSelected: (AeronaveDTO) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
 
-    Box(modifier = Modifier
-        .fillMaxWidth()
-        .padding(8.dp)) {
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
         OutlinedTextField(
             value = selectedAeronave?.ModeloAvion ?: "Seleccionar aeronave",
             onValueChange = {},
             readOnly = true,
             label = { Text("Modelo de Aeronave") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { expanded = true },
             trailingIcon = {
-                IconButton(onClick = { expanded = !expanded }) {
-                    Icon(
-                        imageVector = Icons.Default.ArrowDropDown,
-                        contentDescription = "Abrir lista"
-                    )
-                }
-            }
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+            },
+            modifier = Modifier
+                .menuAnchor()
+                .fillMaxWidth()
         )
 
-        DropdownMenu(
+        ExposedDropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
+            if (aeronaves.isEmpty()) {
+                DropdownMenuItem(
+                    text = { Text("No hay aeronaves disponibles") },
+                    onClick = {}
+                )
+            }
+
             aeronaves.forEach { aeronave ->
                 DropdownMenuItem(
                     text = { Text(aeronave.ModeloAvion) },
@@ -227,6 +246,7 @@ fun AeronaveDropdown(
                 )
             }
         }
+
     }
 }
 
@@ -255,7 +275,6 @@ fun ListaDeTiposDeVuelo(tiposDeVuelo: List<TipoVueloDTO>) {
         }
     }
 }
-
 
 @Composable
 fun TipoVueloCard(vuelo: TipoVueloDTO) {
