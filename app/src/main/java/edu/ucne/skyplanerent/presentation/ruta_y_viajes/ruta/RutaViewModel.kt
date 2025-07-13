@@ -131,7 +131,7 @@ class RutaViewModel @Inject constructor(
                         _uiState.update {
                             it.copy(
                                 errorMessage = getting.message
-                                    ?: "Hubo un error al cargar la retencion",
+                                    ?: "Hubo un error al cargar la ruta",
                                 isLoading = false
                             )
                         }
