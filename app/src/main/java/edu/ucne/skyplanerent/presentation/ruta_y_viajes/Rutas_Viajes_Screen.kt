@@ -196,10 +196,10 @@ fun AeronaveDropdown(
         .fillMaxWidth()
         .padding(8.dp)) {
         OutlinedTextField(
-            value = selectedAeronave?.ModeloAvion ?: "Seleccione un modelo de aeronave",
+            value = selectedAeronave?.ModeloAvion ?: "Seleccionar aeronave",
             onValueChange = {},
             readOnly = true,
-            label = { Text("Aeronave (Modelo)") },
+            label = { Text("Modelo de Aeronave") },
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable { expanded = true },
@@ -255,6 +255,7 @@ fun ListaDeTiposDeVuelo(tiposDeVuelo: List<TipoVueloDTO>) {
         }
     }
 }
+
 
 @Composable
 fun TipoVueloCard(vuelo: TipoVueloDTO) {
