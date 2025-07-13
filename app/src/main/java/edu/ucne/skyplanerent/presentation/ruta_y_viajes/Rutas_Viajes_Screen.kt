@@ -3,6 +3,7 @@ package edu.ucne.skyplanerent.presentation.ruta_y_viajes
 import android.app.DatePickerDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -35,26 +36,39 @@ import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloViewM
 import kotlinx.coroutines.CoroutineScope
 import java.text.SimpleDateFormat
 import java.util.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import dagger.hilt.android.lifecycle.HiltViewModel
+import edu.ucne.skyplanerent.data.remote.dto.AeronaveDTO
+import edu.ucne.skyplanerent.presentation.aeronave.AeronaveUiState
+import edu.ucne.skyplanerent.presentation.aeronave.AeronaveViewModel
+
 
 @Composable
 fun Rutas_Viajes_Screen(
     reservaViewModel: ReservaViewModel = hiltViewModel(),
     tipoVueloViewModel: TipoVueloViewModel = hiltViewModel(),
+    aeronaveViewModel: AeronaveViewModel = hiltViewModel(),
     rutaViewModel: RutaViewModel = hiltViewModel(),
    // rutas: List<RutaDTO>,
     scope: CoroutineScope,
     onCreate: () -> Unit,
     onEdit: (Int) -> Unit,
     onDelete: (Int) -> Unit,
-   // onRutaClick: (Int) -> Unit
+    goBackDetails: (Int) -> Unit
 ) {
    // val reservaUiState by reservaViewModel.uiState.collectAsStateWithLifecycle()
     val rutaUiState by rutaViewModel.uiState.collectAsStateWithLifecycle()
     val tipoVueloUiState by tipoVueloViewModel.uiState.collectAsStateWithLifecycle()
+    val aeronavesUiState by aeronaveViewModel.uiState.collectAsStateWithLifecycle()
+
 
 
     Vuelos_RutasBodyListScreen(
         uiState = rutaUiState,
+        uiStateA = aeronavesUiState,
         tiposDeVuelo = tipoVueloUiState.tipovuelo,
         // rutas = rutas,
         scope = scope,
@@ -73,7 +87,7 @@ fun Rutas_Viajes_Screen(
             )
             reservaViewModel.saveReserva()
         },
-      //  onRutaClick = onRutaClick
+         goBackDetails = goBackDetails
     )
 }
 
@@ -82,17 +96,18 @@ fun Rutas_Viajes_Screen(
 @Composable
 fun Vuelos_RutasBodyListScreen(
     uiState: RutaUiState,
+    uiStateA: AeronaveUiState,
     tiposDeVuelo: List<TipoVueloDTO>,
-   // rutas: List<RutaDTO>,
     scope: CoroutineScope,
     onCreate: () -> Unit,
     onEdit: (Int) -> Unit,
     onDelete: (Int) -> Unit,
     onReserva: (Date) -> Unit,
-   // onRutaClick: (Int) -> Unit
+    goBackDetails: (Int) -> Unit
 ) {
     var fechaSeleccionada by remember { mutableStateOf<Date?>(null) }
     val navController = rememberNavController()
+    var selectedAeronave by remember { mutableStateOf<AeronaveDTO?>(null) }
 
     Scaffold(
         topBar = {
@@ -101,7 +116,7 @@ fun Vuelos_RutasBodyListScreen(
                     Text(
                         text = "Tipos de vuelos y destinos",
                         fontWeight = FontWeight.Bold,
-                        fontSize = 26.sp,
+                        fontSize = 18.sp,
                         color = Color.Black
                     )
                 },
@@ -111,70 +126,111 @@ fun Vuelos_RutasBodyListScreen(
             )
         }
     ) { innerPadding ->
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
+        LazyColumn(
             modifier = Modifier
                 .padding(innerPadding)
-                .padding(8.dp)
                 .fillMaxSize()
+                .padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-
-
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Selector de fecha
-            FechaSelector(
-                fechaSeleccionada = fechaSeleccionada,
-                onFechaSeleccionada = { nuevaFecha ->
-                    fechaSeleccionada = nuevaFecha
-                }
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Button(
-                onClick = {
-                    fechaSeleccionada?.let {
-                        onReserva(it)
-                    }
-                },
-                enabled = fechaSeleccionada != null
-            ) {
-                Text("Reservar con fecha")
+            item {
+                FechaSelector(
+                    fechaSeleccionada = fechaSeleccionada,
+                    onFechaSeleccionada = { nuevaFecha -> fechaSeleccionada = nuevaFecha }
+                )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            ListaDeTiposDeVuelo(tiposDeVuelo = tiposDeVuelo)
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            ListaDeRutas(
-                rutas = uiState.rutas,
-                onRutaClick = { rutaId ->
-                    navController.navigate("ruta_detalles/$rutaId")
+            item {
+                Button(
+                    onClick = { fechaSeleccionada?.let { onReserva(it) } },
+                    enabled = fechaSeleccionada != null,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Reservar con fecha")
                 }
-            )
+            }
 
+            item {
+                ListaDeTiposDeVuelo(tiposDeVuelo = tiposDeVuelo)
+            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            item {
+                Text(
+                    text = "Rutas disponibles",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+            }
 
-          /*  LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                items(uiState.reservas) { reserva ->
-                    Text("Reserva ID: ${reserva.reservaId} - Fecha: ${
-                        reserva.fecha?.let {
-                            SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(it)
-                        } ?: ""
-                    }")
-                }
-            }*/
+            itemsIndexed(uiState.rutas) { index, ruta ->
+                RutaListItem(
+                    index = index + 1,
+                    ruta = ruta,
+                    onClick = { ruta.RutaId?.let { navController.navigate("ruta_detalles/$it") } }
+                )
+            }
+
+            item {
+                AeronaveDropdown(
+                    aeronaves = uiStateA.Aeronaves,
+                    selectedAeronave = selectedAeronave,
+                    onAeronaveSelected = { selectedAeronave = it }
+                )
+            }
         }
     }
 }
+
+
+
+@Composable
+fun AeronaveDropdown(
+    aeronaves: List<AeronaveDTO>,
+    selectedAeronave: AeronaveDTO?,
+    onAeronaveSelected: (AeronaveDTO) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .padding(8.dp)) {
+        OutlinedTextField(
+            value = selectedAeronave?.ModeloAvion ?: "Seleccione un modelo de aeronave",
+            onValueChange = {},
+            readOnly = true,
+            label = { Text("Aeronave (Modelo)") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { expanded = true },
+            trailingIcon = {
+                IconButton(onClick = { expanded = !expanded }) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowDropDown,
+                        contentDescription = "Abrir lista"
+                    )
+                }
+            }
+        )
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            aeronaves.forEach { aeronave ->
+                DropdownMenuItem(
+                    text = { Text(aeronave.ModeloAvion) },
+                    onClick = {
+                        onAeronaveSelected(aeronave)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+
 
 @Composable
 fun ListaDeTiposDeVuelo(tiposDeVuelo: List<TipoVueloDTO>) {
@@ -331,4 +387,5 @@ fun FechaSelector(
             Text("Seleccionar fecha del vuelo")
         }
     }
+
 }
