@@ -31,6 +31,9 @@ sealed interface Screen {
     @Serializable
     object AdminPanel : Screen
 
+    @Serializable
+    data class RutaScreen(val rutaId:Int) : Screen
+
 
 
     @Serializable
