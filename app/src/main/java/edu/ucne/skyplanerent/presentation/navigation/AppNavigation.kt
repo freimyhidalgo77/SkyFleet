@@ -10,6 +10,7 @@ import androidx.navigation.toRoute
 import com.google.firebase.auth.FirebaseAuth
 import edu.ucne.skyplanerent.HomeScreen
 import edu.ucne.skyplanerent.data.local.entity.RutaEntity
+import edu.ucne.skyplanerent.presentation.admin.AdminPanelScreen
 import edu.ucne.skyplanerent.presentation.login.FirstScreen
 import edu.ucne.skyplanerent.presentation.login.LoginScreen
 import edu.ucne.skyplanerent.presentation.login.RegisterScreen
@@ -25,12 +26,10 @@ fun AppNavigation() {
     val navController = rememberNavController()
     val scope = rememberCoroutineScope()
 
-
     NavHost(
         navController = navController,
         startDestination = Screen.FirstScreen
     ) {
-
         composable<Screen.FirstScreen> {
             FirstScreen(navController)
         }
@@ -46,13 +45,11 @@ fun AppNavigation() {
                 onNavigateToReserva = {
                     navController.navigate(Screen.Reserva)
                 },
-
                 onNavigateToRutas_Viajes = {
                     navController.navigate(Screen.Rutas_y_viajes)
                 }
             )
         }
-
 
         composable<Screen.Login> {
             LoginScreen(
@@ -72,7 +69,6 @@ fun AppNavigation() {
             )
         }
 
-
         composable<Screen.Reserva> {
             ReservaListScreen(
                 scope = scope,
@@ -83,7 +79,7 @@ fun AppNavigation() {
         }
 
         composable<Screen.Rutas_y_viajes> {
-            Rutas_Viajes_Screen (
+            Rutas_Viajes_Screen(
                 scope = scope,
                 onCreate = { /* navController.navigate(...) */ },
                 onEdit = { /* navController.navigate(...) */ },
@@ -102,6 +98,10 @@ fun AppNavigation() {
                     navController.navigateUp()
                 }
             )
+        }
+
+        composable<Screen.AdminPanel> {
+            AdminPanelScreen()
         }
     }
 }
