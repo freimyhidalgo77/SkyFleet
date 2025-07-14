@@ -61,6 +61,7 @@ dependencies {
     implementation(libs.androidx.junit.ktx)
     implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.benchmark.common)
+    implementation(libs.androidx.benchmark.macro)
     annotationProcessor("androidx.room:room-compiler:2.6.1")
     ksp("androidx.room:room-compiler:2.6.1")
 

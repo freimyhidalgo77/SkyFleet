@@ -1,0 +1,168 @@
+package edu.ucne.skyplanerent.presentation.admin
+
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.ui.tooling.preview.Preview
+
+@Composable
+fun AdminPanelScreen() {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Text(
+            text = "Panel de Administrador",
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Card(modifier = Modifier.weight(1f)) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(text = "Total de vuelos", fontSize = 16.sp)
+                    Text(text = "1,234", fontSize = 24.sp, style = MaterialTheme.typography.headlineSmall)
+                }
+            }
+            Card(modifier = Modifier.weight(1f)) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(text = "Aeronaves activas", fontSize = 16.sp)
+                    Text(text = "19", fontSize = 24.sp, style = MaterialTheme.typography.headlineSmall)
+                }
+            }
+        }
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
+        ) {
+            Card(modifier = Modifier.weight(1f)) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(text = "Usuarios registrados", fontSize = 16.sp)
+                    Text(text = "567", fontSize = 24.sp, style = MaterialTheme.typography.headlineSmall)
+                }
+            }
+            Card(modifier = Modifier.weight(1f)) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(text = "Total de reservas", fontSize = 16.sp)
+                    Text(text = "890", fontSize = 24.sp, style = MaterialTheme.typography.headlineSmall)
+                }
+            }
+        }
+
+        Text(
+            text = "Tendencias",
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier.padding(vertical = 16.dp)
+        )
+
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(text = "Estadísticas de vuelos", fontSize = 16.sp)
+                Text(text = "+12%", fontSize = 24.sp, color = MaterialTheme.colorScheme.primary)
+                Text(text = "Últimos 30 días +12%", fontSize = 12.sp, color = MaterialTheme.colorScheme.primary)
+                // Placeholder para el gráfico de línea
+                Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .height(100.dp))
+            }
+        }
+
+        Card(modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(text = "Estadísticas de reservas", fontSize = 16.sp)
+                Text(text = "-5%", fontSize = 24.sp, color = MaterialTheme.colorScheme.error)
+                Text(text = "Últimos 30 días -5%", fontSize = 12.sp, color = MaterialTheme.colorScheme.error)
+                // Placeholder para el gráfico de barras
+                Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .height(100.dp))
+            }
+        }
+
+        Text(
+            text = "Seleccionar una opción",
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier.padding(vertical = 16.dp)
+        )
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Card(modifier = Modifier.weight(1f)) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Icon(imageVector = Icons.Outlined.Star, contentDescription = "Aeronaves")
+                    Text(text = "Gestionar aeronaves", fontSize = 16.sp)
+                }
+            }
+            Card(modifier = Modifier.weight(1f)) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Icon(imageVector = Icons.Outlined.LocationOn, contentDescription = "Rutas")
+                    Text(text = "Gestionar rutas", fontSize = 16.sp)
+                }
+            }
+        }
+
+        Card(modifier = Modifier.fillMaxWidth().padding(top = 16.dp)) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Icon(imageVector = Icons.Outlined.Star, contentDescription = "Vuelos")
+                Text(text = "Gestionar vuelos", fontSize = 16.sp)
+            }
+        }
+
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 16.dp)
+        ) {
+            IconButton(onClick = { /* Navegar a Home */ }) {
+                Icon(imageVector = Icons.Default.Home, contentDescription = "Home")
+            }
+            IconButton(onClick = { /* Navegar a Perfil */ }) {
+                Icon(imageVector = Icons.Default.Person, contentDescription = "Perfil")
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun AdminPanelScreenPreview() {
+    AdminPanelScreen()
+}
