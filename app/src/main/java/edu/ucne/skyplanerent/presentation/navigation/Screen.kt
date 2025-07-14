@@ -28,11 +28,13 @@ sealed interface Screen {
     @Serializable
     object Perfil : Screen
 
+    @Serializable
+    object AdminPanel : Screen
+
 
 
     @Serializable
     data class RutaDetails(val rutaId:Int) : Screen
-
 
 
 }
