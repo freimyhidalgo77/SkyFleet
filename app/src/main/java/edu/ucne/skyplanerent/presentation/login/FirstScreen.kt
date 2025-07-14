@@ -26,15 +26,13 @@ import edu.ucne.skyplanerent.presentation.navigation.Screen
 
 @Composable
 fun FirstScreen(navController: NavHostController) {
-
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
-    )
-    {
+    ) {
         Image(
             painter = painterResource(id = R.drawable.logoskyfleet),
             contentDescription = "Logo de Skyfleet",
@@ -44,55 +42,72 @@ fun FirstScreen(navController: NavHostController) {
         )
         Spacer(modifier = Modifier.height(25.dp))
 
-            Text(
-                text = "Reserva tu avion con solo unos clicks!",
-                style = MaterialTheme.typography.titleMedium
-            )
+        Text(
+            text = "Reserva tu avion con solo unos clicks!",
+            style = MaterialTheme.typography.titleMedium
+        )
 
-            Spacer(modifier = Modifier.height(15.dp))
+        Spacer(modifier = Modifier.height(15.dp))
 
-            Column (
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Button(
+                onClick = {
+                    navController.navigate(Screen.Login(0))
+                },
                 modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF0A80ED),
+                    contentColor = Color.White
+                )
             ) {
+                Text(
+                    "Iniciar sesión",
+                    style = MaterialTheme.typography.labelLarge
+                )
+            }
 
-                Button(
-                    onClick = {
-                        navController.navigate(Screen.Login(0))
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF0A80ED),
-                        contentColor = Color.White
-                    )
-                ) {
-                    Text("Iniciar sesión",
-                        style = MaterialTheme.typography.labelLarge
-                    )
+            Spacer(modifier = Modifier.height(8.dp))
 
-                }
+            Button(
+                onClick = {
+                    navController.navigate(Screen.Register)
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF0A80ED),
+                    contentColor = Color.White
+                )
+            ) {
+                Text(
+                    "Registrarse",
+                    style = MaterialTheme.typography.labelLarge
+                )
+            }
 
-                Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
-                Button(
-                    onClick = {
-                        navController.navigate(Screen.Register)
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF0A80ED),
-                        contentColor = Color.White
-                    )
-                ) {
-                    Text("Registrarse",
-                        style = MaterialTheme.typography.labelLarge
-                        )
-                }
+            Button(
+                onClick = {
+                    navController.navigate(Screen.AdminPanel)
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF0A80ED),
+                    contentColor = Color.White
+                )
+            ) {
+                Text(
+                    "Ir a Panel de Administrador",
+                    style = MaterialTheme.typography.labelLarge
+                )
             }
         }
-
     }
+}
 
 
 
