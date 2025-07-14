@@ -110,15 +110,31 @@ fun Vuelos_RutasBodyListScreen(
     val navController = rememberNavController()
     var selectedAeronave by remember { mutableStateOf<AeronaveDTO?>(null) }
 
+
+    val licencias = listOf(
+        "PPL - Piloto Privado",
+        "CPL - Piloto Comercial",
+        "ATPL - Piloto de Transporte de Línea Aérea",
+        "IR - Habilitación de Vuelo por Instrumentos",
+        "ME - Habilitación Multimotor",
+        "Turboprop - Habilitación Turboprop",
+        "Jet Type Rating - Habilitación Jet"
+    )
+
+
+    var soyPiloto by remember { mutableStateOf<Boolean?>(null) }
+    var licenciaSeleccionada by remember { mutableStateOf<String?>(null) }
+    var mostrarLicencias by remember { mutableStateOf(false) }
+    var expandedLicencia by remember { mutableStateOf(false) }
+
+
+
     LaunchedEffect(uiStateA.Aeronaves) {
         println("Aeronaves disponibles: ${uiStateA.Aeronaves.size}")
         uiStateA.Aeronaves.forEach {
             println("Aeronave: ${it.ModeloAvion}")
         }
     }
-
-
-
 
 
     Scaffold(
@@ -190,6 +206,91 @@ fun Vuelos_RutasBodyListScreen(
                     onAeronaveSelected = { selectedAeronave = it }
                 )
             }
+
+
+            item {
+                Text(
+                    text = "Tipo de cliente",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    Button(
+                        onClick = {
+                            soyPiloto = true
+                            mostrarLicencias = true
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (soyPiloto == true) Color(0xFF64B5F6) else Color.LightGray
+                        )
+                    ) {
+                        Text("Soy piloto")
+                    }
+
+                    Button(
+                        onClick = {
+                            soyPiloto = false
+                            mostrarLicencias = false
+                            licenciaSeleccionada = null
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (soyPiloto == false) Color(0xFF64B5F6) else Color.LightGray
+                        )
+                    ) {
+                        Text("Necesito un piloto")
+                    }
+                }
+            }
+
+            if (mostrarLicencias) {
+                item {
+                    ExposedDropdownMenuBox(
+                        expanded = expandedLicencia,
+                        onExpandedChange = { expandedLicencia = !expandedLicencia },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = licenciaSeleccionada ?: "Seleccionar licencia",
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Licencia de piloto") },
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedLicencia)
+                            },
+                            modifier = Modifier.menuAnchor()
+                        )
+
+                        ExposedDropdownMenu(
+                            expanded = expandedLicencia,
+                            onDismissRequest = { expandedLicencia = false }
+                        ) {
+                            licencias.forEach { licencia ->
+                                DropdownMenuItem(
+                                    text = { Text(licencia) },
+                                    onClick = {
+                                        licenciaSeleccionada = licencia
+                                        expandedLicencia = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+
+
+
+
         }
     }
 }
@@ -407,5 +508,26 @@ fun FechaSelector(
             Text("Seleccionar fecha del vuelo")
         }
     }
+
+
+    /*val licencias = listOf(
+    "PPL - Piloto Privado",
+    "CPL - Piloto Comercial",
+    "ATPL - Piloto de Transporte de Línea Aérea",
+    "IR - Habilitación de Vuelo por Instrumentos",
+    "ME - Habilitación Multimotor",
+    "Turboprop - Habilitación Turboprop",
+    "Jet Type Rating - Habilitación Jet"
+)
+Puedes incluso validar el tipo de avión a rentar con la licencia seleccionada, por ejemplo:
+
+Monomotor → Requiere PPL como mínimo
+
+Bimotor a pistón → PPL + ME
+
+Turboprop → CPL o superior + Turboprop
+
+Jet ejecutivo → CPL o ATPL + Jet Type Rating*/
+
 
 }
