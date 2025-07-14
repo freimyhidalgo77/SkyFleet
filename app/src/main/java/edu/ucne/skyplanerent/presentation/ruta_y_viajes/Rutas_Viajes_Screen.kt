@@ -161,6 +161,8 @@ fun Vuelos_RutasBodyListScreen(
                 .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+
+
             item {
                 FechaSelector(
                     fechaSeleccionada = fechaSeleccionada,
@@ -195,7 +197,9 @@ fun Vuelos_RutasBodyListScreen(
                 RutaListItem(
                     index = index + 1,
                     ruta = ruta,
-                    onClick = { ruta.RutaId?.let { navController.navigate("ruta_detalles/$it") } }
+                    onClick = {
+                          goBackDetails(0)
+                    }
                 )
             }
 
@@ -249,7 +253,9 @@ fun Vuelos_RutasBodyListScreen(
                 }
             }
 
+
             if (mostrarLicencias) {
+
                 item {
                     ExposedDropdownMenuBox(
                         expanded = expandedLicencia,
@@ -287,10 +293,27 @@ fun Vuelos_RutasBodyListScreen(
                 }
             }
 
+            item {
+                val puedeContinuar = selectedAeronave != null &&
+                        fechaSeleccionada != null &&
+                        (soyPiloto != true || licenciaSeleccionada != null)
 
+                Spacer(modifier = Modifier.height(16.dp))
 
-
-
+                Button(
+                    onClick = { goBackDetails(0) },
+                    enabled = puedeContinuar,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (puedeContinuar) Color(0xFF0A80ED) else Color.LightGray,
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("Continuar")
+                }
+            }
         }
     }
 }
@@ -429,7 +452,7 @@ fun ListaDeRutas(
                 RutaListItem(
                     index = index + 1,
                     ruta = ruta,
-                    onClick = { onRutaClick(ruta.RutaId!!) }
+                    onClick = {  }
                 )
             }
         }
@@ -508,26 +531,4 @@ fun FechaSelector(
             Text("Seleccionar fecha del vuelo")
         }
     }
-
-
-    /*val licencias = listOf(
-    "PPL - Piloto Privado",
-    "CPL - Piloto Comercial",
-    "ATPL - Piloto de Transporte de Línea Aérea",
-    "IR - Habilitación de Vuelo por Instrumentos",
-    "ME - Habilitación Multimotor",
-    "Turboprop - Habilitación Turboprop",
-    "Jet Type Rating - Habilitación Jet"
-)
-Puedes incluso validar el tipo de avión a rentar con la licencia seleccionada, por ejemplo:
-
-Monomotor → Requiere PPL como mínimo
-
-Bimotor a pistón → PPL + ME
-
-Turboprop → CPL o superior + Turboprop
-
-Jet ejecutivo → CPL o ATPL + Jet Type Rating*/
-
-
 }
