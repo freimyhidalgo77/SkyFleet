@@ -17,6 +17,7 @@ import edu.ucne.skyplanerent.presentation.login.RegisterScreen
 import edu.ucne.skyplanerent.presentation.reserva.ReservaListScreen
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.RutaScreenDetails
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.Rutas_Viajes_Screen
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaListScreen
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
@@ -101,15 +102,30 @@ fun AppNavigation() {
             )
         }
 
-        composable<Screen.AdminPanel> {
-            AdminPanelScreen()
+        composable<Screen.RutaList> {
+            RutaListScreen(
+                goToRuta = { id ->
+                    navController.navigate(Screen.Ruta(id))
+                },
+                createRuta = {
+                    navController.navigate(Screen.Ruta(null))
+                },
+                goBack = { navController.popBackStack() }
+            )
         }
-        composable<Screen.RutaScreen> { backStack ->
-            val rutaId = backStack.toRoute<Screen.RutaScreen>().rutaId
+
+        composable<Screen.Ruta> { backStack ->
             RutaScreen(
-                rutaId = rutaId,
+                goBack = { navController.popBackStack() }
+            )
+        }
+
+        composable<Screen.AdminPanel> {
+            AdminPanelScreen(
+                navController = navController,
                 goBack = { navController.popBackStack() }
             )
         }
     }
 }
+
