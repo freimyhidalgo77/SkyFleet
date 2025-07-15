@@ -198,7 +198,7 @@ fun Vuelos_RutasBodyListScreen(
                     index = index + 1,
                     ruta = ruta,
                     onClick = {
-                          goBackDetails(0)
+                        goBackDetails(ruta.RutaId)
                     }
                 )
             }
