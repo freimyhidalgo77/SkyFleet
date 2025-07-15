@@ -2,42 +2,42 @@ package edu.ucne.skyplanerent.presentation.navigation
 
 import kotlinx.serialization.Serializable
 
-sealed interface Screen {
+sealed class Screen {
 
     @Serializable
-    object Home : Screen
+    object Home : Screen()
 
     @Serializable
-    object FirstScreen : Screen
+    object FirstScreen : Screen()
 
     @Serializable
-    object Register : Screen
+    object Register : Screen()
 
     @Serializable
-    data class Login(val loginId: Int) : Screen
+    data class Login(val loginId: Int) : Screen()
 
     @Serializable
-     object  Reserva : Screen
+     object  Reserva : Screen()
 
     @Serializable
-    object Aeronaves : Screen
+    object Aeronaves : Screen()
 
     @Serializable
-    object Rutas_y_viajes : Screen
+    object Rutas_y_viajes : Screen()
 
     @Serializable
-    object Perfil : Screen
+    object Perfil : Screen()
 
     @Serializable
-    object AdminPanel : Screen
+    object AdminPanel : Screen()
 
     @Serializable
-    data class RutaScreen(val rutaId:Int) : Screen
-
-
+    data object RutaList: Screen()
 
     @Serializable
-    data class RutaDetails(val rutaId:Int) : Screen
+    data class Ruta(val rutaId: Int?): Screen()
 
+    @Serializable
+    data class RutaDetails(val rutaId:Int) : Screen()
 
 }
