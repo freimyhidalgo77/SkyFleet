@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
@@ -146,9 +147,8 @@ fun AdminPanelScreen(
                     }
                 }
                 Card(
-                    onClick = {navController.navigate(Screen.RutaList)},
-                    modifier = Modifier
-                        .weight(1f)
+                    onClick = { navController.navigate(Screen.RutaList) },
+                    modifier = Modifier.weight(1f)
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -157,6 +157,21 @@ fun AdminPanelScreen(
                         Icon(imageVector = Icons.Default.LocationOn, contentDescription = "Rutas")
                         Text(text = "Gestionar rutas", fontSize = 16.sp)
                     }
+                }
+            }
+        }
+
+        item {
+            Card(
+                onClick = { navController.navigate(Screen.TipoVueloList) },
+                modifier = Modifier.fillMaxWidth().padding(top = 32.dp)
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.padding(24.dp)
+                ) {
+                    Icon(imageVector = Icons.Default.Star, contentDescription = "Tipos de Vuelo")
+                    Text(text = "Gestionar tipos de vuelo", fontSize = 16.sp)
                 }
             }
         }

@@ -1,8 +1,6 @@
 package edu.ucne.skyplanerent.data.repository
 
 import android.util.Log
-import edu.ucne.skyplanerent.data.local.dao.TipoVueloDao
-import edu.ucne.skyplanerent.data.local.entity.TipoVueloEntity
 import edu.ucne.skyplanerent.data.remote.Resource
 import edu.ucne.skyplanerent.data.remote.dto.TipoVueloDTO
 import edu.ucne.skyplanerent.data.remote.tiposVuelos.TipoVueloDataSource
@@ -14,7 +12,23 @@ import javax.inject.Inject
 class TipoVueloRepository @Inject constructor(
     private val dataSource: TipoVueloDataSource
 ){
-    fun getTipoVuelos(): Flow<Resource<List<TipoVueloDTO>>> = flow {
+    fun getTipoVuelos(tipovueloid: Int): Flow<Resource<List<TipoVueloDTO>>> = flow {
+        try{
+            emit(Resource.Loading())
+            val tiposVuelos= dataSource.getTiposVuelos()
+            emit(Resource.Success(tiposVuelos))
+        }catch (e: HttpException){
+            val errorMessage = e.response()?.errorBody()?.string() ?: e.message()
+            Log.e("TipoVueloRepository", "HttpException: $errorMessage")
+            emit(Resource.Error("Error de conexion $errorMessage"))
+        }catch (e: Exception){
+            Log.e("TipoVueloRepository", "Exception: ${e.message}")
+            emit(Resource.Error("Error: ${e.message}"))
+
+        }
+    }
+
+    fun getTipoVuelo(): Flow<Resource<List<TipoVueloDTO>>> = flow {
         try{
             emit(Resource.Loading())
             val tiposVuelos= dataSource.getTiposVuelos()
@@ -34,7 +48,7 @@ class TipoVueloRepository @Inject constructor(
 
     suspend fun find(id: Int) = dataSource.getTipoVuelo(id)
 
-    suspend fun save(tipoVueloDTO: TipoVueloDTO) = dataSource.postTipoVuelo(tipoVueloDTO)
+    suspend fun saveTipoVuelo(tipoVueloDTO: TipoVueloDTO) = dataSource.postTipoVuelo(tipoVueloDTO)
 
-    suspend fun delete(id: Int) = dataSource.deleteTipoVuelo(id)
+    suspend fun deleteTipoVuelo(id: Int) = dataSource.deleteTipoVuelo(id)
 }

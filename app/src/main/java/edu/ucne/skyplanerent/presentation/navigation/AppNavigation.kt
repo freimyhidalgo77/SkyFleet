@@ -19,6 +19,8 @@ import edu.ucne.skyplanerent.presentation.ruta_y_viajes.RutaScreenDetails
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.Rutas_Viajes_Screen
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaListScreen
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaScreen
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloListScreen
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 
@@ -116,6 +118,24 @@ fun AppNavigation() {
 
         composable<Screen.Ruta> { backStack ->
             RutaScreen(
+                goBack = { navController.popBackStack() }
+            )
+        }
+
+        composable<Screen.TipoVueloList> {
+            TipoVueloListScreen(
+                goToTipoVuelo = { id ->
+                    navController.navigate(Screen.TipoVuelo(id))
+                },
+                createTipoVuelo = {
+                    navController.navigate(Screen.TipoVuelo(null))
+                },
+                goBack = { navController.popBackStack() }
+            )
+        }
+
+        composable<Screen.TipoVuelo> { backStack ->
+            TipoVueloScreen(
                 goBack = { navController.popBackStack() }
             )
         }

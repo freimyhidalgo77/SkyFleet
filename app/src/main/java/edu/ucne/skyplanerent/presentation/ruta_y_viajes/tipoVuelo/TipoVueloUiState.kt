@@ -8,6 +8,9 @@ data class TipoVueloUiState(
     val nombreVuelo: String = "",
     val descripcionTipoVuelo: String = "",
     val isLoading: Boolean = false,
+    val isSuccess: Boolean = false,
+    val errorNombreVuelo: String? = null,
+    val errorDescripcionTipovuelo: String? = null,
     val successMessage: String? = null,
     val errorMessage: String? = null,
     val tipovuelo: List<TipoVueloDTO> = emptyList()
