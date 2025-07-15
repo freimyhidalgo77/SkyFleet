@@ -72,7 +72,7 @@ class RutaViewModel @Inject constructor(
     private fun nuevo() {
         _uiState.update {
             it.copy(
-                rutaId = null,
+                rutaId = 0,
                 aeronaveId = 0,
                 origen = "",
                 destino = "",
