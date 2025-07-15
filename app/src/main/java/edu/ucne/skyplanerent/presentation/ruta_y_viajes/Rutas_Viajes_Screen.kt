@@ -1,9 +1,7 @@
 package edu.ucne.skyplanerent.presentation.ruta_y_viajes
 
 import android.app.DatePickerDialog
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -17,30 +15,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
 import edu.ucne.skyplanerent.data.local.entity.ReservaEntity
-import edu.ucne.skyplanerent.data.local.entity.RutaEntity
-import edu.ucne.skyplanerent.data.local.entity.TipoVueloEntity
 import edu.ucne.skyplanerent.data.remote.dto.RutaDTO
 import edu.ucne.skyplanerent.data.remote.dto.TipoVueloDTO
 import edu.ucne.skyplanerent.presentation.reserva.ReservaViewModel
-import edu.ucne.skyplanerent.presentation.reserva.UiState
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaUiState
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaViewModel
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloViewModel
 import kotlinx.coroutines.CoroutineScope
 import java.text.SimpleDateFormat
 import java.util.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.ucne.skyplanerent.data.remote.dto.AeronaveDTO
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveUiState
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveViewModel
@@ -179,7 +168,7 @@ fun Vuelos_RutasBodyListScreen(
                 RutaListItem(
                     index = index + 1,
                     ruta = ruta,
-                    onClick = { ruta.RutaId?.let { navController.navigate("ruta_detalles/$it") } }
+                    onClick = { ruta.rutaId?.let { navController.navigate("ruta_detalles/$it") } }
                 )
             }
 
@@ -328,7 +317,7 @@ fun ListaDeRutas(
                 RutaListItem(
                     index = index + 1,
                     ruta = ruta,
-                    onClick = { onRutaClick(ruta.RutaId!!) }
+                    onClick = { onRutaClick(ruta.rutaId!!) }
                 )
             }
         }
