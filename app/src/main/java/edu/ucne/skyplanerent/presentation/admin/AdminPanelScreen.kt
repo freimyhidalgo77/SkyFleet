@@ -1,5 +1,6 @@
 package edu.ucne.skyplanerent.presentation.admin
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.*
@@ -14,9 +15,15 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
+import edu.ucne.skyplanerent.presentation.navigation.Screen
 
 @Composable
-fun AdminPanelScreen() {
+fun AdminPanelScreen(
+    navController: NavController,
+    goBack: () -> Unit
+) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -96,7 +103,6 @@ fun AdminPanelScreen() {
                     Text(text = "Estadísticas de vuelos", fontSize = 16.sp)
                     Text(text = "+12%", fontSize = 24.sp, color = MaterialTheme.colorScheme.primary)
                     Text(text = "Últimos 30 días +12%", fontSize = 12.sp, color = MaterialTheme.colorScheme.primary)
-                    // Placeholder para el gráfico de línea
                     Box(modifier = Modifier
                         .fillMaxWidth()
                         .height(100.dp))
@@ -110,7 +116,6 @@ fun AdminPanelScreen() {
                     Text(text = "Estadísticas de reservas", fontSize = 16.sp)
                     Text(text = "-5%", fontSize = 24.sp, color = MaterialTheme.colorScheme.error)
                     Text(text = "Últimos 30 días -5%", fontSize = 12.sp, color = MaterialTheme.colorScheme.error)
-                    // Placeholder para el gráfico de barras
                     Box(modifier = Modifier
                         .fillMaxWidth()
                         .height(100.dp))
@@ -140,7 +145,11 @@ fun AdminPanelScreen() {
                         Text(text = "Gestionar aeronaves", fontSize = 16.sp)
                     }
                 }
-                Card(modifier = Modifier.weight(1f)) {
+                Card(
+                    onClick = {navController.navigate(Screen.RutaList)},
+                    modifier = Modifier
+                        .weight(1f)
+                ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.padding(24.dp)
@@ -180,10 +189,4 @@ fun AdminPanelScreen() {
             }
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun AdminPanelScreenPreview() {
-    AdminPanelScreen()
 }
