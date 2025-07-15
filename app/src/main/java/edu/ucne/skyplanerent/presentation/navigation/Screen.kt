@@ -1,5 +1,6 @@
 package edu.ucne.skyplanerent.presentation.navigation
 
+import edu.ucne.skyplanerent.data.remote.dto.RutaDTO
 import kotlinx.serialization.Serializable
 
 sealed interface Screen {
