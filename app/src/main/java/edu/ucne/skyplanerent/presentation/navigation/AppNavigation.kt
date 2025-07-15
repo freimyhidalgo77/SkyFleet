@@ -99,7 +99,7 @@ fun AppNavigation() {
             RutaScreenDetails(
                 rutaId = args.rutaId,
                 goBack = {
-                    navController.navigateUp()
+                    navController.navigate(Screen.RutaDetails(0))
                 }
             )
         }
