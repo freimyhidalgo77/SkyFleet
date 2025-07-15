@@ -4,7 +4,7 @@ import edu.ucne.skyplanerent.data.local.entity.RutaEntity
 import edu.ucne.skyplanerent.data.remote.dto.RutaDTO
 
 data class RutaUiState(
-    val rutaId: Int? = null,
+    val rutaId: Int = 0,
     val aeronaveId: Int = 0,
     val origen: String = "",
     val destino: String = "",
