@@ -137,12 +137,15 @@ fun AdminPanelScreen(
                 horizontalArrangement = Arrangement.spacedBy(32.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Card(modifier = Modifier.weight(1f)) {
+                Card(
+                    onClick = { navController.navigate(Screen.AeronaveList) },
+                    modifier = Modifier.weight(1f)
+                ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.padding(24.dp)
                     ) {
-                        Icon(imageVector = Icons.Default.Settings, contentDescription = "Aeronaves")
+                        Icon(imageVector = Icons.Default.Star, contentDescription = "Aeronaves")
                         Text(text = "Gestionar aeronaves", fontSize = 16.sp)
                     }
                 }

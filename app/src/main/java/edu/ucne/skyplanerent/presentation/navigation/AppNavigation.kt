@@ -11,6 +11,8 @@ import com.google.firebase.auth.FirebaseAuth
 import edu.ucne.skyplanerent.HomeScreen
 import edu.ucne.skyplanerent.data.local.entity.RutaEntity
 import edu.ucne.skyplanerent.presentation.admin.AdminPanelScreen
+import edu.ucne.skyplanerent.presentation.aeronave.AeronaveListScreen
+import edu.ucne.skyplanerent.presentation.aeronave.AeronaveScreen
 import edu.ucne.skyplanerent.presentation.login.FirstScreen
 import edu.ucne.skyplanerent.presentation.login.LoginScreen
 import edu.ucne.skyplanerent.presentation.login.RegisterScreen
@@ -136,6 +138,24 @@ fun AppNavigation() {
 
         composable<Screen.TipoVuelo> { backStack ->
             TipoVueloScreen(
+                goBack = { navController.popBackStack() }
+            )
+        }
+
+        composable<Screen.AeronaveList> {
+            AeronaveListScreen(
+                goToAeronave = { id ->
+                    navController.navigate(Screen.TipoVuelo(id))
+                },
+                createAeronave = {
+                    navController.navigate(Screen.TipoVuelo(null))
+                },
+                goBack = { navController.popBackStack() }
+            )
+        }
+
+        composable<Screen.Aeronave> { backStack ->
+            AeronaveScreen(
                 goBack = { navController.popBackStack() }
             )
         }
