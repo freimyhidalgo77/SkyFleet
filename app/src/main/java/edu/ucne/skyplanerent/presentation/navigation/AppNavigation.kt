@@ -67,6 +67,9 @@ fun AppNavigation() {
             LoginScreen(
                 onLoginSuccess = {
                     navController.navigate(Screen.Home)
+                },
+                onNavigateToRegister = {
+                    navController.navigate(Screen.Register)
                 }
             )
         }
@@ -99,9 +102,6 @@ fun AppNavigation() {
                 onDelete = { /* lógica */ },
                 goBackDetails = {
                     navController.navigate(Screen.RutaDetails(0))
-                },
-                goToFormulario = {
-                    navController.navigate(Screen.Formulario(0))
                 },
                 goTopreReserva = {
                     navController.navigate(Screen.PreReserva(0))
