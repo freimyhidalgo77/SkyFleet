@@ -18,6 +18,7 @@ import edu.ucne.skyplanerent.presentation.login.LoginScreen
 import edu.ucne.skyplanerent.presentation.login.RegisterScreen
 import edu.ucne.skyplanerent.presentation.reserva.PagoReservaListScreen
 import edu.ucne.skyplanerent.presentation.reserva.ReservaDeleteScreen
+import edu.ucne.skyplanerent.presentation.reserva.ReservaDetailsScreen
 import edu.ucne.skyplanerent.presentation.reserva.ReservaEditScreen
 import edu.ucne.skyplanerent.presentation.reserva.ReservaListScreen
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.PreReservaListScreen
@@ -89,6 +90,7 @@ fun AppNavigation() {
             ReservaListScreen(
                 scope = scope,
                 onCreate = { /* navController.navigate(...) */ },
+                onDetails = {navController.navigate(Screen.ReservaDetails(0))},
                 onEdit = { navController.navigate(Screen.ReservaEdit(0)) },
                 onDelete = {navController.navigate(Screen.ReservaDelete(0)) }
             )
@@ -146,6 +148,27 @@ fun AppNavigation() {
                     navController.navigate(Screen.PagoReserva(0))
                 }
             )
+        }
+
+
+        composable<Screen.ReservaDetails> {
+            val args = it.toRoute<Screen.ReservaDetails>()
+            ReservaDetailsScreen (
+                reservaId = args.reservaId,
+                goBack = {
+                    navController.navigate(Screen.ReservaDetails(0))
+                },
+                scope = scope,
+                goToEdit = {
+                    navController.navigate(Screen.ReservaEdit(0))
+                },
+
+                goToDelete = {
+                    navController.navigate(Screen.ReservaDelete(0))
+                }
+
+            )
+
         }
 
 
