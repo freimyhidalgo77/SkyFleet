@@ -42,7 +42,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 fun ReservaDeleteScreen(
     reservaId: Int,
     viewModel: ReservaViewModel = hiltViewModel(),
-    goBack: () -> Unit
+    goBack: (Int) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     var showDialog by remember { mutableStateOf(false) }
@@ -66,7 +66,7 @@ fun ReservaDeleteScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = goBack) {
+                    IconButton(onClick = {goBack(0)}) {
                         Icon(Icons.Filled.ArrowBack, contentDescription = "Regresar")
                     }
                 },
@@ -110,7 +110,7 @@ fun ReservaDeleteScreen(
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 Button(
-                    onClick = goBack,
+                    onClick = {goBack(0)},
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
                 ) {
                     Text(text = "Cancelar")
@@ -147,7 +147,7 @@ fun ReservaDeleteScreen(
                     onClick = {
                         viewModel.deleteReserva()
                         showDialog = false
-                        goBack()
+                        goBack(0)
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
                 ) {
