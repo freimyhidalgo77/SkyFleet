@@ -1,7 +1,11 @@
 package edu.ucne.skyplanerent.presentation.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
@@ -10,9 +14,13 @@ import androidx.navigation.toRoute
 import com.google.firebase.auth.FirebaseAuth
 import edu.ucne.skyplanerent.HomeScreen
 import edu.ucne.skyplanerent.data.local.entity.RutaEntity
+import edu.ucne.skyplanerent.data.local.entity.TipoVueloEntity
+import edu.ucne.skyplanerent.data.remote.dto.AeronaveDTO
+import edu.ucne.skyplanerent.data.remote.dto.RutaDTO
 import edu.ucne.skyplanerent.presentation.login.FirstScreen
 import edu.ucne.skyplanerent.presentation.login.LoginScreen
 import edu.ucne.skyplanerent.presentation.login.RegisterScreen
+import edu.ucne.skyplanerent.presentation.reserva.PagoReservaListScreen
 import edu.ucne.skyplanerent.presentation.reserva.ReservaListScreen
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.RutaScreenDetails
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.Rutas_Viajes_Screen
@@ -25,6 +33,9 @@ fun AppNavigation() {
     val auth = FirebaseAuth.getInstance()
     val navController = rememberNavController()
     val scope = rememberCoroutineScope()
+    val rutaList by remember { mutableStateOf(emptyList<RutaEntity>()) }
+    val tipoList by remember { mutableStateOf(emptyList<TipoVueloEntity>()) }
+
 
 
     NavHost(
@@ -114,11 +125,26 @@ fun AppNavigation() {
                 formularioId = args.formularioId,
                 goBack = {
                     navController.navigate(Screen.Formulario(0))
+                },
+                goToPago = {
+                    navController.navigate(Screen.PagoReserva(0))
                 }
             )
         }
 
 
+        composable<Screen.PagoReserva> {
+            val args = it.toRoute<Screen.PagoReserva>()
+            PagoReservaListScreen (
+                pagoReservaId = args.pagoReservaId,
+                goBack = {
+                    navController.navigate(Screen.Reserva)
+                },
+                rutaList = rutaList,
+                tipoVueloList = tipoList
+
+            )
+        }
 
     }
 }
