@@ -111,7 +111,7 @@ fun AeronaveListBodyScreen(
             Column(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                if (uiState.Aeronaves.isEmpty()) {
+                if (uiState.aeronaves.isEmpty()) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -130,10 +130,10 @@ fun AeronaveListBodyScreen(
                             .fillMaxWidth()
                             .padding(8.dp)
                     ) {
-                        items(uiState.Aeronaves) { aeronave ->
+                        items(uiState.aeronaves) { aeronave ->
                             AeronaveRow(
                                 it = aeronave,
-                                goToAeronave = { goToAeronave(aeronave.AeronaveId ?: 0) }
+                                goToAeronave = { goToAeronave(aeronave.aeronaveId ?: 0) }
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                         }
@@ -176,20 +176,53 @@ private fun AeronaveRow(
     ) {
         Text(
             modifier = Modifier.weight(1f),
-            text = "Aeronave ${it.AeronaveId}",
+            text = "Aeronave ${it.aeronaveId ?: "N/A"}",
             color = Color.Black
         )
-        Text(
-            modifier = Modifier.weight(2f),
-            text = "Modelo: ${it.ModeloAvion}",
-            style = MaterialTheme.typography.titleMedium,
-            color = Color.Blue
-        )
-        Text(
-            modifier = Modifier.weight(2f),
-            text = "Registración: ${it.Registracion}",
-            color = Color.Blue
-        )
+        Column(
+            modifier = Modifier.weight(2f)
+        ) {
+            Text(
+                text = "Modelo: ${it.modeloAvion}, Categoría: ${it.descripcionCategoria}",
+                style = MaterialTheme.typography.titleMedium,
+                color = Color.Blue
+            )
+            Text(
+                text = "Registración: ${it.registracion}, Licencia: ${it.licencia}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Blue
+            )
+            Text(
+                text = "Costo: $${it.costoXHora?.toString() ?: "0.0"}, Peso: ${it.peso?.toString() ?: "0.0"} kg",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Blue
+            )
+            Text(
+                text = "Velocidad Máx: ${it.velocidadMaxima?.toString() ?: "0.0"} km/h, Rango: ${it.rango} km",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Blue
+            )
+            Text(
+                text = "Combustible: ${it.capacidadCombustible} L, Consumo: ${it.consumoXHora} L/h",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Blue
+            )
+            Text(
+                text = "Pasajeros: ${it.capacidadPasajeros}, Altitud Máx: ${it.altitudMaxima} m",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Blue
+            )
+            Text(
+                text = "Motor: ${it.descripcionMotor}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Blue
+            )
+            Text(
+                text = "Descripción: ${it.descripcionAeronave}",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Blue
+            )
+        }
         IconButton(onClick = goToAeronave) {
             Icon(
                 Icons.Default.ArrowForward,

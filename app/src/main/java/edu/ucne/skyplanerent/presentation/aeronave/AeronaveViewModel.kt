@@ -576,22 +576,22 @@ class AeronaveViewModel @Inject constructor(
                             val aeronave = resource.data?.firstOrNull()
                             _uiState.update {
                                 it.copy(
-                                    AeronaveId = aeronave?.AeronaveId,
+                                    AeronaveId = aeronave?.aeronaveId,
                                     estadoId = aeronave?.estadoId,
-                                    ModeloAvion = aeronave?.ModeloAvion ?: "",
-                                    DescripcionCategoria = aeronave?.DescripcionCategoria ?: "",
-                                    Registracion = aeronave?.Registracion ?: "",
-                                    CostoXHora = aeronave?.CostoXHora,
-                                    DescripcionAeronave = aeronave?.DescripcionAeronave ?: "",
-                                    VelocidadMaxima = aeronave?.VelocidadMaxima,
-                                    DescripcionMotor = aeronave?.DescripcionMotor ?: "",
-                                    CapacidadCombustible = aeronave?.CapacidadCombustible ?: 0,
-                                    ConsumoXHora = aeronave?.ConsumoXHora ?: 0,
-                                    Peso = aeronave?.Peso,
-                                    Rango = aeronave?.Rango ?: 0,
-                                    CapacidadPasajeros = aeronave?.CapacidadPasajeros ?: 0,
-                                    AltitudMaxima = aeronave?.AltitudMaxima ?: 0,
-                                    Licencia = aeronave?.Licencia ?: ""
+                                    ModeloAvion = aeronave?.modeloAvion ?: "",
+                                    DescripcionCategoria = aeronave?.descripcionCategoria ?: "",
+                                    Registracion = aeronave?.registracion ?: "",
+                                    CostoXHora = aeronave?.costoXHora,
+                                    DescripcionAeronave = aeronave?.descripcionAeronave ?: "",
+                                    VelocidadMaxima = aeronave?.velocidadMaxima,
+                                    DescripcionMotor = aeronave?.descripcionMotor ?: "",
+                                    CapacidadCombustible = aeronave?.capacidadCombustible ?: 0,
+                                    ConsumoXHora = aeronave?.consumoXHora ?: 0,
+                                    Peso = aeronave?.peso,
+                                    Rango = aeronave?.rango ?: 0,
+                                    CapacidadPasajeros = aeronave?.capacidadPasajeros ?: 0,
+                                    AltitudMaxima = aeronave?.altitudMaxima ?: 0,
+                                    Licencia = aeronave?.licencia ?: ""
                                 )
                             }
                         }
@@ -621,7 +621,7 @@ class AeronaveViewModel @Inject constructor(
                     is Resource.Success -> {
                         _uiState.update {
                             it.copy(
-                                Aeronaves = result.data ?: emptyList(),
+                                aeronaves = result.data ?: emptyList(),
                                 isLoading = false
                             )
                         }
@@ -641,20 +641,20 @@ class AeronaveViewModel @Inject constructor(
 }
 
 fun AeronaveUiState.toEntity() = AeronaveDTO(
-    AeronaveId = AeronaveId,
-    estadoId = estadoId,
-    ModeloAvion = ModeloAvion ?: "",
-    DescripcionCategoria = DescripcionCategoria ?: "",
-    Registracion = Registracion ?: "",
-    CostoXHora = CostoXHora,
-    DescripcionAeronave = DescripcionAeronave ?: "",
-    VelocidadMaxima = VelocidadMaxima,
-    DescripcionMotor = DescripcionMotor ?: "",
-    CapacidadCombustible = CapacidadCombustible ?: 0,
-    ConsumoXHora = ConsumoXHora ?: 0,
-    Peso = Peso,
-    Rango = Rango ?: 0,
-    CapacidadPasajeros = CapacidadPasajeros ?: 0,
-    AltitudMaxima = AltitudMaxima ?: 0,
-    Licencia = Licencia ?: ""
+    aeronaveId = AeronaveId,
+    estadoId = estadoId ?: 0,
+    modeloAvion = ModeloAvion ?: "",
+    descripcionCategoria = DescripcionCategoria ?: "",
+    registracion = Registracion ?: "",
+    costoXHora = CostoXHora,
+    descripcionAeronave = DescripcionAeronave ?: "",
+    velocidadMaxima = VelocidadMaxima,
+    descripcionMotor = DescripcionMotor ?: "",
+    capacidadCombustible = CapacidadCombustible ?: 0,
+    consumoXHora = ConsumoXHora ?: 0,
+    peso = Peso,
+    rango = Rango ?: 0,
+    capacidadPasajeros = CapacidadPasajeros ?: 0,
+    altitudMaxima = AltitudMaxima ?: 0,
+    licencia = Licencia ?: ""
 )

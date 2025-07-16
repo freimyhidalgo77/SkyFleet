@@ -38,6 +38,6 @@ data class AeronaveUiState (
     val errorMessage:String? = null,
     val isLoading:Boolean = false,
     val isSuccess: Boolean = false,
-    val Aeronaves:List<AeronaveDTO> = emptyList()
+    val aeronaves:List<AeronaveDTO> = emptyList()
 
 )

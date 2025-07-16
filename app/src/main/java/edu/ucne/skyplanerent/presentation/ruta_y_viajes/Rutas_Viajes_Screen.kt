@@ -99,10 +99,10 @@ fun Vuelos_RutasBodyListScreen(
     val navController = rememberNavController()
     var selectedAeronave by remember { mutableStateOf<AeronaveDTO?>(null) }
 
-    LaunchedEffect(uiStateA.Aeronaves) {
-        println("Aeronaves disponibles: ${uiStateA.Aeronaves.size}")
-        uiStateA.Aeronaves.forEach {
-            println("Aeronave: ${it.ModeloAvion}")
+    LaunchedEffect(uiStateA.aeronaves) {
+        println("Aeronaves disponibles: ${uiStateA.aeronaves.size}")
+        uiStateA.aeronaves.forEach {
+            println("Aeronave: ${it.modeloAvion}")
         }
     }
 
@@ -174,7 +174,7 @@ fun Vuelos_RutasBodyListScreen(
 
             item {
                 AeronaveDropdown(
-                    aeronaves = uiStateA.Aeronaves,
+                    aeronaves = uiStateA.aeronaves,
                     selectedAeronave = selectedAeronave,
                     onAeronaveSelected = { selectedAeronave = it }
                 )
@@ -202,7 +202,7 @@ fun AeronaveDropdown(
             .padding(8.dp)
     ) {
         OutlinedTextField(
-            value = selectedAeronave?.ModeloAvion ?: "Seleccionar aeronave",
+            value = selectedAeronave?.modeloAvion ?: "Seleccionar aeronave",
             onValueChange = {},
             readOnly = true,
             label = { Text("Modelo de Aeronave") },
@@ -227,7 +227,7 @@ fun AeronaveDropdown(
 
             aeronaves.forEach { aeronave ->
                 DropdownMenuItem(
-                    text = { Text(aeronave.ModeloAvion) },
+                    text = { Text(aeronave.modeloAvion) },
                     onClick = {
                         onAeronaveSelected(aeronave)
                         expanded = false

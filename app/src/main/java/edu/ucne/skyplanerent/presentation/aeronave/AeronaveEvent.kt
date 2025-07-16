@@ -1,7 +1,7 @@
 package edu.ucne.skyplanerent.presentation.aeronave
 
 
-interface AeronaveEvent {
+sealed interface AeronaveEvent {
 
     data class AeronaveChange(val aeronaveId: Int): AeronaveEvent
     data class EstadoIdChange(val estadoId: Int?): AeronaveEvent
