@@ -127,7 +127,7 @@ fun Vuelos_RutasBodyListScreen(
     LaunchedEffect(uiStateA.Aeronaves) {
         println("🛩 Aeronaves disponibles: ${uiStateA.Aeronaves}")
         uiStateA.Aeronaves.forEach {
-            println(" Modelo: ${it.ModeloAvion}")
+            println(" Modelo: ${it.modeloAvion}")
         }
     }
 
@@ -329,7 +329,7 @@ fun AeronaveDropdown(
             .padding(8.dp)
     ) {
         OutlinedTextField(
-            value = selectedAeronave?.ModeloAvion?: "Seleccionar aeronave",
+            value = selectedAeronave?.modeloAvion?: "Seleccionar aeronave",
             onValueChange = {},
             readOnly = true,
             label = { Text("Modelo de Aeronave") },
@@ -354,7 +354,7 @@ fun AeronaveDropdown(
 
             aeronaves.forEach { aeronave ->
                 DropdownMenuItem(
-                    text = { Text(aeronave.ModeloAvion) },
+                    text = { Text(aeronave.modeloAvion) },
                     onClick = {
                         onAeronaveSelected(aeronave)
                         expanded = false

@@ -78,24 +78,24 @@ class AeronaveViewModel @Inject constructor(
         viewModelScope.launch {
             if (aeronaveId > 0) {
                 val aeronaveDTO = aeronaveRepository.find(aeronaveId)
-                if (aeronaveDTO.AeronaveId != 0) {
+                if (aeronaveDTO.aeronaveId != 0) {
                     _uiState.update {
                         it.copy(
-                            AeronaveId = aeronaveDTO.AeronaveId,
-                            ModeloAvion = aeronaveDTO.ModeloAvion,
-                            DescripcionAeronave = aeronaveDTO.DescripcionAeronave,
-                            Registracion = aeronaveDTO.Registracion,
-                            CostoXHora = aeronaveDTO.CostoXHora,
-                            VelocidadMaxima = aeronaveDTO.VelocidadMaxima,
-                            DescripcionMotor =  aeronaveDTO.DescripcionMotor,
-                            CapacidadCombustible = aeronaveDTO.CapacidadCombustible,
-                            ConsumoXHora = aeronaveDTO.ConsumoXHora,
-                            DescripcionCategoria = aeronaveDTO.DescripcionCategoria,
-                            Peso = aeronaveDTO.Peso,
-                            Rango = aeronaveDTO.Rango,
-                            CapacidadPasajeros =  aeronaveDTO.CapacidadPasajeros,
-                            AltitudMaxima = aeronaveDTO.AltitudMaxima,
-                            Licencia = aeronaveDTO.Licencia
+                            AeronaveId = aeronaveDTO.aeronaveId,
+                            ModeloAvion = aeronaveDTO.modeloAvion,
+                            DescripcionAeronave = aeronaveDTO.descripcionAeronave,
+                            Registracion = aeronaveDTO.registracion,
+                            CostoXHora = aeronaveDTO.costoXHora,
+                            VelocidadMaxima = aeronaveDTO.velocidadMaxima,
+                            DescripcionMotor =  aeronaveDTO.descripcionMotor,
+                            CapacidadCombustible = aeronaveDTO.capacidadCombustible,
+                            ConsumoXHora = aeronaveDTO.consumoXHora,
+                            DescripcionCategoria = aeronaveDTO.descripcionCategoria,
+                            Peso = aeronaveDTO.peso,
+                            Rango = aeronaveDTO.rango,
+                            CapacidadPasajeros =  aeronaveDTO.capacidadPasajeros,
+                            AltitudMaxima = aeronaveDTO.altitudMaxima,
+                            Licencia = aeronaveDTO.licencia
                         )
                     }
                 }
@@ -175,22 +175,22 @@ class AeronaveViewModel @Inject constructor(
 
 
     fun AeronaveUiState.toDTO() = AeronaveDTO(
-        AeronaveId = AeronaveId,
+        aeronaveId = AeronaveId,
         estadoId =  estadoId?:0,
-        ModeloAvion =  ModeloAvion?: "",
-        DescripcionAeronave = DescripcionAeronave?: "",
-        Registracion = Registracion?: "",
-        CostoXHora = CostoXHora?:0.0,
-        VelocidadMaxima = VelocidadMaxima?: 0.0,
-        DescripcionMotor =  DescripcionMotor?:"",
-        CapacidadCombustible = CapacidadCombustible?: 0,
-        ConsumoXHora = ConsumoXHora?: 0,
-        DescripcionCategoria = DescripcionCategoria?:"",
-        Peso = Peso?:0.0,
-        Rango = Rango?: 0 ,
-        CapacidadPasajeros =  CapacidadPasajeros?: 0,
-        AltitudMaxima = AltitudMaxima?: 0,
-        Licencia = Licencia?:""
+        modeloAvion =  ModeloAvion?: "",
+        descripcionAeronave = DescripcionAeronave?: "",
+        registracion = Registracion?: "",
+        costoXHora = CostoXHora?:0.0,
+        velocidadMaxima = VelocidadMaxima?: 0.0,
+        descripcionMotor =  DescripcionMotor?:"",
+        capacidadCombustible = CapacidadCombustible?: 0,
+        consumoXHora = ConsumoXHora?: 0,
+        descripcionCategoria = DescripcionCategoria?:"",
+        peso = Peso?:0.0,
+        rango = Rango?: 0 ,
+        capacidadPasajeros =  CapacidadPasajeros?: 0,
+        altitudMaxima = AltitudMaxima?: 0,
+        licencia = Licencia?:""
 
     )
 
