@@ -145,10 +145,10 @@ fun AppNavigation() {
         composable<Screen.AeronaveList> {
             AeronaveListScreen(
                 goToAeronave = { id ->
-                    navController.navigate(Screen.TipoVuelo(id))
+                    navController.navigate(Screen.Aeronave(id))
                 },
                 createAeronave = {
-                    navController.navigate(Screen.TipoVuelo(null))
+                    navController.navigate(Screen.Aeronave(null))
                 },
                 goBack = { navController.popBackStack() }
             )
