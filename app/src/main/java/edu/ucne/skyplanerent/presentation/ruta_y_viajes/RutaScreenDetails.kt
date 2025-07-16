@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import edu.ucne.skyplanerent.data.remote.dto.RutaDTO
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaViewModel
 
 
@@ -36,34 +35,91 @@ fun RutaScreenDetails(
 
     val ruta = uiState.rutas.find { it.RutaId == rutaId }
 
-    Column(modifier = Modifier.padding(16.dp)) {
-        Text(text = "Detalles de la Ruta", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+    Column(
+        modifier = Modifier
+            .padding(horizontal = 20.dp, vertical = 16.dp)
+    ) {
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "Detalles de la ruta",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(vertical = 16.dp)
+        )
 
         ruta?.let {
-            Text(text = "Origen: ${it.origen}")
-            Text(text = "Destino: ${it.destino}")
-            Text(text = "Distancia: ${it.distancia} km")
-            Text(text = "Duración estimada: ${it.duracion} min")
+            androidx.compose.foundation.layout.Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                // Columna Izquierda
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Origen",
+                        fontSize = 14.sp,
+                        color = Color(0xFF5A6B87)
+                    )
+                    Text(
+                        text = it.origen,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+
+                    Text(
+                        text = "Distancia",
+                        fontSize = 14.sp,
+                        color = Color(0xFF5A6B87)
+                    )
+                    Text(
+                        text = "${it.distancia} millas nautics\n(NM)",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+
+                // Columna Derecha
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Destino",
+                        fontSize = 14.sp,
+                        color = Color(0xFF5A6B87)
+                    )
+                    Text(
+                        text = it.destino,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
+
+                    Text(
+                        text = "Duracion estimada",
+                        fontSize = 14.sp,
+                        color = Color(0xFF5A6B87)
+                    )
+                    Text(
+                        text = "${it.duracion} hour ${if (it.duracion % 60 != 0) "${it.duracion % 60} minutes" else ""}",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
         } ?: Text("Ruta no encontrada")
 
-
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.weight(1f))
 
         Button(
-            onClick = {},
+            onClick = { /* Acción al seleccionar */ },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp),
+                .padding(top = 32.dp)
+                .height(52.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF0A80ED),
+                containerColor = Color(0xFF339AFF),
                 contentColor = Color.White
-            )
+            ),
+            shape = androidx.compose.foundation.shape.RoundedCornerShape(30.dp)
         ) {
             Text("Seleccionar ruta")
         }
-
     }
-
 }
