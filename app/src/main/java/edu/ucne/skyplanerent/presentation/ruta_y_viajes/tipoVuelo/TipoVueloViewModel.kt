@@ -38,13 +38,13 @@ class TipoVueloViewModel @Inject constructor(
             TipoVueloEvent.LimpiarErrorMessageDescripcionTipoVueloChange -> limpiarErrorMessageDescripcionTipoVuelo()
             is TipoVueloEvent.TipoVueloChange -> tipoVueloIdChange(event.vueloId)
             is TipoVueloEvent.DescripcionTipoVueloChange -> descripcionTipoVueloChange(event.descripciontipovuelo)
+            is TipoVueloEvent.NombreVueloChange -> nombreVueloChange(event.nombrevuelo)
             TipoVueloEvent.New -> nuevo()
             TipoVueloEvent.postTipoVuelo -> addTipoVuelo()
             TipoVueloEvent.ResetSuccessMessage -> _uiState.update { it.copy(isSuccess = false, successMessage = null) }
             is TipoVueloEvent.GetTipoVuelo -> findTipoVuelo(event.id)
             TipoVueloEvent.Save -> saveTipoVuelo()
             TipoVueloEvent.Delete -> deleteTipoVuelo()
-            is TipoVueloEvent.NombreVueloChange -> TODO()
         }
     }
 
@@ -76,6 +76,14 @@ class TipoVueloViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update {
                 it.copy(descripcionTipoVuelo = descripcion)
+            }
+        }
+    }
+
+    private fun nombreVueloChange(nombrevuelo: String) {
+        viewModelScope.launch {
+            _uiState.update {
+                it.copy(nombreVuelo = nombrevuelo)
             }
         }
     }
