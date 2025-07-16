@@ -49,5 +49,5 @@ class RutaRepository @Inject constructor(
 
     suspend fun saveRuta(rutaDTO: RutaDTO) = dataSource.postRuta(rutaDTO)
 
-    suspend fun delete(id: Int) = dataSource.deleteRuta(id)
+    suspend fun deleteRuta(id: Int) = dataSource.deleteRuta(id)
 }

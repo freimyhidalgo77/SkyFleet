@@ -6,8 +6,8 @@ sealed interface RutaEvent{
     data class AeronaveChange(val aeronaveId: Int): RutaEvent
     data class OrigenChange(val origen: String): RutaEvent
     data class DestinoChange(val destino: String): RutaEvent
-    data class DistanciaChange(val distancia: String): RutaEvent
-    data class DuracionEstimadaChange(val duracionEstimada: String): RutaEvent
+    data class DistanciaChange(val distancia: Double): RutaEvent
+    data class DuracionEstimadaChange(val duracionEstimada: Int): RutaEvent
 
 
     data object LimpiarErrorMessageOrigenChange: RutaEvent

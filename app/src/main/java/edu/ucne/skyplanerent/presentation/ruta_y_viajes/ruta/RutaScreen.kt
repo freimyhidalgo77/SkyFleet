@@ -242,7 +242,7 @@ fun RutaBodyScreen(
 
                     OutlinedTextField(
                         value = uiState.distancia?.toString() ?: "",
-                        onValueChange = { onEvent(RutaEvent.DistanciaChange((it.toDoubleOrNull() ?: 0.0).toString())) },
+                        onValueChange = { onEvent(RutaEvent.DistanciaChange((it.toDoubleOrNull() ?: 0.0))) },
                         label = { Text("Distancia") },
                         modifier = Modifier.fillMaxWidth(),
                         isError = distanciaError,
@@ -267,7 +267,7 @@ fun RutaBodyScreen(
 
                     OutlinedTextField(
                         value = uiState.duracionEstimada?.toString() ?: "",
-                        onValueChange = { onEvent(RutaEvent.DuracionEstimadaChange((it.toIntOrNull() ?: 0).toString())) },
+                        onValueChange = { onEvent(RutaEvent.DuracionEstimadaChange((it.toIntOrNull() ?: 0))) },
                         label = { Text("Duración Estimada") },
                         modifier = Modifier.fillMaxWidth(),
                         isError = duracionError,

@@ -20,14 +20,14 @@ import javax.inject.Inject
 @HiltViewModel
 class RutaViewModel @Inject constructor(
     private val rutaRepository: RutaRepository
-): ViewModel(){
+) : ViewModel() {
     private val _uiState = MutableStateFlow(RutaUiState())
     val uiState = _uiState.asStateFlow()
 
     private val _uiEvent = Channel<UiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
 
-    init{
+    init {
         getRutas()
     }
 
@@ -44,68 +44,72 @@ class RutaViewModel @Inject constructor(
             is RutaEvent.RutaChange -> rutaIdChange(event.rutaId)
             RutaEvent.ResetSuccessMessage -> _uiState.update { it.copy(isSuccess = false, successMessage = null) }
             is RutaEvent.GetRuta -> findRuta(event.id)
-            is RutaEvent.AeronaveChange -> TODO()
-            RutaEvent.Delete -> TODO()
-            is RutaEvent.DestinoChange -> TODO()
-            is RutaEvent.DuracionEstimadaChange -> TODO()
-            RutaEvent.Save -> TODO()
-            is RutaEvent.DistanciaChange -> TODO()
+            is RutaEvent.AeronaveChange -> aeronaveChange(event.aeronaveId)
+            RutaEvent.Delete -> deleteRuta()
+            is RutaEvent.DestinoChange -> destinoChange(event.destino)
+            is RutaEvent.DuracionEstimadaChange -> duracionEstimadaChange(event.duracionEstimada)
+            RutaEvent.Save -> saveRuta()
+            is RutaEvent.DistanciaChange -> distanciaChange(event.distancia)
         }
     }
 
     private fun limpiarErrorMessageOrigen() {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(errorOrigen = "")
-            }
+            _uiState.update { it.copy(errorOrigen = "") }
         }
     }
 
     private fun limpiarErrorMessageDestino() {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(errorDestino = "")
-            }
+            _uiState.update { it.copy(errorDestino = "") }
         }
     }
 
     private fun limpiarErrorMessageDistancia() {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(errorOrigen = "")
-            }
+            _uiState.update { it.copy(errorDistancia = "") } // Corregido a errorDistancia
         }
     }
 
     private fun limpiarErrorMessageDuracionEstimada() {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(errorDuracionEstimada = "")
-            }
+            _uiState.update { it.copy(errorDuracionEstimada = "") }
         }
     }
 
     private fun origenChange(origen: String) {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(origen = origen)
-            }
+            _uiState.update { it.copy(origen = origen) }
         }
     }
 
-    private fun rutaIdChange(id: Int){
+    private fun rutaIdChange(id: Int) {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(rutaId = id)
-            }
+            _uiState.update { it.copy(rutaId = id) }
+        }
+    }
+
+    private fun destinoChange(destino: String) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(destino = destino) }
+        }
+    }
+
+    private fun duracionEstimadaChange(duracion: Int) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(duracionEstimada = duracion) }
         }
     }
 
     private fun distanciaChange(distancia: Double) {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(distancia = distancia)
-            }
+            _uiState.update { it.copy(distancia = distancia) }
+        }
+    }
+
+    private fun aeronaveChange(aeronaveId: Int) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(aeronaveId = aeronaveId) }
         }
     }
 
@@ -113,6 +117,8 @@ class RutaViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update {
                 it.copy(
+                    rutaId = null,
+                    aeronaveId = 0,
                     origen = "",
                     destino = "",
                     distancia = 0.0,
@@ -122,7 +128,7 @@ class RutaViewModel @Inject constructor(
                     errorDestino = "",
                     errorDistancia = "",
                     errorDuracionEstimada = "",
-                    errorMessage = "",
+                    errorMessage = ""
                 )
             }
         }
@@ -132,45 +138,35 @@ class RutaViewModel @Inject constructor(
         viewModelScope.launch {
             var error = false
 
-            if (_uiState.value.aeronaveId <= 0) {
-                _uiState.update {
-                    it.copy(errorAeronave = "Este campo es obligatorio *")
-                }
+            if (_uiState.value.aeronaveId == null || _uiState.value.aeronaveId <= 0) {
+                _uiState.update { it.copy(errorAeronave = "Este campo es obligatorio *") }
                 error = true
             }
             if (_uiState.value.origen.isNullOrBlank()) {
-                _uiState.update {
-                    it.copy(errorOrigen = "El origen es obligatorio *")
-                }
+                _uiState.update { it.copy(errorOrigen = "El origen es obligatorio *") }
                 error = true
             }
             if (_uiState.value.destino.isNullOrBlank()) {
-                _uiState.update {
-                    it.copy(errorDestino = "El destino es obligatorio *")
-                }
+                _uiState.update { it.copy(errorDestino = "El destino es obligatorio *") }
                 error = true
             }
-            if (_uiState.value.distancia <= 0.0) {
-                _uiState.update {
-                    it.copy(errorDistancia = "La distancia debe ser mayor que cero *")
-                }
+            if (_uiState.value.distancia == null || _uiState.value.distancia <= 0.0) {
+                _uiState.update { it.copy(errorDistancia = "La distancia debe ser mayor que cero *") }
                 error = true
             }
             if (_uiState.value.duracionEstimada <= 0) {
-                _uiState.update {
-                    it.copy(errorDuracionEstimada = "La duración debe ser mayor que cero *")
-                }
+                _uiState.update { it.copy(errorDuracionEstimada = "La duración debe ser mayor que cero *") }
                 error = true
             }
             if (error) return@launch
+
             try {
                 rutaRepository.saveRuta(_uiState.value.toEntity())
 
-                // Actualizar estado con mensaje de éxito
                 _uiState.update {
                     it.copy(
                         isSuccess = true,
-                        successMessage = "Usuario guardado correctamente",
+                        successMessage = "Ruta guardada correctamente", // Corregido mensaje
                         errorMessage = null
                     )
                 }
@@ -178,16 +174,14 @@ class RutaViewModel @Inject constructor(
                 getRutas()
                 nuevo()
 
-                // Navegar de regreso después de un breve retraso para que se vea el mensaje
-                delay(2000) // Espera 2 segundos para mostrar el mensaje
+                delay(2000)
                 _uiEvent.send(UiEvent.NavigateUp)
-            }catch (e: retrofit2.HttpException) {
+            } catch (e: retrofit2.HttpException) {
                 if (e.code() == 500) {
-                    // Si es un error 500, usa los datos locales y notifica
                     _uiState.update {
                         it.copy(
                             isSuccess = true,
-                            successMessage = "Usuario guardado. Falló sincronización con el servidor (500).",
+                            successMessage = "Ruta guardada. Falló sincronización con el servidor (500).",
                             errorMessage = null
                         )
                     }
@@ -198,13 +192,12 @@ class RutaViewModel @Inject constructor(
                             isSuccess = false
                         )
                     }
-                    return@launch // Salir si es otro error de API
-
+                    return@launch
                 }
-            }catch (e: Exception){
+            } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
-                        errorMessage = "Error al guardar el usuario: ${e.localizedMessage}",
+                        errorMessage = "Error al guardar la ruta: ${e.localizedMessage}",
                         isSuccess = false
                     )
                 }
@@ -214,10 +207,71 @@ class RutaViewModel @Inject constructor(
         }
     }
 
-    fun findRuta(RutaId: Int) {
+    private fun saveRuta() {
         viewModelScope.launch {
-            if (RutaId > 0) {
-                rutaRepository.getRutas(RutaId).collect { resource ->
+            try {
+                rutaRepository.saveRuta(_uiState.value.toEntity())
+                _uiState.update {
+                    it.copy(
+                        isSuccess = true,
+                        successMessage = "Ruta guardada correctamente",
+                        errorMessage = null
+                    )
+                }
+                getRutas()
+                nuevo()
+                delay(2000)
+                _uiEvent.send(UiEvent.NavigateUp)
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        errorMessage = "Error al guardar la ruta: ${e.localizedMessage}",
+                        isSuccess = false
+                    )
+                }
+            }
+        }
+    }
+
+    private fun deleteRuta() {
+        viewModelScope.launch {
+            try {
+                _uiState.value.rutaId?.let { id ->
+                    rutaRepository.deleteRuta(id)
+                    _uiState.update {
+                        it.copy(
+                            isSuccess = true,
+                            successMessage = "Ruta eliminada correctamente",
+                            errorMessage = null
+                        )
+                    }
+                    getRutas()
+                    nuevo()
+                    delay(2000)
+                    _uiEvent.send(UiEvent.NavigateUp)
+                } ?: run {
+                    _uiState.update {
+                        it.copy(
+                            errorMessage = "No se seleccionó una ruta para eliminar",
+                            isSuccess = false
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        errorMessage = "Error al eliminar la ruta: ${e.localizedMessage}",
+                        isSuccess = false
+                    )
+                }
+            }
+        }
+    }
+
+    fun findRuta(rutaId: Int) {
+        viewModelScope.launch {
+            if (rutaId > 0) {
+                rutaRepository.getRutas(rutaId).collect { resource ->
                     when (resource) {
                         is Resource.Success -> {
                             val ruta = resource.data?.firstOrNull()
@@ -233,9 +287,7 @@ class RutaViewModel @Inject constructor(
                             }
                         }
                         is Resource.Error -> {
-                            _uiState.update {
-                                it.copy(errorMessage = resource.message)
-                            }
+                            _uiState.update { it.copy(errorMessage = resource.message) }
                         }
                         is Resource.Loading -> {
                             _uiState.update { it.copy(isLoading = true) }
@@ -251,11 +303,8 @@ class RutaViewModel @Inject constructor(
             rutaRepository.getRuta().collectLatest { result ->
                 when (result) {
                     is Resource.Loading -> {
-                        _uiState.update {
-                            it.copy(isLoading = true)
-                        }
+                        _uiState.update { it.copy(isLoading = true) }
                     }
-
                     is Resource.Success -> {
                         _uiState.update {
                             it.copy(
@@ -264,7 +313,6 @@ class RutaViewModel @Inject constructor(
                             )
                         }
                     }
-
                     is Resource.Error -> {
                         _uiState.update {
                             it.copy(
@@ -278,7 +326,6 @@ class RutaViewModel @Inject constructor(
         }
     }
 }
-
 
 fun RutaUiState.toEntity() = RutaDTO(
     rutaId = rutaId,
