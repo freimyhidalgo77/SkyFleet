@@ -45,4 +45,8 @@ object AppModule {
     @Singleton
     fun provideAeronaveDb(appDataDb: SkyPlaneRentDB) = appDataDb.aeronaveDao()
 
+    @Provides
+    @Singleton
+    fun provideCategoriaAeronaveDb(appDataDb: SkyPlaneRentDB) = appDataDb.categoriaAeronaveDao()
+
 }
