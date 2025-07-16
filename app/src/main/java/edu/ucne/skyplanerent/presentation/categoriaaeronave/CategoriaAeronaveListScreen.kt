@@ -1,0 +1,135 @@
+package edu.ucne.skyplanerent.presentation.categoriaaeronave
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import edu.ucne.skyplanerent.data.local.entity.CategoriaAeronaveEntity
+
+@Composable
+fun CategoriaAeronaveListScreen(
+    viewModel: CategoriaAeronaveViewModel = hiltViewModel(),
+    goToCategoria: (Int) -> Unit,
+    createCategoria: () -> Unit,
+    deleteCategoria: ((CategoriaAeronaveEntity) -> Unit)? = null,
+    goBack: () -> Unit
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    CategoriaAeronaveListBodyScreen(
+        uiState = uiState,
+        goToCategoria = goToCategoria,
+        createCategoria = createCategoria,
+        deleteCategoria = { categoria ->
+            viewModel.onEvent(CategoriaAeronaveEvent.CategoriaIdChange(categoria.categoriaId ?: 0))
+            viewModel.onEvent(CategoriaAeronaveEvent.Delete)
+        },
+        goBack = goBack
+    )
+}
+
+@Composable
+private fun CategoriaAeronaveRow(
+    it: CategoriaAeronaveEntity,
+    goToCategoria: () -> Unit,
+    deleteCategoria: (CategoriaAeronaveEntity) -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+    ) {
+        Text(modifier = Modifier.weight(1f), text = it.categoriaId.toString(), color = Color.Black)
+        Text(
+            modifier = Modifier.weight(2f),
+            text = it.descripcionCategoria,
+            style = MaterialTheme.typography.titleMedium,
+            color = Color.Black
+        )
+        IconButton(onClick = goToCategoria) {
+            Icon(Icons.Default.Edit, contentDescription = "Editar", tint = MaterialTheme.colorScheme.primary)
+        }
+        IconButton(onClick = { deleteCategoria(it) }) {
+            Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = MaterialTheme.colorScheme.error)
+        }
+    }
+    HorizontalDivider()
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CategoriaAeronaveListBodyScreen(
+    uiState: CategoriaAeronaveUiState,
+    goToCategoria: (Int) -> Unit,
+    createCategoria: () -> Unit,
+    deleteCategoria: (CategoriaAeronaveEntity) -> Unit,
+    goBack: () -> Unit
+) {
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        topBar = {
+            TopAppBar(
+                title = { Text("Lista de Categorías de Aeronaves") },
+                navigationIcon = {
+                    IconButton(onClick = goBack) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Volver"
+                        )
+                    }
+                }
+            )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = createCategoria
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Create a new Category"
+                )
+            }
+        }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(padding)
+        ) {
+            LazyColumn(modifier = Modifier.fillMaxWidth()) {
+                items(uiState.categorias) { categoria ->
+                    CategoriaAeronaveRow(
+                        it = categoria,
+                        goToCategoria = { goToCategoria(categoria.categoriaId ?: 0) },
+                        deleteCategoria = deleteCategoria
+                    )
+                }
+            }
+        }
+    }
+}
