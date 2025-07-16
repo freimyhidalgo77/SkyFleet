@@ -52,8 +52,8 @@ fun ReservaListScreen(
     viewModel: ReservaViewModel = hiltViewModel(),
     scope: CoroutineScope,
     onCreate:()-> Unit,
-    onEdit:(Int)-> Unit,
-    onDelete:(Int)-> Unit
+    onEdit:(ReservaEntity)-> Unit,
+    onDelete:(ReservaEntity)-> Unit
 
 ){
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -73,8 +73,8 @@ fun ReservaBodyListScreen(
     uiState: UiState,
     scope: CoroutineScope,
     onCreate:()-> Unit,
-    onEdit:(Int)-> Unit,
-    onDelete:(Int)-> Unit
+    onEdit:(ReservaEntity)-> Unit,
+    onDelete:(ReservaEntity)-> Unit
 
 ){
     Scaffold(
@@ -129,8 +129,8 @@ fun ReservaBodyListScreen(
 @Composable
 fun ReservaRow(
     reserva: ReservaEntity,
-    onEdit: (Int) -> Unit,
-    onDelete: (Int) -> Unit
+    onEdit: (ReservaEntity) -> Unit,
+    onDelete: (ReservaEntity) -> Unit
 
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -187,9 +187,41 @@ fun ReservaRow(
                     )
                 )
 
+            }
+
+                IconButton(
+                    onClick = { expanded = !expanded },
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(Icons.Filled.MoreVert, contentDescription = "Mas opciones")
+                }
+
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
+                    modifier = Modifier.background(MaterialTheme.colorScheme.surface)
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Editar") },
+                        leadingIcon = { Icon(Icons.Filled.Edit, contentDescription = "Editar") },
+                        onClick = {
+                            expanded = false
+                            onEdit(reserva)
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Eliminar") },
+                        leadingIcon = { Icon(Icons.Filled.Delete, contentDescription = "Eliminar") },
+                        onClick = {
+                            expanded = false
+                            onDelete(reserva)
+                        }
+                    )
+
+                     }
                  }
             }
         }
-    }
+
 
 
