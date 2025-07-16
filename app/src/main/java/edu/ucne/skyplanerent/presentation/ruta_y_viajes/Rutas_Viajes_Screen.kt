@@ -50,7 +50,6 @@ fun Rutas_Viajes_Screen(
     onEdit: (Int) -> Unit,
     onDelete: (Int) -> Unit,
     goBackDetails: (Int) -> Unit,
-    goToFormulario: (Int)-> Unit,
     goTopreReserva: (Int)-> Unit
 
 
@@ -83,7 +82,6 @@ fun Rutas_Viajes_Screen(
             reservaViewModel.saveReserva()
         },
          goBackDetails = goBackDetails,
-        goToFormulario = goToFormulario,
         goTopreReserva = goTopreReserva
     )
 }
@@ -101,7 +99,6 @@ fun Vuelos_RutasBodyListScreen(
     onDelete: (Int) -> Unit,
     onReserva: (Date) -> Unit,
     goBackDetails: (Int) -> Unit,
-    goToFormulario: (Int)-> Unit,
     goTopreReserva: (Int)-> Unit
 
 ) {
