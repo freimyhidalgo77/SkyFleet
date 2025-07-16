@@ -35,6 +35,8 @@ fun RutaScreenDetails(
 
     val ruta = uiState.rutas.find { it.RutaId == rutaId }
 
+
+
     Column(
         modifier = Modifier
             .padding(horizontal = 20.dp, vertical = 16.dp)
