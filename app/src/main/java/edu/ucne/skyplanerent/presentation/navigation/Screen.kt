@@ -53,6 +53,9 @@ sealed class Screen {
     data class AeronaveDetailsScreen(val aeronaveId: Int?): Screen()
 
     @Serializable
+    data class RutaDetailsScreen(val rutaId: Int?): Screen()
+
+    @Serializable
     data class RutaDetails(val rutaId:Int) : Screen()
 
     @Serializable

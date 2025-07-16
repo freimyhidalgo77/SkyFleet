@@ -44,7 +44,6 @@ class RutaViewModel @Inject constructor(
             is RutaEvent.RutaChange -> rutaIdChange(event.rutaId)
             RutaEvent.ResetSuccessMessage -> _uiState.update { it.copy(isSuccess = false, successMessage = null) }
             is RutaEvent.GetRuta -> findRuta(event.id)
-            is RutaEvent.AeronaveChange -> aeronaveChange(event.aeronaveId)
             RutaEvent.Delete -> deleteRuta()
             is RutaEvent.DestinoChange -> destinoChange(event.destino)
             is RutaEvent.DuracionEstimadaChange -> duracionEstimadaChange(event.duracionEstimada)
@@ -107,23 +106,15 @@ class RutaViewModel @Inject constructor(
         }
     }
 
-    private fun aeronaveChange(aeronaveId: Int) {
-        viewModelScope.launch {
-            _uiState.update { it.copy(aeronaveId = aeronaveId) }
-        }
-    }
-
     private fun nuevo() {
         viewModelScope.launch {
             _uiState.update {
                 it.copy(
                     rutaId = null,
-                    aeronaveId = 0,
                     origen = "",
                     destino = "",
                     distancia = 0.0,
                     duracionEstimada = 0,
-                    errorAeronave = "",
                     errorOrigen = "",
                     errorDestino = "",
                     errorDistancia = "",
@@ -138,10 +129,6 @@ class RutaViewModel @Inject constructor(
         viewModelScope.launch {
             var error = false
 
-            if (_uiState.value.aeronaveId == null || _uiState.value.aeronaveId <= 0) {
-                _uiState.update { it.copy(errorAeronave = "Este campo es obligatorio *") }
-                error = true
-            }
             if (_uiState.value.origen.isNullOrBlank()) {
                 _uiState.update { it.copy(errorOrigen = "El origen es obligatorio *") }
                 error = true
@@ -271,14 +258,13 @@ class RutaViewModel @Inject constructor(
     fun findRuta(rutaId: Int) {
         viewModelScope.launch {
             if (rutaId > 0) {
-                rutaRepository.getRutas(rutaId).collect { resource ->
+                rutaRepository.getRuta(rutaId).collect { resource ->
                     when (resource) {
                         is Resource.Success -> {
                             val ruta = resource.data?.firstOrNull()
                             _uiState.update {
                                 it.copy(
                                     rutaId = ruta?.rutaId,
-                                    aeronaveId = ruta?.aeronaveId ?: 0,
                                     origen = ruta?.origen ?: "",
                                     destino = ruta?.destino ?: "",
                                     distancia = ruta?.distancia ?: 0.0,
@@ -300,7 +286,7 @@ class RutaViewModel @Inject constructor(
 
     private fun getRutas() {
         viewModelScope.launch {
-            rutaRepository.getRuta().collectLatest { result ->
+            rutaRepository.getRutas().collectLatest { result ->
                 when (result) {
                     is Resource.Loading -> {
                         _uiState.update { it.copy(isLoading = true) }
@@ -329,7 +315,6 @@ class RutaViewModel @Inject constructor(
 
 fun RutaUiState.toEntity() = RutaDTO(
     rutaId = rutaId,
-    aeronaveId = aeronaveId ?: 0,
     origen = origen ?: "",
     destino = destino ?: "",
     distancia = distancia ?: 0.0,

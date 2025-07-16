@@ -111,7 +111,6 @@ fun RutaListBodyScreen(
             Column(
                 modifier = Modifier.fillMaxWidth()
             ) {
-
                 if (uiState.rutas.isEmpty()) {
                     Box(
                         modifier = Modifier

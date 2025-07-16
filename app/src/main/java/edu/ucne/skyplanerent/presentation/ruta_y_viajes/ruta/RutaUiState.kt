@@ -5,14 +5,12 @@ import edu.ucne.skyplanerent.data.remote.dto.RutaDTO
 
 data class RutaUiState(
     val rutaId: Int? = null,
-    val aeronaveId: Int = 0,
     val origen: String = "",
     val destino: String = "",
     val distancia: Double = 0.0,
     val duracionEstimada: Int = 0,
     val isLoading: Boolean = false,
     val isSuccess: Boolean = false,
-    val errorAeronave: String? = null,
     val errorOrigen: String? = null,
     val errorDestino: String? = null,
     val errorDistancia: String? = null,

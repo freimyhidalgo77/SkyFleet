@@ -29,6 +29,8 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -44,19 +46,20 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edu.ucne.skyplanerent.presentation.UiEvent
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RutaScreen(
-    compraId: Int? = null,
+    rutaId: Int? = null,
     viewModel: RutaViewModel = hiltViewModel(),
     goBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(compraId) {
-        compraId?.let {
-            if (it > 0) {
-                viewModel.onEvent(RutaEvent.GetRuta(it))
-            }
+    LaunchedEffect(rutaId) {
+        if (rutaId != null && rutaId > 0) {
+            viewModel.onEvent(RutaEvent.GetRuta(rutaId))
+        } else {
+            viewModel.onEvent(RutaEvent.New) // Inicializar para nueva ruta
         }
     }
 
@@ -79,24 +82,30 @@ fun RutaBodyScreen(
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     // Validaciones
-    val aeronaveError = uiState.aeronaveId < 0
     val origenError = uiState.origen.isNullOrBlank()
     val destinoError = uiState.destino.isNullOrBlank()
-    val distanciaError = uiState.distancia == null || uiState.distancia < 0.0
-    val duracionError = uiState.duracionEstimada < 0
+    val distanciaError = uiState.distancia <= 0.0
+    val duracionError = uiState.duracionEstimada <= 0
     val isFormValid = !origenError && !destinoError && !distanciaError && !duracionError
 
     LaunchedEffect(Unit) {
         viewModel.uiEvent.collect { event ->
             when (event) {
                 is UiEvent.NavigateUp -> goBack()
-                is UiEvent.ShowSnackbar -> TODO()
+                is UiEvent.ShowSnackbar -> {
+                    scope.launch {
+                        snackbarHostState.showSnackbar(
+                            message = event.message,
+                            duration = SnackbarDuration.Short
+                        )
+                    }
+                }
             }
         }
     }
 
-    // Mostrar Snackbar y navegar al éxito
-    LaunchedEffect(uiState.isSuccess || !uiState.errorMessage.isNullOrBlank()) {
+    // Mostrar Snackbar para éxito o error
+    LaunchedEffect(uiState.isSuccess, uiState.errorMessage) {
         if (uiState.isSuccess && !uiState.successMessage.isNullOrBlank()) {
             scope.launch {
                 snackbarHostState.showSnackbar(
@@ -104,7 +113,6 @@ fun RutaBodyScreen(
                     duration = SnackbarDuration.Short
                 )
                 onEvent(RutaEvent.ResetSuccessMessage)
-                goBack() // Navegar a la lista después de mostrar el Snackbar
             }
         } else if (!uiState.errorMessage.isNullOrBlank()) {
             scope.launch {
@@ -126,17 +134,27 @@ fun RutaBodyScreen(
             }
         },
         topBar = {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(
-                    onClick = goBack,
-                    modifier = Modifier.align(Alignment.CenterVertically)
-                ) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "volver")
-                }
-            }
+            TopAppBar(
+                title = {
+                    Text(
+                        text = if (uiState.rutaId == null) "Nueva Ruta" else "Editar Ruta",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = Color.White
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = goBack) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Volver",
+                            tint = Color.White
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFF272D4D)
+                )
+            )
         }
     ) { innerPadding ->
         Column(
@@ -154,12 +172,12 @@ fun RutaBodyScreen(
                         .padding(8.dp)
                 ) {
                     Spacer(modifier = Modifier.height(32.dp))
-                    Text("Registro de compras")
+                    Text(if (uiState.rutaId == null) "Nueva Ruta" else "Editar Ruta")
 
                     OutlinedTextField(
                         value = uiState.rutaId?.toString() ?: "Nuevo",
                         onValueChange = {},
-                        label = { Text("ID Compra") },
+                        label = { Text("ID Ruta") },
                         modifier = Modifier.fillMaxWidth(),
                         readOnly = true,
                         enabled = false
@@ -216,33 +234,8 @@ fun RutaBodyScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     OutlinedTextField(
-                        value = uiState.aeronaveId?.toString() ?: "",
-                        onValueChange = { onEvent(RutaEvent.AeronaveChange(it.toIntOrNull() ?: 0)) },
-                        label = { Text("ID Aeronave") },
-                        modifier = Modifier.fillMaxWidth(),
-                        isError = aeronaveError,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color.Blue,
-                            unfocusedBorderColor = Color.Gray,
-                            focusedLabelColor = Color.Blue,
-                            errorBorderColor = Color.Red
-                        )
-                    )
-                    if (aeronaveError) {
-                        Text(
-                            text = "El ID de la aeronave debe ser mayor a 0",
-                            color = Color.Red,
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(start = 16.dp, top = 4.dp)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    OutlinedTextField(
-                        value = uiState.distancia?.toString() ?: "",
-                        onValueChange = { onEvent(RutaEvent.DistanciaChange((it.toDoubleOrNull() ?: 0.0))) },
+                        value = uiState.distancia.toString(),
+                        onValueChange = { onEvent(RutaEvent.DistanciaChange(it.toDoubleOrNull() ?: 0.0)) },
                         label = { Text("Distancia") },
                         modifier = Modifier.fillMaxWidth(),
                         isError = distanciaError,
@@ -266,8 +259,8 @@ fun RutaBodyScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     OutlinedTextField(
-                        value = uiState.duracionEstimada?.toString() ?: "",
-                        onValueChange = { onEvent(RutaEvent.DuracionEstimadaChange((it.toIntOrNull() ?: 0))) },
+                        value = uiState.duracionEstimada.toString(),
+                        onValueChange = { onEvent(RutaEvent.DuracionEstimadaChange(it.toIntOrNull() ?: 0)) },
                         label = { Text("Duración Estimada") },
                         modifier = Modifier.fillMaxWidth(),
                         isError = duracionError,
@@ -318,8 +311,11 @@ fun RutaBodyScreen(
                         OutlinedButton(
                             onClick = {
                                 if (isFormValid) {
-                                    onEvent(RutaEvent.PostRuta)
-                                    // goBack() removido de aquí, ahora se maneja en LaunchedEffect
+                                    if (uiState.rutaId == null) {
+                                        onEvent(RutaEvent.PostRuta) // Crear nueva ruta
+                                    } else {
+                                        onEvent(RutaEvent.Save) // Editar ruta existente
+                                    }
                                 }
                             },
                             enabled = isFormValid,
@@ -330,11 +326,7 @@ fun RutaBodyScreen(
                             border = BorderStroke(1.dp, if (isFormValid) Color.Blue else Color.Gray),
                             modifier = Modifier.padding(horizontal = 8.dp)
                         ) {
-                            /* Icon(
-                                imageVector = Icons.Default.Edit,
-                                contentDescription = "save button"
-                            )*/
-                            Text(text = "Guardar")
+                            Text(text = if (uiState.rutaId == null) "Guardar" else "Actualizar")
                         }
                     }
                 }
