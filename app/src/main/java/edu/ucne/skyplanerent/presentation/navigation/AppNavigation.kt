@@ -5,18 +5,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.google.firebase.auth.FirebaseAuth
 import edu.ucne.skyplanerent.HomeScreen
 import edu.ucne.skyplanerent.data.local.entity.RutaEntity
 import edu.ucne.skyplanerent.data.local.entity.TipoVueloEntity
-import edu.ucne.skyplanerent.data.remote.dto.AeronaveDTO
-import edu.ucne.skyplanerent.data.remote.dto.RutaDTO
 import edu.ucne.skyplanerent.presentation.login.FirstScreen
 import edu.ucne.skyplanerent.presentation.login.LoginScreen
 import edu.ucne.skyplanerent.presentation.login.RegisterScreen
@@ -24,11 +20,10 @@ import edu.ucne.skyplanerent.presentation.reserva.PagoReservaListScreen
 import edu.ucne.skyplanerent.presentation.reserva.ReservaDeleteScreen
 import edu.ucne.skyplanerent.presentation.reserva.ReservaEditScreen
 import edu.ucne.skyplanerent.presentation.reserva.ReservaListScreen
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.PreReservaListScreen
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.RutaScreenDetails
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.Rutas_Viajes_Screen
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.formulario.FormularioScreen
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.coroutineScope
 
 @Composable
 fun AppNavigation() {
@@ -107,6 +102,9 @@ fun AppNavigation() {
                 },
                 goToFormulario = {
                     navController.navigate(Screen.Formulario(0))
+                },
+                goTopreReserva = {
+                    navController.navigate(Screen.PreReserva(0))
                 }
             )
         }
@@ -120,6 +118,22 @@ fun AppNavigation() {
                 }
             )
         }
+
+        composable<Screen.PreReserva> {
+            val args = it.toRoute<Screen.PreReserva>()
+            PreReservaListScreen (
+                preReservaId = args.prereservaId,
+                goBack = {
+                    navController.navigate(Screen.PreReserva(0))
+                },
+                goToFormulario = {
+                    navController.navigate(Screen.Formulario(0))
+                },
+                tipoVueloList = tipoList,
+                rutaList = rutaList
+            )
+        }
+
 
         composable<Screen.Formulario> {
             val args = it.toRoute<Screen.Formulario>()
