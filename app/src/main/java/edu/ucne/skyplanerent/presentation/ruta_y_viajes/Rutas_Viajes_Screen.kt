@@ -50,7 +50,8 @@ fun Rutas_Viajes_Screen(
     onEdit: (Int) -> Unit,
     onDelete: (Int) -> Unit,
     goBackDetails: (Int) -> Unit,
-    goToFormulario: (Int)-> Unit
+    goToFormulario: (Int)-> Unit,
+    goTopreReserva: (Int)-> Unit
 
 
 ) {
@@ -82,7 +83,8 @@ fun Rutas_Viajes_Screen(
             reservaViewModel.saveReserva()
         },
          goBackDetails = goBackDetails,
-        goToFormulario = goToFormulario
+        goToFormulario = goToFormulario,
+        goTopreReserva = goTopreReserva
     )
 }
 
@@ -99,7 +101,9 @@ fun Vuelos_RutasBodyListScreen(
     onDelete: (Int) -> Unit,
     onReserva: (Date) -> Unit,
     goBackDetails: (Int) -> Unit,
-    goToFormulario: (Int)-> Unit
+    goToFormulario: (Int)-> Unit,
+    goTopreReserva: (Int)-> Unit
+
 ) {
     var fechaSeleccionada by remember { mutableStateOf<Date?>(null) }
     val navController = rememberNavController()
@@ -277,7 +281,6 @@ fun Vuelos_RutasBodyListScreen(
                 }
             }
 
-
             item {
                 AeronaveDropdown(
                     aeronaves = uiStateA.Aeronaves,
@@ -286,17 +289,13 @@ fun Vuelos_RutasBodyListScreen(
                 )
             }
 
-
-
-
-
             item {
                 /*val puedeContinuar = selectedAeronave != null &&
                         fechaSeleccionada != null &&
                         (soyPiloto != true || licenciaSeleccionada != null)*/
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
-                    onClick = { goToFormulario(0) },
+                    onClick = { goTopreReserva(0) },
                     //enabled = puedeContinuar,
                     modifier = Modifier
                         .fillMaxWidth()
