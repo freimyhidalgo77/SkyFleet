@@ -1,6 +1,6 @@
 package edu.ucne.skyplanerent.data.remote.dto
 
-import android.icu.text.DecimalFormat
+import kotlinx.serialization.SerialName
 
 data class RutaDTO (
     val RutaId: Int = 0,
@@ -9,4 +9,4 @@ data class RutaDTO (
     val distancia:Double?,
     val duracion:Int = 0,
 
-)
+    )
