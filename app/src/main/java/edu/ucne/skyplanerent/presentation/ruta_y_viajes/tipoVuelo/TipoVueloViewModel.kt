@@ -230,7 +230,7 @@ class TipoVueloViewModel @Inject constructor(
                             val tipoVuelo = resource.data?.firstOrNull()
                             _uiState.update {
                                 it.copy(
-                                    tipoVueloId = tipoVuelo?.TipoVueloId,
+                                    tipoVueloId = tipoVuelo?.tipoVueloId,
                                     nombreVuelo = tipoVuelo?.nombreVuelo ?: "",
                                     descripcionTipoVuelo = tipoVuelo?.descripcionTipoVuelo ?: "",
                                 )
@@ -282,7 +282,7 @@ class TipoVueloViewModel @Inject constructor(
 }
 
 fun TipoVueloUiState.toEntity() = TipoVueloDTO(
-    TipoVueloId = tipoVueloId,
+    tipoVueloId = tipoVueloId,
     nombreVuelo = nombreVuelo ?: "",
     descripcionTipoVuelo = descripcionTipoVuelo ?: "",
 )

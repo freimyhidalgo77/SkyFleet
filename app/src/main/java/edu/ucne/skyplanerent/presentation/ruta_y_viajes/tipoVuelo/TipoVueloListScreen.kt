@@ -133,7 +133,7 @@ fun TipoVueloListBodyScreen(
                         items(uiState.tipovuelo) { tipoVuelo ->
                             TipoVueloRow(
                                 it = tipoVuelo,
-                                goToTipoVuelo = { goToTipoVuelo(tipoVuelo.TipoVueloId ?: 0) }
+                                goToTipoVuelo = { goToTipoVuelo(tipoVuelo.tipoVueloId ?: 0) }
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                         }
@@ -176,7 +176,7 @@ private fun TipoVueloRow(
     ) {
         Text(
             modifier = Modifier.weight(1f),
-            text = "Tipo Vuelo ${it.TipoVueloId}",
+            text = "Tipo Vuelo ${it.tipoVueloId}",
             color = Color.Black
         )
         Text(
