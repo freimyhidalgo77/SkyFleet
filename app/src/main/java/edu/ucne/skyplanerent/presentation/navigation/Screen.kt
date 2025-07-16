@@ -34,6 +34,9 @@ sealed interface Screen {
     @Serializable
     data class RutaDetails(val rutaId:Int) : Screen
 
+    @Serializable
+    data class Formulario(val formularioId:Int) : Screen
+
 
 
 }

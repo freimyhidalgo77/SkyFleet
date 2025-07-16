@@ -28,6 +28,7 @@ import kotlin.reflect.KFunction1
 
 @Composable
 fun FormularioScreen (
+    formularioId:Int,
     viewModel: FormularioViewModel = hiltViewModel(),
     goBack: () -> Unit
 
@@ -71,6 +72,12 @@ fun FormularioBodyScreen(
             .padding(24.dp),
         verticalArrangement = Arrangement.Top
     ) {
+
+
+     Text(
+         text = "",
+
+     )
 
         Spacer(modifier = Modifier.height(16.dp))
 

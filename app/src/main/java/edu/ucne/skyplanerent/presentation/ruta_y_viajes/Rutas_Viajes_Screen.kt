@@ -49,14 +49,15 @@ fun Rutas_Viajes_Screen(
     onCreate: () -> Unit,
     onEdit: (Int) -> Unit,
     onDelete: (Int) -> Unit,
-    goBackDetails: (Int) -> Unit
+    goBackDetails: (Int) -> Unit,
+    goToFormulario: (Int)-> Unit
+
+
 ) {
    // val reservaUiState by reservaViewModel.uiState.collectAsStateWithLifecycle()
     val rutaUiState by rutaViewModel.uiState.collectAsStateWithLifecycle()
     val tipoVueloUiState by tipoVueloViewModel.uiState.collectAsStateWithLifecycle()
     val aeronavesUiState by aeronaveViewModel.uiState.collectAsStateWithLifecycle()
-
-
 
 
     Vuelos_RutasBodyListScreen(
@@ -80,7 +81,8 @@ fun Rutas_Viajes_Screen(
             )
             reservaViewModel.saveReserva()
         },
-         goBackDetails = goBackDetails
+         goBackDetails = goBackDetails,
+        goToFormulario = goToFormulario
     )
 }
 
@@ -96,7 +98,8 @@ fun Vuelos_RutasBodyListScreen(
     onEdit: (Int) -> Unit,
     onDelete: (Int) -> Unit,
     onReserva: (Date) -> Unit,
-    goBackDetails: (Int) -> Unit
+    goBackDetails: (Int) -> Unit,
+    goToFormulario: (Int)-> Unit
 ) {
     var fechaSeleccionada by remember { mutableStateOf<Date?>(null) }
     val navController = rememberNavController()
@@ -122,9 +125,9 @@ fun Vuelos_RutasBodyListScreen(
 
 
     LaunchedEffect(uiStateA.Aeronaves) {
-        println("Aeronaves disponibles: ${uiStateA.Aeronaves.size}")
+        println("🛩 Aeronaves disponibles: ${uiStateA.Aeronaves}")
         uiStateA.Aeronaves.forEach {
-            println("Aeronave: ${it.ModeloAvion}")
+            println(" Modelo: ${it.ModeloAvion}")
         }
     }
 
@@ -247,7 +250,6 @@ fun Vuelos_RutasBodyListScreen(
 
 
             if (mostrarLicencias) {
-
                 item {
                     ExposedDropdownMenuBox(
                         expanded = expandedLicencia,
@@ -286,20 +288,18 @@ fun Vuelos_RutasBodyListScreen(
             }
 
             item {
-                val puedeContinuar = selectedAeronave != null &&
+                /*val puedeContinuar = selectedAeronave != null &&
                         fechaSeleccionada != null &&
-                        (soyPiloto != true || licenciaSeleccionada != null)
-
+                        (soyPiloto != true || licenciaSeleccionada != null)*/
                 Spacer(modifier = Modifier.height(16.dp))
-
                 Button(
-                    onClick = { goBackDetails(0) },
-                    enabled = puedeContinuar,
+                    onClick = { goToFormulario(0) },
+                    //enabled = puedeContinuar,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = if (puedeContinuar) Color(0xFF0A80ED) else Color.LightGray,
+                        containerColor = /*if (puedeContinuar)*/ Color(0xFF0A80ED) /*else Color.LightGray*/,
                         contentColor = Color.White
                     )
                 ) {
@@ -329,7 +329,7 @@ fun AeronaveDropdown(
             .padding(8.dp)
     ) {
         OutlinedTextField(
-            value = selectedAeronave?.ModeloAvion ?: "Seleccionar aeronave",
+            value = selectedAeronave?.ModeloAvion?: "Seleccionar aeronave",
             onValueChange = {},
             readOnly = true,
             label = { Text("Modelo de Aeronave") },

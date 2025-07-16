@@ -16,6 +16,7 @@ import edu.ucne.skyplanerent.presentation.login.RegisterScreen
 import edu.ucne.skyplanerent.presentation.reserva.ReservaListScreen
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.RutaScreenDetails
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.Rutas_Viajes_Screen
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.formulario.FormularioScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 
@@ -90,6 +91,9 @@ fun AppNavigation() {
                 onDelete = { /* lógica */ },
                 goBackDetails = {
                     navController.navigate(Screen.RutaDetails(0))
+                },
+                goToFormulario = {
+                    navController.navigate(Screen.Formulario(0))
                 }
             )
         }
@@ -103,5 +107,18 @@ fun AppNavigation() {
                 }
             )
         }
+
+        composable<Screen.Formulario> {
+            val args = it.toRoute<Screen.Formulario>()
+            FormularioScreen (
+                formularioId = args.formularioId,
+                goBack = {
+                    navController.navigate(Screen.Formulario(0))
+                }
+            )
+        }
+
+
+
     }
 }
