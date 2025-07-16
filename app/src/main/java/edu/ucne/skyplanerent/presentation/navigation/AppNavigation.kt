@@ -21,6 +21,8 @@ import edu.ucne.skyplanerent.presentation.login.FirstScreen
 import edu.ucne.skyplanerent.presentation.login.LoginScreen
 import edu.ucne.skyplanerent.presentation.login.RegisterScreen
 import edu.ucne.skyplanerent.presentation.reserva.PagoReservaListScreen
+import edu.ucne.skyplanerent.presentation.reserva.ReservaDeleteScreen
+import edu.ucne.skyplanerent.presentation.reserva.ReservaEditScreen
 import edu.ucne.skyplanerent.presentation.reserva.ReservaListScreen
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.RutaScreenDetails
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.Rutas_Viajes_Screen
@@ -89,13 +91,13 @@ fun AppNavigation() {
             ReservaListScreen(
                 scope = scope,
                 onCreate = { /* navController.navigate(...) */ },
-                onEdit = { /* navController.navigate(...) */ },
-                onDelete = { /* lógica */ }
+                onEdit = { navController.navigate(Screen.ReservaEdit(0)) },
+                onDelete = {navController.navigate(Screen.ReservaDelete(0)) }
             )
         }
 
         composable<Screen.Rutas_y_viajes> {
-            Rutas_Viajes_Screen (
+            Rutas_Viajes_Screen(
                 scope = scope,
                 onCreate = { /* navController.navigate(...) */ },
                 onEdit = { /* navController.navigate(...) */ },
@@ -121,7 +123,7 @@ fun AppNavigation() {
 
         composable<Screen.Formulario> {
             val args = it.toRoute<Screen.Formulario>()
-            FormularioScreen (
+            FormularioScreen(
                 formularioId = args.formularioId,
                 goBack = {
                     navController.navigate(Screen.Formulario(0))
@@ -133,7 +135,33 @@ fun AppNavigation() {
         }
 
 
-        composable<Screen.PagoReserva> {
+        composable<Screen.ReservaEdit> {
+            val args = it.toRoute<Screen.ReservaEdit>()
+            ReservaEditScreen (
+                reservaId = args.reservaId,
+                goBack = {
+                    navController.navigate(Screen.ReservaEdit(0))
+                }
+
+            )
+        }
+
+
+        composable<Screen.ReservaDelete> {
+            val args = it.toRoute<Screen.ReservaDelete>()
+            ReservaDeleteScreen(
+                reservaId = args.reservaId,
+                goBack = {
+                    navController.navigate(Screen.ReservaDelete(0))
+                }
+
+            )
+
+        }
+
+
+
+            composable<Screen.PagoReserva> {
             val args = it.toRoute<Screen.PagoReserva>()
             PagoReservaListScreen (
                 pagoReservaId = args.pagoReservaId,
@@ -145,6 +173,6 @@ fun AppNavigation() {
 
             )
         }
-
     }
+
 }
