@@ -55,7 +55,7 @@ fun CategoriaAeronaveListScreen(
 @Composable
 private fun CategoriaAeronaveRow(
     it: CategoriaAeronaveEntity,
-    goToCategoria: () -> Unit,
+    goToCategoria: (Int) -> Unit, // Cambiado a (Int) -> Unit para pasar categoriaId
     deleteCategoria: (CategoriaAeronaveEntity) -> Unit
 ) {
     Row(
@@ -71,7 +71,7 @@ private fun CategoriaAeronaveRow(
             style = MaterialTheme.typography.titleMedium,
             color = Color.Black
         )
-        IconButton(onClick = goToCategoria) {
+        IconButton(onClick = { goToCategoria(it.categoriaId ?: 0) }) { // Pasar categoriaId al hacer clic
             Icon(Icons.Default.Edit, contentDescription = "Editar", tint = MaterialTheme.colorScheme.primary)
         }
         IconButton(onClick = { deleteCategoria(it) }) {
@@ -125,7 +125,7 @@ fun CategoriaAeronaveListBodyScreen(
                 items(uiState.categorias) { categoria ->
                     CategoriaAeronaveRow(
                         it = categoria,
-                        goToCategoria = { goToCategoria(categoria.categoriaId ?: 0) },
+                        goToCategoria = { categoriaId -> goToCategoria(categoriaId) }, // Pasar categoriaId
                         deleteCategoria = deleteCategoria
                     )
                 }

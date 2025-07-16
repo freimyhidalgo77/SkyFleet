@@ -74,6 +74,36 @@ class AeronaveViewModel @Inject constructor(
         }
     }
 
+    // Nueva función para filtrar aeronaves por categoriaId
+    fun filterAeronavesByCategoria(categoriaId: Int) {
+        viewModelScope.launch {
+            aeronaveRepository.getAeronaves().collectLatest { result ->
+                when (result) {
+                    is Resource.Loading -> {
+                        _uiState.update { it.copy(isLoading = true) }
+                    }
+                    is Resource.Success -> {
+                        val filteredAeronaves = result.data?.filter { it.estadoId == categoriaId } ?: emptyList()
+                        _uiState.update {
+                            it.copy(
+                                aeronaves = filteredAeronaves,
+                                isLoading = false
+                            )
+                        }
+                    }
+                    is Resource.Error -> {
+                        _uiState.update {
+                            it.copy(
+                                errorMessage = result.message ?: "Error desconocido",
+                                isLoading = false
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private fun limpiarErrorMessageEstadoId() {
         viewModelScope.launch {
             _uiState.update {

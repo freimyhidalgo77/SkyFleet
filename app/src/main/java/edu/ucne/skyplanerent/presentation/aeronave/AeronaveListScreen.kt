@@ -38,11 +38,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edu.ucne.skyplanerent.data.remote.dto.AeronaveDTO
 
+
 @Composable
 fun AeronaveListScreen(
     viewModel: AeronaveViewModel = hiltViewModel(),
-    createAeronave: () -> Unit,
     goToAeronave: (Int) -> Unit,
+    createAeronave: () -> Unit,
     goBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -176,57 +177,14 @@ private fun AeronaveRow(
     ) {
         Text(
             modifier = Modifier.weight(1f),
-            text = "Aeronave ${it.aeronaveId ?: "N/A"}",
-            color = Color.Black
+            text = it.modeloAvion ?: "N/A",
+            color = Color.Black,
+            style = MaterialTheme.typography.titleMedium
         )
-        Column(
-            modifier = Modifier.weight(2f)
-        ) {
-            Text(
-                text = "Modelo: ${it.modeloAvion}, Categoría: ${it.descripcionCategoria}",
-                style = MaterialTheme.typography.titleMedium,
-                color = Color.Blue
-            )
-            Text(
-                text = "Registración: ${it.registracion}, Licencia: ${it.licencia}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.Blue
-            )
-            Text(
-                text = "Costo: $${it.costoXHora?.toString() ?: "0.0"}, Peso: ${it.peso?.toString() ?: "0.0"} kg",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.Blue
-            )
-            Text(
-                text = "Velocidad Máx: ${it.velocidadMaxima?.toString() ?: "0.0"} km/h, Rango: ${it.rango} km",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.Blue
-            )
-            Text(
-                text = "Combustible: ${it.capacidadCombustible} L, Consumo: ${it.consumoXHora} L/h",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.Blue
-            )
-            Text(
-                text = "Pasajeros: ${it.capacidadPasajeros}, Altitud Máx: ${it.altitudMaxima} m",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.Blue
-            )
-            Text(
-                text = "Motor: ${it.descripcionMotor}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.Blue
-            )
-            Text(
-                text = "Descripción: ${it.descripcionAeronave}",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.Blue
-            )
-        }
         IconButton(onClick = goToAeronave) {
             Icon(
                 Icons.Default.ArrowForward,
-                contentDescription = "Modificar/Eliminar",
+                contentDescription = "Ver detalles",
                 tint = MaterialTheme.colorScheme.primary
             )
         }

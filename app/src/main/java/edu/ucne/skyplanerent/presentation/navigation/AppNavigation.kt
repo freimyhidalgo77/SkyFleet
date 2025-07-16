@@ -1,18 +1,21 @@
 package edu.ucne.skyplanerent.presentation.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import androidx.navigation.toRoute
 import com.google.firebase.auth.FirebaseAuth
 import edu.ucne.skyplanerent.HomeScreen
-import edu.ucne.skyplanerent.data.local.entity.RutaEntity
 import edu.ucne.skyplanerent.presentation.admin.AdminPanelScreen
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveListScreen
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveScreen
+import edu.ucne.skyplanerent.presentation.aeronave.AeronaveViewModel
 import edu.ucne.skyplanerent.presentation.categoriaaeronave.CategoriaAeronaveListScreen
 import edu.ucne.skyplanerent.presentation.categoriaaeronave.CategoriaAeronaveScreen
 import edu.ucne.skyplanerent.presentation.login.FirstScreen
@@ -25,8 +28,6 @@ import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaListScreen
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaScreen
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloListScreen
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloScreen
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.coroutineScope
 
 @Composable
 fun AppNavigation() {
@@ -146,8 +147,8 @@ fun AppNavigation() {
 
         composable<Screen.CategoriaAeronaveList> {
             CategoriaAeronaveListScreen(
-                goToCategoria = { id ->
-                    navController.navigate(Screen.CategoriaAeronave(id))
+                goToCategoria = { categoriaId ->
+                    navController.navigate("aeronaveList?categoriaId=$categoriaId") // Ruta explícita
                 },
                 createCategoria = {
                     navController.navigate(Screen.CategoriaAeronave(null))
@@ -166,6 +167,38 @@ fun AppNavigation() {
         composable<Screen.AdminPanel> {
             AdminPanelScreen(
                 navController = navController,
+                goBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = "aeronaveList?categoriaId={categoriaId}",
+            arguments = listOf(
+                navArgument("categoriaId") {
+                    type = NavType.IntType
+                    defaultValue = -1
+                }
+            )
+        ) { backStackEntry ->
+            val categoriaId = backStackEntry.arguments?.getInt("categoriaId") ?: -1
+            val viewModel: AeronaveViewModel = hiltViewModel()
+            LaunchedEffect(categoriaId) {
+                if (categoriaId != -1) viewModel.filterAeronavesByCategoria(categoriaId)
+            }
+            AeronaveListScreen(
+                goToAeronave = { id ->
+                    navController.navigate(Screen.Aeronave(id))
+                },
+                createAeronave = {
+                    navController.navigate(Screen.Aeronave(null))
+                },
+                goBack = { navController.popBackStack() }
+            )
+        }
+
+        composable<Screen.Aeronave> { backStack ->
+            AeronaveScreen(
+                aeronaveId = backStack.toRoute<Screen.Aeronave>().aeronaveId,
                 goBack = { navController.popBackStack() }
             )
         }
