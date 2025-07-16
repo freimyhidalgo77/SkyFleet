@@ -30,6 +30,7 @@ import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloListS
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloScreen
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveDetailsScreen
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaDetailsScreen
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloDetailsScreen
 
 @Composable
 fun AppNavigation() {
@@ -133,7 +134,7 @@ fun AppNavigation() {
         composable<Screen.TipoVueloList> {
             TipoVueloListScreen(
                 goToTipoVuelo = { id ->
-                    navController.navigate(Screen.TipoVuelo(id))
+                    navController.navigate(Screen.TipoVueloDetails(id))
                 },
                 createTipoVuelo = {
                     navController.navigate(Screen.TipoVuelo(null))
@@ -144,6 +145,7 @@ fun AppNavigation() {
 
         composable<Screen.TipoVuelo> { backStack ->
             TipoVueloScreen(
+                tipoVueloId = backStack.toRoute<Screen.TipoVuelo>().tipovueloId,
                 goBack = { navController.popBackStack() }
             )
         }
@@ -225,6 +227,17 @@ fun AppNavigation() {
                 goBack = { navController.popBackStack() },
                 onDelete = { id -> /* Lógica para eliminar */ },
                 onEdit = { id -> navController.navigate(Screen.Ruta(id)) }
+            )
+        }
+
+        // Nueva definición para TipoVueloDetails
+        composable<Screen.TipoVueloDetails> { backStack ->
+            val args = backStack.toRoute<Screen.TipoVueloDetails>()
+            TipoVueloDetailsScreen(
+                tipoVueloId = args.tipovueloId,
+                goBack = { navController.popBackStack() },
+                onDelete = { id -> /* Lógica para eliminar */ },
+                onEdit = { id -> navController.navigate(Screen.TipoVuelo(id)) }
             )
         }
     }

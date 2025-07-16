@@ -38,6 +38,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edu.ucne.skyplanerent.data.remote.dto.TipoVueloDTO
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TipoVueloListScreen(
     viewModel: TipoVueloViewModel = hiltViewModel(),
@@ -176,7 +177,7 @@ private fun TipoVueloRow(
     ) {
         Text(
             modifier = Modifier.weight(1f),
-            text = "Tipo Vuelo ${it.tipoVueloId}",
+            text = "Tipo Vuelo ${it.tipoVueloId ?: "N/A"}",
             color = Color.Black
         )
         Text(

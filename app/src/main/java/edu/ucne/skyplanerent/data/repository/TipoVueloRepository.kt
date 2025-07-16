@@ -12,11 +12,11 @@ import javax.inject.Inject
 class TipoVueloRepository @Inject constructor(
     private val dataSource: TipoVueloDataSource
 ){
-    fun getTipoVuelos(tipovueloid: Int): Flow<Resource<List<TipoVueloDTO>>> = flow {
+    fun getTipoVuelo(tipovueloId: Int): Flow<Resource<List<TipoVueloDTO>>> = flow {
         try{
             emit(Resource.Loading())
-            val tiposVuelos= dataSource.getTiposVuelos()
-            emit(Resource.Success(tiposVuelos))
+            val tipoVuelo= dataSource.getTipoVuelo(tipovueloId)
+            emit(Resource.Success(listOf(tipoVuelo)))
         }catch (e: HttpException){
             val errorMessage = e.response()?.errorBody()?.string() ?: e.message()
             Log.e("TipoVueloRepository", "HttpException: $errorMessage")
@@ -28,7 +28,7 @@ class TipoVueloRepository @Inject constructor(
         }
     }
 
-    fun getTipoVuelo(): Flow<Resource<List<TipoVueloDTO>>> = flow {
+    fun getTipoVuelos(): Flow<Resource<List<TipoVueloDTO>>> = flow {
         try{
             emit(Resource.Loading())
             val tiposVuelos= dataSource.getTiposVuelos()

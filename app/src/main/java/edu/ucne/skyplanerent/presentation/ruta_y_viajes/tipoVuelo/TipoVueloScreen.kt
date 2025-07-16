@@ -43,6 +43,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edu.ucne.skyplanerent.presentation.UiEvent
 import kotlinx.coroutines.launch
 
+
 @Composable
 fun TipoVueloScreen(
     tipoVueloId: Int? = null,

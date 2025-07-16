@@ -232,7 +232,7 @@ class TipoVueloViewModel @Inject constructor(
     private fun findTipoVuelo(tipoVueloId: Int) {
         viewModelScope.launch {
             if (tipoVueloId > 0) {
-                tipoVueloRepository.getTipoVuelos(tipoVueloId).collect { resource ->
+                tipoVueloRepository.getTipoVuelo(tipoVueloId).collect { resource ->
                     when (resource) {
                         is Resource.Success -> {
                             val tipoVuelo = resource.data?.firstOrNull()
@@ -260,7 +260,7 @@ class TipoVueloViewModel @Inject constructor(
 
     private fun getTipoVuelos() {
         viewModelScope.launch {
-            tipoVueloRepository.getTipoVuelo().collectLatest { result ->
+            tipoVueloRepository.getTipoVuelos().collectLatest { result ->
                 when (result) {
                     is Resource.Loading -> {
                         _uiState.update {
