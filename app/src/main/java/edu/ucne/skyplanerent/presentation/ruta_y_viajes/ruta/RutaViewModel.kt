@@ -89,11 +89,12 @@ class RutaViewModel @Inject constructor(
                 if (rutaDto.RutaId!= 0) {
                     _uiState.update {
                         it.copy(
-                            rutaId = rutaDto.RutaId,
+                            rutaId = rutaDto.RutaId!!,
                             origen = rutaDto.origen,
                             destino = rutaDto.destino,
                             distancia = rutaDto.distancia?:0.0,
-                            duracionEstimada = rutaDto.duracion
+                            duracionEstimada = rutaDto.duracion,
+                           // rutaActual = rutaDto
                         )
                     }
                 }
