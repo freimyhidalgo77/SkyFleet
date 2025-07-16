@@ -138,7 +138,7 @@ fun AdminPanelScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Card(
-                    onClick = { navController.navigate(Screen.AeronaveList) },
+                    onClick = { navController.navigate(Screen.CategoriaAeronaveList) },
                     modifier = Modifier.weight(1f)
                 ) {
                     Column(
