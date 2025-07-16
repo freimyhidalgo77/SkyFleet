@@ -1,16 +1,18 @@
 package edu.ucne.skyplanerent.presentation.ruta_y_viajes
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -20,7 +22,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,40 +29,31 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import edu.ucne.skyplanerent.R
 import edu.ucne.skyplanerent.data.local.entity.ReservaEntity
 import edu.ucne.skyplanerent.data.local.entity.RutaEntity
 import edu.ucne.skyplanerent.data.local.entity.TipoVueloEntity
 import edu.ucne.skyplanerent.presentation.reserva.ReservaViewModel
 import edu.ucne.skyplanerent.presentation.reserva.UiState
-import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaViewModel
-import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloViewModel
-import kotlinx.coroutines.CoroutineScope
 import java.text.SimpleDateFormat
 import java.util.Locale
 
 
 @Composable
 fun PreReservaListScreen(
-    /*TipoVueloviewModel: TipoVueloViewModel = hiltViewModel(),
-    RutaviewModel: RutaViewModel = hiltViewModel(),
-    tipoVueloId:Int,
-    rutaId:Int,*/
+    preReservaId:Int,
     tipoVueloList: List<TipoVueloEntity>,
     rutaList: List<RutaEntity>,
-    viewModel: ReservaViewModel= hiltViewModel(),
-    scope: CoroutineScope,
-    onCreate:()-> Unit,
-    onEdit:(Int)-> Unit,
-    onDelete:(Int)-> Unit
+    viewModel: ReservaViewModel = hiltViewModel(),
+    goBack:()->Unit,
+    goToFormulario: (Int)-> Unit,
 
-){
+
+    ){
 
     /*LaunchedEffect(rutaId, tipoVueloId){
         TipoVueloviewModel.uiState.value.tipovuelo
@@ -73,12 +65,12 @@ fun PreReservaListScreen(
 
     ReservaBodyListScreen(
         uiState = uiState,
-        scope = scope,
+       // scope = scope,
         tipoVueloList = tipoVueloList,
         rutaList = rutaList,
-        onCreate = onCreate,
-        onEdit = onEdit,
-        onDelete = onDelete
+        goToFormulario = goToFormulario,
+        goBack = goBack
+
     )
 }
 
@@ -86,14 +78,12 @@ fun PreReservaListScreen(
 @Composable
 fun ReservaBodyListScreen(
     uiState: UiState,
-    scope: CoroutineScope,
     tipoVueloList:List<TipoVueloEntity>,
     rutaList:List<RutaEntity>,
-    onCreate:()-> Unit,
-    onEdit:(Int)-> Unit,
-    onDelete:(Int)-> Unit
+    goToFormulario: (Int)-> Unit,
+    goBack:()->Unit,
 
-){
+    ){
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -110,8 +100,6 @@ fun ReservaBodyListScreen(
                 )
             )
         },
-
-
         ){innerPadding->
         Column (
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -121,10 +109,8 @@ fun ReservaBodyListScreen(
                 .fillMaxSize()
 
         ) {
-
-
             LazyColumn(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
 
             ) {
@@ -134,10 +120,28 @@ fun ReservaBodyListScreen(
 
                     // Solo si ambos existen, los mostramos
                     if (tipoVuelo != null && ruta != null) {
-                        PreReservaRow(reserva, tipoVuelo, ruta, onEdit, onDelete)
+                        PreReservaRow(reserva, tipoVuelo, ruta)
                     }
                 }
             }
+
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Button(
+                onClick = { //save()
+                    goToFormulario(0)
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF0A80ED),
+                    contentColor = Color.White
+                )
+
+            ) {
+                Text("Continuar reserva")
+            }
+
         }
     }
 }
@@ -147,8 +151,7 @@ fun PreReservaRow(
     reserva: ReservaEntity,
     tipoVuelo: TipoVueloEntity,
     ruta:RutaEntity,
-    onEdit: (Int) -> Unit,
-    onDelete: (Int) -> Unit
+
 
 ) {
     var expanded by remember { mutableStateOf(false) }
