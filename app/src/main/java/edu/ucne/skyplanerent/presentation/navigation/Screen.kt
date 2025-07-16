@@ -52,4 +52,10 @@ sealed class Screen {
     @Serializable
     data class RutaDetails(val rutaId:Int) : Screen()
 
+    @Serializable
+    data object CategoriaAeronaveList : Screen()
+
+    @Serializable
+    data class CategoriaAeronave(val categoriaId: Int?) : Screen()
+
 }
