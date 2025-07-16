@@ -604,25 +604,29 @@ class AeronaveViewModel @Inject constructor(
                     when (resource) {
                         is Resource.Success -> {
                             val aeronave = resource.data?.firstOrNull()
-                            _uiState.update {
-                                it.copy(
-                                    AeronaveId = aeronave?.aeronaveId,
-                                    estadoId = aeronave?.estadoId,
-                                    ModeloAvion = aeronave?.modeloAvion ?: "",
-                                    DescripcionCategoria = aeronave?.descripcionCategoria ?: "",
-                                    Registracion = aeronave?.registracion ?: "",
-                                    CostoXHora = aeronave?.costoXHora,
-                                    DescripcionAeronave = aeronave?.descripcionAeronave ?: "",
-                                    VelocidadMaxima = aeronave?.velocidadMaxima,
-                                    DescripcionMotor = aeronave?.descripcionMotor ?: "",
-                                    CapacidadCombustible = aeronave?.capacidadCombustible ?: 0,
-                                    ConsumoXHora = aeronave?.consumoXHora ?: 0,
-                                    Peso = aeronave?.peso,
-                                    Rango = aeronave?.rango ?: 0,
-                                    CapacidadPasajeros = aeronave?.capacidadPasajeros ?: 0,
-                                    AltitudMaxima = aeronave?.altitudMaxima ?: 0,
-                                    Licencia = aeronave?.licencia ?: ""
-                                )
+                            aeronave?.let {
+                                _uiState.update {
+                                    it.copy(
+                                        AeronaveId = aeronave.aeronaveId,
+                                        estadoId = aeronave.estadoId,
+                                        ModeloAvion = aeronave.modeloAvion ?: "",
+                                        DescripcionCategoria = aeronave.descripcionCategoria ?: "",
+                                        Registracion = aeronave.registracion ?: "",
+                                        CostoXHora = aeronave.costoXHora,
+                                        DescripcionAeronave = aeronave.descripcionAeronave ?: "",
+                                        VelocidadMaxima = aeronave.velocidadMaxima,
+                                        DescripcionMotor = aeronave.descripcionMotor ?: "",
+                                        CapacidadCombustible = aeronave.capacidadCombustible ?: 0,
+                                        ConsumoXHora = aeronave.consumoXHora ?: 0,
+                                        Peso = aeronave.peso,
+                                        Rango = aeronave.rango ?: 0,
+                                        CapacidadPasajeros = aeronave.capacidadPasajeros ?: 0,
+                                        AltitudMaxima = aeronave.altitudMaxima ?: 0,
+                                        Licencia = aeronave.licencia ?: ""
+                                    )
+                                }
+                            } ?: run {
+                                _uiState.update { it.copy(errorMessage = "Aeronave no encontrada") }
                             }
                         }
                         is Resource.Error -> {

@@ -1,5 +1,6 @@
 package edu.ucne.skyplanerent.presentation.aeronave
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -167,21 +168,28 @@ fun AeronaveListBodyScreen(
 @Composable
 private fun AeronaveRow(
     it: AeronaveDTO,
-    goToAeronave: () -> Unit
+    goToAeronave: (Int) -> Unit
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
+            .clickable { goToAeronave(it.aeronaveId ?: 0) } // Hacer clic en toda la fila
     ) {
-        Text(
-            modifier = Modifier.weight(1f),
-            text = it.modeloAvion ?: "N/A",
-            color = Color.Black,
-            style = MaterialTheme.typography.titleMedium
-        )
-        IconButton(onClick = goToAeronave) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = "ID: ${it.aeronaveId ?: "N/A"}", // Mostrar el ID para depuración
+                color = Color.Black,
+                style = MaterialTheme.typography.bodySmall
+            )
+            Text(
+                text = it.modeloAvion ?: "N/A",
+                color = Color.Black,
+                style = MaterialTheme.typography.titleMedium
+            )
+        }
+        IconButton(onClick = { goToAeronave(it.aeronaveId ?: 0) }) { // Botón opcional
             Icon(
                 Icons.Default.ArrowForward,
                 contentDescription = "Ver detalles",

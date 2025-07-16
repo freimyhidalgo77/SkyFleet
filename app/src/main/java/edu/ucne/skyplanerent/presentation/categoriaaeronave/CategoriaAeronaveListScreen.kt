@@ -1,5 +1,6 @@
 package edu.ucne.skyplanerent.presentation.categoriaaeronave
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,6 +13,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -55,30 +58,49 @@ fun CategoriaAeronaveListScreen(
 @Composable
 private fun CategoriaAeronaveRow(
     it: CategoriaAeronaveEntity,
-    goToCategoria: (Int) -> Unit, // Cambiado a (Int) -> Unit para pasar categoriaId
+    goToCategoria: (Int) -> Unit, // Para navegar a AeronaveListScreen
     deleteCategoria: (CategoriaAeronaveEntity) -> Unit
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
+    Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
+            .clickable { goToCategoria(it.categoriaId ?: 0) }, // Navegar al hacer clic en la tarjeta
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Text(modifier = Modifier.weight(1f), text = it.categoriaId.toString(), color = Color.Black)
-        Text(
-            modifier = Modifier.weight(2f),
-            text = it.descripcionCategoria,
-            style = MaterialTheme.typography.titleMedium,
-            color = Color.Black
-        )
-        IconButton(onClick = { goToCategoria(it.categoriaId ?: 0) }) { // Pasar categoriaId al hacer clic
-            Icon(Icons.Default.Edit, contentDescription = "Editar", tint = MaterialTheme.colorScheme.primary)
-        }
-        IconButton(onClick = { deleteCategoria(it) }) {
-            Icon(Icons.Default.Delete, contentDescription = "Eliminar", tint = MaterialTheme.colorScheme.error)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                modifier = Modifier.weight(1f),
+                text = it.categoriaId.toString(),
+                color = Color.Black
+            )
+            Text(
+                modifier = Modifier.weight(2f),
+                text = it.descripcionCategoria,
+                style = MaterialTheme.typography.titleMedium,
+                color = Color.Black
+            )
+            Row {
+                IconButton(onClick = { goToCategoria(it.categoriaId ?: 0) }) { // Botón de edición
+                    Icon(
+                        Icons.Default.Edit,
+                        contentDescription = "Editar",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+                IconButton(onClick = { deleteCategoria(it) }) { // Botón de eliminación
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = "Eliminar",
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
         }
     }
-    HorizontalDivider()
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -1,6 +1,8 @@
 package edu.ucne.skyplanerent.presentation.aeronave
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,7 +24,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 fun AeronaveDetailsScreen(
     aeronaveId: Int?,
     viewModel: AeronaveViewModel = hiltViewModel(),
-    goBack: () -> Unit
+    goBack: () -> Unit,
+    onDelete: (Int) -> Unit,
+    onEdit: (Int) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -30,13 +34,17 @@ fun AeronaveDetailsScreen(
         aeronaveId?.let {
             if (it > 0) {
                 viewModel.onEvent(AeronaveEvent.GetAeronave(it))
+            } else {
             }
+        } ?: run {
         }
     }
 
     AeronaveDetailsBodyScreen(
         uiState = uiState,
-        goBack = goBack
+        goBack = goBack,
+        onDelete = { onDelete(aeronaveId ?: 0) },
+        onEdit = { onEdit(aeronaveId ?: 0) }
     )
 }
 
@@ -44,7 +52,9 @@ fun AeronaveDetailsScreen(
 @Composable
 fun AeronaveDetailsBodyScreen(
     uiState: AeronaveUiState,
-    goBack: () -> Unit
+    goBack: () -> Unit,
+    onDelete: () -> Unit,
+    onEdit: () -> Unit
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -78,86 +88,125 @@ fun AeronaveDetailsBodyScreen(
                 .padding(padding)
                 .padding(8.dp)
         ) {
-            uiState.aeronaves.firstOrNull()?.let { aeronave ->
-                Column {
-                    Text(
-                        text = "Aeronave ${aeronave.aeronaveId ?: "N/A"}",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = Color.Black
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Modelo: ${aeronave.modeloAvion ?: "N/A"}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Blue
-                    )
-                    Text(
-                        text = "Categoría: ${aeronave.descripcionCategoria ?: "N/A"}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Blue
-                    )
-                    Text(
-                        text = "Registración: ${aeronave.registracion ?: "N/A"}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Blue
-                    )
-                    Text(
-                        text = "Licencia: ${aeronave.licencia ?: "N/A"}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Blue
-                    )
-                    Text(
-                        text = "Costo por Hora: $${aeronave.costoXHora?.toString() ?: "0.0"}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Blue
-                    )
-                    Text(
-                        text = "Peso: ${aeronave.peso?.toString() ?: "0.0"} kg",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Blue
-                    )
-                    Text(
-                        text = "Velocidad Máxima: ${aeronave.velocidadMaxima?.toString() ?: "0.0"} km/h",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Blue
-                    )
-                    Text(
-                        text = "Rango: ${aeronave.rango?.toString() ?: "0"} km",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Blue
-                    )
-                    Text(
-                        text = "Capacidad de Combustible: ${aeronave.capacidadCombustible?.toString() ?: "0"} L",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Blue
-                    )
-                    Text(
-                        text = "Consumo por Hora: ${aeronave.consumoXHora?.toString() ?: "0"} L/h",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Blue
-                    )
-                    Text(
-                        text = "Capacidad de Pasajeros: ${aeronave.capacidadPasajeros?.toString() ?: "0"}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Blue
-                    )
-                    Text(
-                        text = "Altitud Máxima: ${aeronave.altitudMaxima?.toString() ?: "0"} m",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Blue
-                    )
-                    Text(
-                        text = "Motor: ${aeronave.descripcionMotor ?: "N/A"}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Blue
-                    )
-                    Text(
-                        text = "Descripción: ${aeronave.descripcionAeronave ?: "N/A"}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Blue
-                    )
+            if (uiState.AeronaveId != null) {
+                // Capacidad
+                Text(
+                    text = "Capacidad",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color.Black
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Peso Máximo: ${uiState.Peso?.toString() ?: "0.0"} kg",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Blue
+                )
+                Text(
+                    text = "Tipo: ${uiState.DescripcionCategoria ?: "N/A"}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Blue
+                )
+                Text(
+                    text = "Rango: ${uiState.Rango?.toString() ?: "0"} km",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Blue
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Especificaciones
+                Text(
+                    text = "Especificaciones",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color.Black
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Motor: ${uiState.DescripcionMotor ?: "N/A"}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Blue
+                )
+                Text(
+                    text = "Velocidad Máxima: ${uiState.VelocidadMaxima?.toString() ?: "0.0"} km/h",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Blue
+                )
+                Text(
+                    text = "Altitud Máxima: ${uiState.AltitudMaxima?.toString() ?: "0"} m",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Blue
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Información Operacional
+                Text(
+                    text = "Información Operacional",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color.Black
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = "Modelo: ${uiState.ModeloAvion ?: "N/A"}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Blue
+                )
+                Text(
+                    text = "Registración: ${uiState.Registracion ?: "N/A"}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Blue
+                )
+                Text(
+                    text = "Licencia: ${uiState.Licencia ?: "N/A"}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Blue
+                )
+                Text(
+                    text = "Costo por Hora: $${uiState.CostoXHora?.toString() ?: "0.0"}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Blue
+                )
+                Text(
+                    text = "Capacidad de Combustible: ${uiState.CapacidadCombustible?.toString() ?: "0"} L",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Blue
+                )
+                Text(
+                    text = "Consumo por Hora: ${uiState.ConsumoXHora?.toString() ?: "0"} L/h",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Blue
+                )
+                Text(
+                    text = "Capacidad de Pasajeros: ${uiState.CapacidadPasajeros?.toString() ?: "0"}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Blue
+                )
+                Text(
+                    text = "Descripción: ${uiState.DescripcionAeronave ?: "N/A"}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Blue
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Botones
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    Button(
+                        onClick = onDelete,
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                    ) {
+                        Text("Eliminar Aeronave", color = Color.White)
+                    }
+                    Button(
+                        onClick = onEdit,
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                    ) {
+                        Text("Modificar Aeronave", color = Color.White)
+                    }
                 }
-            } ?: run {
+            } else {
                 Text(
                     text = "No se encontraron detalles de la aeronave",
                     style = MaterialTheme.typography.bodyLarge,

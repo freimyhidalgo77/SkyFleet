@@ -13,37 +13,37 @@ import javax.inject.Inject
 
 class AeronaveRepository @Inject constructor(
     private val dataSource: AeronavesDataSource
-){
-    fun getAeronave(aeronaveid: Int): Flow<Resource<List<AeronaveDTO>>> = flow {
-        try{
+) {
+    fun getAeronave(aeronaveId: Int): Flow<Resource<List<AeronaveDTO>>> = flow {
+        try {
             emit(Resource.Loading())
-            val aeronave = dataSource.getAeronaves()
-            emit(Resource.Success(aeronave))
-        }catch (e: HttpException){
+            val aeronave = dataSource.getAeronave(aeronaveId) // Usar el método específico
+            emit(Resource.Success(listOf(aeronave))) // Envolver en una lista para mantener la firma
+        } catch (e: HttpException) {
             val errorMessage = e.response()?.errorBody()?.string() ?: e.message()
             Log.e("Aeronave", "HttpException: $errorMessage")
-            emit(Resource.Error("Error de conexion $errorMessage"))
-        }catch (e: Exception){
+            emit(Resource.Error("Error de conexión $errorMessage"))
+        } catch (e: Exception) {
             Log.e("Aeronave", "Exception: ${e.message}")
             emit(Resource.Error("Error: ${e.message}"))
-
         }
     }
+
     fun getAeronaves(): Flow<Resource<List<AeronaveDTO>>> = flow {
-        try{
+        try {
             emit(Resource.Loading())
-            val aeronave = dataSource.getAeronaves()
-            emit(Resource.Success(aeronave))
-        }catch (e: HttpException){
+            val aeronaves = dataSource.getAeronaves()
+            emit(Resource.Success(aeronaves))
+        } catch (e: HttpException) {
             val errorMessage = e.response()?.errorBody()?.string() ?: e.message()
             Log.e("Aeronave", "HttpException: $errorMessage")
-            emit(Resource.Error("Error de conexion $errorMessage"))
-        }catch (e: Exception){
+            emit(Resource.Error("Error de conexión $errorMessage"))
+        } catch (e: Exception) {
             Log.e("Aeronave", "Exception: ${e.message}")
             emit(Resource.Error("Error: ${e.message}"))
-
         }
     }
+
     suspend fun update(id: Int, aeronaveDTO: AeronaveDTO) =
         dataSource.putAeronave(id, aeronaveDTO)
 

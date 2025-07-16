@@ -28,6 +28,7 @@ import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaListScreen
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaScreen
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloListScreen
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloScreen
+import edu.ucne.skyplanerent.presentation.aeronave.AeronaveDetailsScreen
 
 @Composable
 fun AppNavigation() {
@@ -187,7 +188,7 @@ fun AppNavigation() {
             }
             AeronaveListScreen(
                 goToAeronave = { id ->
-                    navController.navigate(Screen.Aeronave(id))
+                    navController.navigate(Screen.AeronaveDetailsScreen(id)) // Corregido a AeronaveDetails
                 },
                 createAeronave = {
                     navController.navigate(Screen.Aeronave(null))
@@ -200,6 +201,17 @@ fun AppNavigation() {
             AeronaveScreen(
                 aeronaveId = backStack.toRoute<Screen.Aeronave>().aeronaveId,
                 goBack = { navController.popBackStack() }
+            )
+        }
+
+        // Nueva definición para AeronaveDetails
+        composable<Screen.AeronaveDetailsScreen> { backStack ->
+            val args = backStack.toRoute<Screen.AeronaveDetailsScreen>()
+            AeronaveDetailsScreen(
+                aeronaveId = args.aeronaveId,
+                goBack = { navController.popBackStack() },
+                onDelete = { id -> /* Lógica para eliminar */ },
+                onEdit = { id -> navController.navigate(Screen.Aeronave(id)) }
             )
         }
     }
