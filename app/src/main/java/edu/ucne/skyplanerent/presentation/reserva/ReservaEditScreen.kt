@@ -36,7 +36,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 fun ReservaEditScreen(
     reservaId:Int,
     viewModel: ReservaViewModel = hiltViewModel(),
-    goBack:()->Unit
+    goBack:(Int)->Unit
 
 ){
 
@@ -69,7 +69,7 @@ fun ReservaEditBodyScreen(
     onChangeFecha:(String)-> Unit,*/
     onChangePasajeros:(Int)-> Unit,
     save:()->Unit,
-    goBack: () -> Unit
+    goBack: (Int) -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -157,7 +157,7 @@ fun ReservaEditBodyScreen(
                 OutlinedButton(
                     onClick = {
                         save()
-                        goBack()
+                        goBack(0)
 
                     },
                     modifier = Modifier.weight(1f),
@@ -201,11 +201,9 @@ fun ReservaEditBodyScreen(
                                 color = Color.Red
                             )
                         }
-
                     )
                 }
             }
-
         }
     }
 }
