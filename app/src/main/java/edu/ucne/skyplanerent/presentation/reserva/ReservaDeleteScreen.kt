@@ -140,7 +140,7 @@ fun ReservaDeleteScreen(
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
-            title = { Text("Confirmar Eliminación") },
+            title = { Text("Confirmar Eliminacion") },
             text = { Text("¿Realmente deseas eliminar este depósito? Esta acción no se puede deshacer.") },
             confirmButton = {
                 Button(
