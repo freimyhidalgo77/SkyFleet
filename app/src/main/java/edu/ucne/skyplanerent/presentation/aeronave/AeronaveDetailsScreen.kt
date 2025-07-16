@@ -14,12 +14,17 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import edu.ucne.skyplanerent.presentation.UiEvent
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AeronaveDetailsScreen(
     aeronaveId: Int?,
@@ -29,22 +34,42 @@ fun AeronaveDetailsScreen(
     onEdit: (Int) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(aeronaveId) {
         aeronaveId?.let {
             if (it > 0) {
                 viewModel.onEvent(AeronaveEvent.GetAeronave(it))
-            } else {
             }
-        } ?: run {
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.uiEvent.collect { event ->
+            when (event) {
+                is UiEvent.NavigateUp -> goBack()
+                is UiEvent.ShowSnackbar -> {
+                    scope.launch {
+                        snackbarHostState.showSnackbar(
+                            message = event.message,
+                            duration = SnackbarDuration.Short
+                        )
+                    }
+                }
+            }
         }
     }
 
     AeronaveDetailsBodyScreen(
         uiState = uiState,
         goBack = goBack,
-        onDelete = { onDelete(aeronaveId ?: 0) },
-        onEdit = { onEdit(aeronaveId ?: 0) }
+        onDelete = {
+            viewModel.onEvent(AeronaveEvent.Delete)
+            onDelete(aeronaveId ?: 0)
+        },
+        onEdit = { onEdit(aeronaveId ?: 0) },
+        snackbarHostState = snackbarHostState
     )
 }
 
@@ -54,7 +79,8 @@ fun AeronaveDetailsBodyScreen(
     uiState: AeronaveUiState,
     goBack: () -> Unit,
     onDelete: () -> Unit,
-    onEdit: () -> Unit
+    onEdit: () -> Unit,
+    snackbarHostState: SnackbarHostState
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -80,6 +106,14 @@ fun AeronaveDetailsBodyScreen(
                     containerColor = Color(0xFF272D4D)
                 )
             )
+        },
+        snackbarHost = {
+            SnackbarHost(snackbarHostState) { data ->
+                Snackbar(
+                    snackbarData = data,
+                    containerColor = if (uiState.isSuccess) Color.Green.copy(alpha = 0.8f) else Color.Red.copy(alpha = 0.8f)
+                )
+            }
         }
     ) { padding ->
         Column(
