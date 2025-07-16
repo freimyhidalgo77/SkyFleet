@@ -30,6 +30,8 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -45,6 +47,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edu.ucne.skyplanerent.presentation.UiEvent
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AeronaveScreen(
     aeronaveId: Int? = null,
@@ -54,10 +57,10 @@ fun AeronaveScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(aeronaveId) {
-        aeronaveId?.let {
-            if (it > 0) {
-                viewModel.onEvent(AeronaveEvent.GetAeronave(it))
-            }
+        if (aeronaveId != null && aeronaveId > 0) {
+            viewModel.onEvent(AeronaveEvent.GetAeronave(aeronaveId))
+        } else {
+            viewModel.onEvent(AeronaveEvent.New) // Inicializar para nueva aeronave
         }
     }
 
@@ -105,13 +108,20 @@ fun AeronaveBodyScreen(
         viewModel.uiEvent.collect { event ->
             when (event) {
                 is UiEvent.NavigateUp -> goBack()
-                is UiEvent.ShowSnackbar -> TODO()
+                is UiEvent.ShowSnackbar -> {
+                    scope.launch {
+                        snackbarHostState.showSnackbar(
+                            message = event.message,
+                            duration = SnackbarDuration.Short
+                        )
+                    }
+                }
             }
         }
     }
 
-    // Mostrar Snackbar y navegar al éxito
-    LaunchedEffect(uiState.isSuccess || !uiState.errorMessage.isNullOrBlank()) {
+    // Mostrar Snackbar para éxito o error
+    LaunchedEffect(uiState.isSuccess, uiState.errorMessage) {
         if (uiState.isSuccess && !uiState.successMessage.isNullOrBlank()) {
             scope.launch {
                 snackbarHostState.showSnackbar(
@@ -119,7 +129,6 @@ fun AeronaveBodyScreen(
                     duration = SnackbarDuration.Short
                 )
                 onEvent(AeronaveEvent.ResetSuccessMessage)
-                goBack() // Navegar a la lista después de mostrar el Snackbar
             }
         } else if (!uiState.errorMessage.isNullOrBlank()) {
             scope.launch {
@@ -141,23 +150,34 @@ fun AeronaveBodyScreen(
             }
         },
         topBar = {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(
-                    onClick = goBack,
-                    modifier = Modifier.align(Alignment.CenterVertically)
-                ) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "volver")
-                }
-            }
+            TopAppBar(
+                title = {
+                    Text(
+                        text = if (uiState.AeronaveId == null) "Nueva Aeronave" else "Editar Aeronave",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = Color.White
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = goBack) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Volver",
+                            tint = Color.White
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFF272D4D)
+                )
+            )
         }
     ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .padding(8.dp)
                 .verticalScroll(rememberScrollState()) // Habilita el desplazamiento vertical
         ) {
             ElevatedCard(
@@ -169,7 +189,7 @@ fun AeronaveBodyScreen(
                         .padding(8.dp)
                 ) {
                     Spacer(modifier = Modifier.height(32.dp))
-                    Text("Registro de Aeronaves")
+                    Text(if (uiState.AeronaveId == null) "Nueva Aeronave" else "Editar Aeronave")
 
                     OutlinedTextField(
                         value = uiState.AeronaveId?.toString() ?: "Nuevo",
@@ -184,10 +204,7 @@ fun AeronaveBodyScreen(
 
                     OutlinedTextField(
                         value = uiState.estadoId?.toString() ?: "",
-                        onValueChange = {
-                            onEvent(AeronaveEvent.EstadoIdChange(it.toIntOrNull()))
-                            onEvent(AeronaveEvent.LimpiarErrorMessageEstadoIdChange)
-                        },
+                        onValueChange = { onEvent(AeronaveEvent.EstadoIdChange(it.toIntOrNull() ?: 0)) },
                         label = { Text("ID Estado") },
                         modifier = Modifier.fillMaxWidth(),
                         isError = estadoIdError,
@@ -212,10 +229,7 @@ fun AeronaveBodyScreen(
 
                     OutlinedTextField(
                         value = uiState.ModeloAvion,
-                        onValueChange = {
-                            onEvent(AeronaveEvent.ModeloAvionChange(it))
-                            onEvent(AeronaveEvent.LimpiarErrorMessageModeloAvionChange)
-                        },
+                        onValueChange = { onEvent(AeronaveEvent.ModeloAvionChange(it)) },
                         label = { Text("Modelo de Avión") },
                         modifier = Modifier.fillMaxWidth(),
                         isError = modeloAvionError,
@@ -239,10 +253,7 @@ fun AeronaveBodyScreen(
 
                     OutlinedTextField(
                         value = uiState.DescripcionCategoria,
-                        onValueChange = {
-                            onEvent(AeronaveEvent.DescripcionCategoriaChange(it))
-                            onEvent(AeronaveEvent.LimpiarErrorMessageDescripcionCategoriaChange)
-                        },
+                        onValueChange = { onEvent(AeronaveEvent.DescripcionCategoriaChange(it)) },
                         label = { Text("Descripción de Categoría") },
                         modifier = Modifier.fillMaxWidth(),
                         isError = descripcionCategoriaError,
@@ -266,10 +277,7 @@ fun AeronaveBodyScreen(
 
                     OutlinedTextField(
                         value = uiState.Registracion,
-                        onValueChange = {
-                            onEvent(AeronaveEvent.RegistracionChange(it))
-                            onEvent(AeronaveEvent.LimpiarErrorMessageRegistracionChange)
-                        },
+                        onValueChange = { onEvent(AeronaveEvent.RegistracionChange(it)) },
                         label = { Text("Registración") },
                         modifier = Modifier.fillMaxWidth(),
                         isError = registracionError,
@@ -293,10 +301,7 @@ fun AeronaveBodyScreen(
 
                     OutlinedTextField(
                         value = uiState.CostoXHora?.toString() ?: "",
-                        onValueChange = {
-                            onEvent(AeronaveEvent.CostoXHoraChange(it.toDoubleOrNull()))
-                            onEvent(AeronaveEvent.LimpiarErrorMessageCostoXHoraChange)
-                        },
+                        onValueChange = { onEvent(AeronaveEvent.CostoXHoraChange(it.toDoubleOrNull() ?: 0.0)) },
                         label = { Text("Costo por Hora") },
                         modifier = Modifier.fillMaxWidth(),
                         isError = costoXHoraError,
@@ -321,10 +326,7 @@ fun AeronaveBodyScreen(
 
                     OutlinedTextField(
                         value = uiState.DescripcionAeronave,
-                        onValueChange = {
-                            onEvent(AeronaveEvent.DescripcionAeronaveChange(it))
-                            onEvent(AeronaveEvent.LimpiarErrorMessageDescripcionAeronaveChange)
-                        },
+                        onValueChange = { onEvent(AeronaveEvent.DescripcionAeronaveChange(it)) },
                         label = { Text("Descripción de Aeronave") },
                         modifier = Modifier.fillMaxWidth(),
                         isError = descripcionAeronaveError,
@@ -348,10 +350,7 @@ fun AeronaveBodyScreen(
 
                     OutlinedTextField(
                         value = uiState.VelocidadMaxima?.toString() ?: "",
-                        onValueChange = {
-                            onEvent(AeronaveEvent.VelocidadMaximaChange(it.toDoubleOrNull()))
-                            onEvent(AeronaveEvent.LimpiarErrorMessageVelocidadMaximaChange)
-                        },
+                        onValueChange = { onEvent(AeronaveEvent.VelocidadMaximaChange(it.toDoubleOrNull() ?: 0.0)) },
                         label = { Text("Velocidad Máxima") },
                         modifier = Modifier.fillMaxWidth(),
                         isError = velocidadMaximaError,
@@ -376,10 +375,7 @@ fun AeronaveBodyScreen(
 
                     OutlinedTextField(
                         value = uiState.DescripcionMotor,
-                        onValueChange = {
-                            onEvent(AeronaveEvent.DescripcionMotorChange(it))
-                            onEvent(AeronaveEvent.LimpiarErrorMessageDescripcionMotorChange)
-                        },
+                        onValueChange = { onEvent(AeronaveEvent.DescripcionMotorChange(it)) },
                         label = { Text("Descripción del Motor") },
                         modifier = Modifier.fillMaxWidth(),
                         isError = descripcionMotorError,
@@ -403,10 +399,7 @@ fun AeronaveBodyScreen(
 
                     OutlinedTextField(
                         value = uiState.CapacidadCombustible.toString(),
-                        onValueChange = {
-                            onEvent(AeronaveEvent.CapacidadCombustibleChange(it.toIntOrNull() ?: 0))
-                            onEvent(AeronaveEvent.LimpiarErrorMessageCapacidadCombustibleChange)
-                        },
+                        onValueChange = { onEvent(AeronaveEvent.CapacidadCombustibleChange(it.toIntOrNull() ?: 0)) },
                         label = { Text("Capacidad de Combustible") },
                         modifier = Modifier.fillMaxWidth(),
                         isError = capacidadCombustibleError,
@@ -431,10 +424,7 @@ fun AeronaveBodyScreen(
 
                     OutlinedTextField(
                         value = uiState.ConsumoXHora.toString(),
-                        onValueChange = {
-                            onEvent(AeronaveEvent.ConsumoXHoraChange(it.toIntOrNull() ?: 0))
-                            onEvent(AeronaveEvent.LimpiarErrorMessageConsumoXHoraChange)
-                        },
+                        onValueChange = { onEvent(AeronaveEvent.ConsumoXHoraChange(it.toIntOrNull() ?: 0)) },
                         label = { Text("Consumo por Hora") },
                         modifier = Modifier.fillMaxWidth(),
                         isError = consumoXHoraError,
@@ -459,10 +449,7 @@ fun AeronaveBodyScreen(
 
                     OutlinedTextField(
                         value = uiState.Peso?.toString() ?: "",
-                        onValueChange = {
-                            onEvent(AeronaveEvent.PesoChange(it.toDoubleOrNull()))
-                            onEvent(AeronaveEvent.LimpiarErrorMessagePesoChange)
-                        },
+                        onValueChange = { onEvent(AeronaveEvent.PesoChange(it.toDoubleOrNull() ?: 0.0)) },
                         label = { Text("Peso") },
                         modifier = Modifier.fillMaxWidth(),
                         isError = pesoError,
@@ -487,10 +474,7 @@ fun AeronaveBodyScreen(
 
                     OutlinedTextField(
                         value = uiState.Rango.toString(),
-                        onValueChange = {
-                            onEvent(AeronaveEvent.RangoChange(it.toIntOrNull() ?: 0))
-                            onEvent(AeronaveEvent.LimpiarErrorMessageRangoChange)
-                        },
+                        onValueChange = { onEvent(AeronaveEvent.RangoChange(it.toIntOrNull() ?: 0)) },
                         label = { Text("Rango") },
                         modifier = Modifier.fillMaxWidth(),
                         isError = rangoError,
@@ -515,10 +499,7 @@ fun AeronaveBodyScreen(
 
                     OutlinedTextField(
                         value = uiState.CapacidadPasajeros.toString(),
-                        onValueChange = {
-                            onEvent(AeronaveEvent.CapacidadPasajerosChange(it.toIntOrNull() ?: 0))
-                            onEvent(AeronaveEvent.LimpiarErrorMessageCapacidadPasajerosChange)
-                        },
+                        onValueChange = { onEvent(AeronaveEvent.CapacidadPasajerosChange(it.toIntOrNull() ?: 0)) },
                         label = { Text("Capacidad de Pasajeros") },
                         modifier = Modifier.fillMaxWidth(),
                         isError = capacidadPasajerosError,
@@ -543,10 +524,7 @@ fun AeronaveBodyScreen(
 
                     OutlinedTextField(
                         value = uiState.AltitudMaxima.toString(),
-                        onValueChange = {
-                            onEvent(AeronaveEvent.AltitudMaximaChange(it.toIntOrNull() ?: 0))
-                            onEvent(AeronaveEvent.LimpiarErrorMessageAltitudMaximaChange)
-                        },
+                        onValueChange = { onEvent(AeronaveEvent.AltitudMaximaChange(it.toIntOrNull() ?: 0)) },
                         label = { Text("Altitud Máxima") },
                         modifier = Modifier.fillMaxWidth(),
                         isError = altitudMaximaError,
@@ -571,10 +549,7 @@ fun AeronaveBodyScreen(
 
                     OutlinedTextField(
                         value = uiState.Licencia,
-                        onValueChange = {
-                            onEvent(AeronaveEvent.LicenciaChange(it))
-                            onEvent(AeronaveEvent.LimpiarErrorMessageLicenciaChange)
-                        },
+                        onValueChange = { onEvent(AeronaveEvent.LicenciaChange(it)) },
                         label = { Text("Licencia") },
                         modifier = Modifier.fillMaxWidth(),
                         isError = licenciaError,
@@ -624,8 +599,11 @@ fun AeronaveBodyScreen(
                         OutlinedButton(
                             onClick = {
                                 if (isFormValid) {
-                                    onEvent(AeronaveEvent.postAeronave)
-                                    // goBack() removido de aquí, ahora se maneja en LaunchedEffect
+                                    if (uiState.AeronaveId == null) {
+                                        onEvent(AeronaveEvent.postAeronave) // Crear nueva aeronave
+                                    } else {
+                                        onEvent(AeronaveEvent.Save) // Editar aeronave existente
+                                    }
                                 }
                             },
                             enabled = isFormValid,
@@ -636,7 +614,7 @@ fun AeronaveBodyScreen(
                             border = BorderStroke(1.dp, if (isFormValid) Color.Blue else Color.Gray),
                             modifier = Modifier.padding(horizontal = 8.dp)
                         ) {
-                            Text(text = "Guardar")
+                            Text(text = if (uiState.AeronaveId == null) "Guardar" else "Actualizar")
                         }
                     }
                 }

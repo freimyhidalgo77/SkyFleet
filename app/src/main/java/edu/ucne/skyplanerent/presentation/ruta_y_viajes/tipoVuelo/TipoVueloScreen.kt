@@ -28,6 +28,8 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -44,6 +46,7 @@ import edu.ucne.skyplanerent.presentation.UiEvent
 import kotlinx.coroutines.launch
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TipoVueloScreen(
     tipoVueloId: Int? = null,
@@ -53,10 +56,10 @@ fun TipoVueloScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(tipoVueloId) {
-        tipoVueloId?.let {
-            if (it > 0) {
-                viewModel.onEvent(TipoVueloEvent.GetTipoVuelo(it))
-            }
+        if (tipoVueloId != null && tipoVueloId > 0) {
+            viewModel.onEvent(TipoVueloEvent.GetTipoVuelo(tipoVueloId))
+        } else {
+            viewModel.onEvent(TipoVueloEvent.New) // Inicializar para nuevo tipo de vuelo
         }
     }
 
@@ -87,13 +90,20 @@ fun TipoVueloBodyScreen(
         viewModel.uiEvent.collect { event ->
             when (event) {
                 is UiEvent.NavigateUp -> goBack()
-                is UiEvent.ShowSnackbar -> TODO()
+                is UiEvent.ShowSnackbar -> {
+                    scope.launch {
+                        snackbarHostState.showSnackbar(
+                            message = event.message,
+                            duration = SnackbarDuration.Short
+                        )
+                    }
+                }
             }
         }
     }
 
-    // Mostrar Snackbar y navegar al éxito
-    LaunchedEffect(uiState.isSuccess || !uiState.errorMessage.isNullOrBlank()) {
+    // Mostrar Snackbar para éxito o error
+    LaunchedEffect(uiState.isSuccess, uiState.errorMessage) {
         if (uiState.isSuccess && !uiState.successMessage.isNullOrBlank()) {
             scope.launch {
                 snackbarHostState.showSnackbar(
@@ -101,7 +111,6 @@ fun TipoVueloBodyScreen(
                     duration = SnackbarDuration.Short
                 )
                 onEvent(TipoVueloEvent.ResetSuccessMessage)
-                goBack() // Navegar a la lista después de mostrar el Snackbar
             }
         } else if (!uiState.errorMessage.isNullOrBlank()) {
             scope.launch {
@@ -123,17 +132,27 @@ fun TipoVueloBodyScreen(
             }
         },
         topBar = {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(
-                    onClick = goBack,
-                    modifier = Modifier.align(Alignment.CenterVertically)
-                ) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "volver")
-                }
-            }
+            TopAppBar(
+                title = {
+                    Text(
+                        text = if (uiState.tipoVueloId == null) "Nuevo Tipo de Vuelo" else "Editar Tipo de Vuelo",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = Color.White
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = goBack) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Volver",
+                            tint = Color.White
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFF272D4D)
+                )
+            )
         }
     ) { innerPadding ->
         Column(
@@ -151,7 +170,7 @@ fun TipoVueloBodyScreen(
                         .padding(8.dp)
                 ) {
                     Spacer(modifier = Modifier.height(32.dp))
-                    Text("Registro de Tipos de Vuelo")
+                    Text(if (uiState.tipoVueloId == null) "Nuevo Tipo de Vuelo" else "Editar Tipo de Vuelo")
 
                     OutlinedTextField(
                         value = uiState.tipoVueloId?.toString() ?: "Nuevo",
@@ -166,10 +185,7 @@ fun TipoVueloBodyScreen(
 
                     OutlinedTextField(
                         value = uiState.nombreVuelo,
-                        onValueChange = {
-                            onEvent(TipoVueloEvent.NombreVueloChange(it))
-                            onEvent(TipoVueloEvent.LimpiarErrorMessageTipoClienteChange)
-                        },
+                        onValueChange = { onEvent(TipoVueloEvent.NombreVueloChange(it)) },
                         label = { Text("Nombre del Vuelo") },
                         modifier = Modifier.fillMaxWidth(),
                         isError = nombreVueloError,
@@ -193,10 +209,7 @@ fun TipoVueloBodyScreen(
 
                     OutlinedTextField(
                         value = uiState.descripcionTipoVuelo,
-                        onValueChange = {
-                            onEvent(TipoVueloEvent.DescripcionTipoVueloChange(it))
-                            onEvent(TipoVueloEvent.LimpiarErrorMessageDescripcionTipoVueloChange)
-                        },
+                        onValueChange = { onEvent(TipoVueloEvent.DescripcionTipoVueloChange(it)) },
                         label = { Text("Descripción") },
                         modifier = Modifier.fillMaxWidth(),
                         isError = descripcionTipoVueloError,
@@ -246,8 +259,11 @@ fun TipoVueloBodyScreen(
                         OutlinedButton(
                             onClick = {
                                 if (isFormValid) {
-                                    onEvent(TipoVueloEvent.postTipoVuelo)
-                                    // goBack() removido de aquí, ahora se maneja en LaunchedEffect
+                                    if (uiState.tipoVueloId == null) {
+                                        onEvent(TipoVueloEvent.postTipoVuelo) // Crear nuevo tipo de vuelo
+                                    } else {
+                                        onEvent(TipoVueloEvent.Save) // Editar tipo de vuelo existente
+                                    }
                                 }
                             },
                             enabled = isFormValid,
@@ -258,7 +274,7 @@ fun TipoVueloBodyScreen(
                             border = BorderStroke(1.dp, if (isFormValid) Color.Blue else Color.Gray),
                             modifier = Modifier.padding(horizontal = 8.dp)
                         ) {
-                            Text(text = "Guardar")
+                            Text(text = if (uiState.tipoVueloId == null) "Guardar" else "Actualizar")
                         }
                     }
                 }
