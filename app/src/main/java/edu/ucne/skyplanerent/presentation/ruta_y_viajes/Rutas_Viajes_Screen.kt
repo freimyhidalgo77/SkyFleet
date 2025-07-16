@@ -157,24 +157,6 @@ fun Vuelos_RutasBodyListScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
-
-            item {
-                FechaSelector(
-                    fechaSeleccionada = fechaSeleccionada,
-                    onFechaSeleccionada = { nuevaFecha -> fechaSeleccionada = nuevaFecha }
-                )
-            }
-
-            item {
-                Button(
-                    onClick = { fechaSeleccionada?.let { onReserva(it) } },
-                    enabled = fechaSeleccionada != null,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Reservar con fecha")
-                }
-            }
-
             item {
                 ListaDeTiposDeVuelo(tiposDeVuelo = tiposDeVuelo)
             }
@@ -199,13 +181,21 @@ fun Vuelos_RutasBodyListScreen(
             }
 
             item {
-                AeronaveDropdown(
-                    aeronaves = uiStateA.Aeronaves,
-                    selectedAeronave = selectedAeronave,
-                    onAeronaveSelected = { selectedAeronave = it }
+                FechaSelector(
+                    fechaSeleccionada = fechaSeleccionada,
+                    onFechaSeleccionada = { nuevaFecha -> fechaSeleccionada = nuevaFecha }
                 )
             }
 
+            item {
+                Button(
+                    onClick = { fechaSeleccionada?.let { onReserva(it) } },
+                    enabled = fechaSeleccionada != null,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Reservar con fecha")
+                }
+            }
 
             item {
                 Text(
@@ -286,6 +276,19 @@ fun Vuelos_RutasBodyListScreen(
                     }
                 }
             }
+
+
+            item {
+                AeronaveDropdown(
+                    aeronaves = uiStateA.Aeronaves,
+                    selectedAeronave = selectedAeronave,
+                    onAeronaveSelected = { selectedAeronave = it }
+                )
+            }
+
+
+
+
 
             item {
                 /*val puedeContinuar = selectedAeronave != null &&
