@@ -13,5 +13,7 @@ data class RutaUiState(
     val isLoading: Boolean = false,
     val successMessage: String? = null,
     val errorMessage: String? = null,
-    val rutas: List<RutaDTO> = emptyList()
+    val rutas: List<RutaDTO> = emptyList(),
+    //val rutaActual: RutaDTO? = null,
+
 )
