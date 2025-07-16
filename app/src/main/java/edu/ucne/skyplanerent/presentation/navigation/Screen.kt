@@ -40,9 +40,11 @@ sealed interface Screen {
     @Serializable
     data class PagoReserva(val pagoReservaId:Int) : Screen
 
+    @Serializable
+    data class ReservaEdit(val reservaId: Int) : Screen
 
-
-
+    @Serializable
+    data class ReservaDelete(val reservaId: Int) : Screen
 
 
 
