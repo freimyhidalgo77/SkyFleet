@@ -13,6 +13,8 @@ import edu.ucne.skyplanerent.data.local.entity.RutaEntity
 import edu.ucne.skyplanerent.presentation.admin.AdminPanelScreen
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveListScreen
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveScreen
+import edu.ucne.skyplanerent.presentation.categoriaaeronave.CategoriaAeronaveListScreen
+import edu.ucne.skyplanerent.presentation.categoriaaeronave.CategoriaAeronaveScreen
 import edu.ucne.skyplanerent.presentation.login.FirstScreen
 import edu.ucne.skyplanerent.presentation.login.LoginScreen
 import edu.ucne.skyplanerent.presentation.login.RegisterScreen
@@ -142,20 +144,21 @@ fun AppNavigation() {
             )
         }
 
-        composable<Screen.AeronaveList> {
-            AeronaveListScreen(
-                goToAeronave = { id ->
-                    navController.navigate(Screen.Aeronave(id))
+        composable<Screen.CategoriaAeronaveList> {
+            CategoriaAeronaveListScreen(
+                goToCategoria = { id ->
+                    navController.navigate(Screen.CategoriaAeronave(id))
                 },
-                createAeronave = {
-                    navController.navigate(Screen.Aeronave(null))
+                createCategoria = {
+                    navController.navigate(Screen.CategoriaAeronave(null))
                 },
                 goBack = { navController.popBackStack() }
             )
         }
 
-        composable<Screen.Aeronave> { backStack ->
-            AeronaveScreen(
+        composable<Screen.CategoriaAeronave> { backStack ->
+            CategoriaAeronaveScreen(
+                categoriaId = backStack.toRoute<Screen.CategoriaAeronave>().categoriaId,
                 goBack = { navController.popBackStack() }
             )
         }
