@@ -157,9 +157,10 @@ fun FormularioBodyScreen(
 
 
         Button(
-            onClick = { save()
-                      goToPago(0)
-                      },
+            onClick =
+                { save()
+                    goToPago(0)
+                },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFF0A80ED),
