@@ -8,6 +8,8 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -33,6 +35,8 @@ import java.util.*
 import edu.ucne.skyplanerent.data.remote.dto.AeronaveDTO
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveUiState
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveViewModel
+import androidx.compose.material.icons.filled.CalendarToday
+
 
 
 @Composable
@@ -41,19 +45,21 @@ fun Rutas_Viajes_Screen(
     tipoVueloViewModel: TipoVueloViewModel = hiltViewModel(),
     aeronaveViewModel: AeronaveViewModel = hiltViewModel(),
     rutaViewModel: RutaViewModel = hiltViewModel(),
-   // rutas: List<RutaDTO>,
+    // rutas: List<RutaDTO>,
     scope: CoroutineScope,
     onCreate: () -> Unit,
     onEdit: (Int) -> Unit,
     onDelete: (Int) -> Unit,
-    goBackDetails: (Int) -> Unit
+    goBackDetails: (Int) -> Unit,
+    goTopreReserva: (Int)-> Unit,
+    goToRuta: (Int) -> Unit,
+
+
 ) {
-   // val reservaUiState by reservaViewModel.uiState.collectAsStateWithLifecycle()
+    // val reservaUiState by reservaViewModel.uiState.collectAsStateWithLifecycle()
     val rutaUiState by rutaViewModel.uiState.collectAsStateWithLifecycle()
     val tipoVueloUiState by tipoVueloViewModel.uiState.collectAsStateWithLifecycle()
     val aeronavesUiState by aeronaveViewModel.uiState.collectAsStateWithLifecycle()
-
-
 
 
     Vuelos_RutasBodyListScreen(
@@ -77,7 +83,9 @@ fun Rutas_Viajes_Screen(
             )
             reservaViewModel.saveReserva()
         },
-         goBackDetails = goBackDetails
+        goBackDetails = goBackDetails,
+        goTopreReserva = goTopreReserva,
+        goToRuta = goToRuta
     )
 }
 
@@ -93,21 +101,40 @@ fun Vuelos_RutasBodyListScreen(
     onEdit: (Int) -> Unit,
     onDelete: (Int) -> Unit,
     onReserva: (Date) -> Unit,
-    goBackDetails: (Int) -> Unit
+    goBackDetails: (Int) -> Unit,
+    goToRuta: (Int) -> Unit,
+    goTopreReserva: (Int)-> Unit
+
 ) {
     var fechaSeleccionada by remember { mutableStateOf<Date?>(null) }
     val navController = rememberNavController()
     var selectedAeronave by remember { mutableStateOf<AeronaveDTO?>(null) }
 
+
+    val licencias = listOf(
+        "PPL - Piloto Privado",
+        "CPL - Piloto Comercial",
+        "ATPL - Piloto de Transporte de Línea Aérea",
+        "IR - Habilitación de Vuelo por Instrumentos",
+        "ME - Habilitación Multimotor",
+        "Turboprop - Habilitación Turboprop",
+        "Jet Type Rating - Habilitación Jet"
+    )
+
+
+    var soyPiloto by remember { mutableStateOf<Boolean?>(null) }
+    var licenciaSeleccionada by remember { mutableStateOf<String?>(null) }
+    var mostrarLicencias by remember { mutableStateOf(false) }
+    var expandedLicencia by remember { mutableStateOf(false) }
+
+
+
     LaunchedEffect(uiStateA.aeronaves) {
-        println("Aeronaves disponibles: ${uiStateA.aeronaves.size}")
+        println("🛩 Aeronaves disponibles: ${uiStateA.aeronaves}")
         uiStateA.aeronaves.forEach {
-            println("Aeronave: ${it.modeloAvion}")
+            println(" Modelo: ${it.modeloAvion}")
         }
     }
-
-
-
 
 
     Scaffold(
@@ -134,6 +161,29 @@ fun Vuelos_RutasBodyListScreen(
                 .padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+
+            item {
+                ListaDeTiposDeVuelo(tiposDeVuelo = tiposDeVuelo)
+            }
+
+            item {
+                Text(
+                    text = "Rutas disponibles",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+            }
+
+            items(uiState.rutas) { ruta ->
+                RutasRow(
+                    it = ruta,
+                    goToRuta = { goToRuta(ruta.rutaId ?: 0) }
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+
             item {
                 FechaSelector(
                     fechaSeleccionada = fechaSeleccionada,
@@ -152,24 +202,83 @@ fun Vuelos_RutasBodyListScreen(
             }
 
             item {
-                ListaDeTiposDeVuelo(tiposDeVuelo = tiposDeVuelo)
-            }
-
-            item {
                 Text(
-                    text = "Rutas disponibles",
-                    fontSize = 20.sp,
+                    text = "Tipo de cliente",
                     fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                 )
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    Button(
+                        onClick = {
+                            soyPiloto = true
+                            mostrarLicencias = true
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (soyPiloto == true) Color(0xFF64B5F6) else Color.LightGray
+                        )
+                    ) {
+                        Text("Soy piloto")
+                    }
+
+                    Button(
+                        onClick = {
+                            soyPiloto = false
+                            mostrarLicencias = false
+                            licenciaSeleccionada = null
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (soyPiloto == false) Color(0xFF64B5F6) else Color.LightGray
+                        )
+                    ) {
+                        Text("Necesito un piloto")
+                    }
+                }
             }
 
-            itemsIndexed(uiState.rutas) { index, ruta ->
-                RutaListItem(
-                    index = index + 1,
-                    ruta = ruta,
-                    onClick = { ruta.rutaId?.let { navController.navigate("ruta_detalles/$it") } }
-                )
+
+            if (mostrarLicencias) {
+                item {
+                    ExposedDropdownMenuBox(
+                        expanded = expandedLicencia,
+                        onExpandedChange = { expandedLicencia = !expandedLicencia },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = licenciaSeleccionada ?: "Seleccionar licencia",
+                            onValueChange = {},
+                            readOnly = true,
+                            label = { Text("Licencia de piloto") },
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedLicencia)
+                            },
+                            modifier = Modifier.menuAnchor()
+                        )
+
+                        ExposedDropdownMenu(
+                            expanded = expandedLicencia,
+                            onDismissRequest = { expandedLicencia = false }
+                        ) {
+                            licencias.forEach { licencia ->
+                                DropdownMenuItem(
+                                    text = { Text(licencia) },
+                                    onClick = {
+                                        licenciaSeleccionada = licencia
+                                        expandedLicencia = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+                }
             }
 
             item {
@@ -178,6 +287,26 @@ fun Vuelos_RutasBodyListScreen(
                     selectedAeronave = selectedAeronave,
                     onAeronaveSelected = { selectedAeronave = it }
                 )
+            }
+
+            item {
+                /*val puedeContinuar = selectedAeronave != null &&
+                        fechaSeleccionada != null &&
+                        (soyPiloto != true || licenciaSeleccionada != null)*/
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = { goTopreReserva(0) },
+                    //enabled = puedeContinuar,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = /*if (puedeContinuar)*/ Color(0xFF0A80ED) /*else Color.LightGray*/,
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("Continuar")
+                }
             }
         }
     }
@@ -202,7 +331,7 @@ fun AeronaveDropdown(
             .padding(8.dp)
     ) {
         OutlinedTextField(
-            value = selectedAeronave?.modeloAvion ?: "Seleccionar aeronave",
+            value = selectedAeronave?.modeloAvion?: "Seleccionar aeronave",
             onValueChange = {},
             readOnly = true,
             label = { Text("Modelo de Aeronave") },
@@ -294,74 +423,31 @@ fun TipoVueloCard(vuelo: TipoVueloDTO) {
 
 
 @Composable
-fun ListaDeRutas(
-    rutas: List<RutaDTO>,
-    onRutaClick: (Int) -> Unit
+private fun RutasRow(
+    it: RutaDTO,
+    goToRuta: () -> Unit
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-    ) {
-        Text(
-            text = "Rutas disponibles",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(vertical = 8.dp)
-        )
-
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            itemsIndexed(rutas) { index, ruta ->
-                RutaListItem(
-                    index = index + 1,
-                    ruta = ruta,
-                    onClick = { onRutaClick(ruta.rutaId!!) }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun RutaListItem(
-    index: Int,
-    ruta: RutaDTO,
-    onClick: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() }
             .padding(vertical = 12.dp)
-    ) {
+    ){
         Text(
-            text = "Ruta $index",
+            text = "Ruta ${it.rutaId}",
             fontWeight = FontWeight.Bold,
             fontSize = 16.sp
         )
-        Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = "Origen: ${ruta.origen}, Destino: ${ruta.destino}",
+            text = "Origen: ${it.origen}, Destino: ${it.destino}",
             fontSize = 14.sp,
             color = Color.Gray
         )
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.End
-        ) {
-            Text(
-                text = ">",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.DarkGray
-            )
+        IconButton(onClick = goToRuta) {
+            Icon(Icons.Default.ArrowForward, contentDescription = "Modificar/Eliminar", tint = MaterialTheme.colorScheme.primary)
         }
-        Divider()
     }
+    HorizontalDivider()
 }
-
 
 @Composable
 fun FechaSelector(
@@ -370,6 +456,9 @@ fun FechaSelector(
 ) {
     val contexto = LocalContext.current
     val calendario = Calendar.getInstance()
+    val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    val fechaTexto = fechaSeleccionada?.let { dateFormat.format(it) } ?: ""
+
     val datePickerDialog = DatePickerDialog(
         contexto,
         { _, year, month, day ->
@@ -382,19 +471,20 @@ fun FechaSelector(
         calendario.get(Calendar.DAY_OF_MONTH)
     )
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = "Fecha seleccionada: ${
-                fechaSeleccionada?.let {
-                    SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(it)
-                } ?: "No seleccionada"
-            }",
-            style = MaterialTheme.typography.bodyLarge
-        )
-
-        Button(onClick = { datePickerDialog.show() }) {
-            Text("Seleccionar fecha del vuelo")
-        }
-    }
+    OutlinedTextField(
+        value = fechaTexto,
+        onValueChange = {}, // Read-only
+        readOnly = true,
+        label = { Text("Fecha del vuelo") },
+        trailingIcon = {
+            IconButton(onClick = { datePickerDialog.show() }) {
+                Icon(Icons.Filled.CalendarToday, contentDescription = "Seleccionar fecha")
+            }
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .clickable { datePickerDialog.show() }
+    )
 
 }
