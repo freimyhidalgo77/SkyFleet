@@ -5,12 +5,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -35,25 +38,31 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edu.ucne.skyplanerent.R
 import edu.ucne.skyplanerent.data.local.entity.ReservaEntity
+import edu.ucne.skyplanerent.data.remote.dto.RutaDTO
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaViewModel
 import kotlinx.coroutines.CoroutineScope
 
 @Composable
 fun ReservaDetailsScreen(
+    reservaId:Int,
     viewModel: ReservaViewModel = hiltViewModel(),
+    rutaViewModel: RutaViewModel = hiltViewModel(),
     scope: CoroutineScope,
-    onCreate:()-> Unit,
-    onEdit:(Int)-> Unit,
-    onDelete:(Int)-> Unit
+    goBack:()->Unit,
+    goToEdit: (Int)->Unit,
+    goToDelete:(Int)->Unit,
 
-){
+    ){
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val rutauiState by rutaViewModel.uiState.collectAsStateWithLifecycle()
+
 
     ReservaDetailsBodyScreen(
         uiState = uiState,
         scope = scope,
-        onCreate = onCreate,
-        onEdit = onEdit,
-        onDelete = onDelete
+        goBack = goBack,
+        goToEdit = goToEdit,
+        goToDelete = goToDelete,
     )
 }
 
@@ -62,9 +71,9 @@ fun ReservaDetailsScreen(
 fun ReservaDetailsBodyScreen(
     uiState: UiState,
     scope: CoroutineScope,
-    onCreate:()-> Unit,
-    onEdit:(Int)-> Unit,
-    onDelete:(Int)-> Unit
+    goBack:()->Unit,
+    goToEdit: (Int)->Unit,
+    goToDelete:(Int)->Unit
 
 ){
     Scaffold(
@@ -85,107 +94,90 @@ fun ReservaDetailsBodyScreen(
         },
 
 
-        ){innerPadding->
-        Column (
+        ) { innerPadding ->
+        Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .padding(innerPadding)
                 .padding(8.dp)
                 .fillMaxSize()
 
-        ){
+        ) {
 
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
 
-            ){
-                items(uiState.reservas){reserva->
-                    ReservaDetailsRow(reserva,onEdit,onDelete)
+            ) {
+                items(uiState.reservas) { reserva ->
+                    ReservaDetailsRow(reserva, goToEdit, goToDelete)
                 }
             }
         }
     }
 }
 
+
 @Composable
 fun ReservaDetailsRow(
     reserva: ReservaEntity,
-    onEdit: (Int) -> Unit,
-    onDelete: (Int) -> Unit
-
+    goToEdit: (Int) -> Unit,
+    goToDelete: (Int) -> Unit
 ) {
-    var expanded by remember { mutableStateOf(false) }
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        Text(
+            text = "Reserva NO.#: ${reserva.reservaId}",
+            fontWeight = FontWeight.Bold,
+            fontSize = 18.sp,
+            color = MaterialTheme.colorScheme.onSurface
+        )
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-                .background(MaterialTheme.colorScheme.surfaceVariant),
-            horizontalArrangement = Arrangement.SpaceBetween
+        Spacer(modifier = Modifier.height(20.dp))
 
+        Text(text = "Detalles del vuelo", fontWeight = FontWeight.Bold)
+        Text("Hora y fecha: ${reserva.fecha}", fontSize = 16.sp)
+        Text("Origen: ${reserva.rutaId}", fontSize = 16.sp)
+        Text("Destino: ${reserva.rutaId}", fontSize = 16.sp)
+        Text("Aeronave: ${reserva.categoriaId}", fontSize = 16.sp)
+        Text("Duracion del vuelo: ${reserva.categoriaId}", fontSize = 16.sp)
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Text("Detalles del cliente: ${reserva.pasajeros}", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+
+        Spacer(modifier = Modifier.height(120.dp))
+
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
-                modifier = Modifier.weight(5f),
-                verticalArrangement = Arrangement.Center
+            Button(
+                onClick = { goToEdit(0) },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF0AEDA9),
+                    contentColor = Color.White
+                )
             ) {
+                Text("Modificar reserva")
+            }
 
-                Text(
-                    text = "Reserva NO.#: ${reserva.reservaId}",
-                    style = androidx.compose.ui.text.TextStyle(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.onSurface
-
-                    )
-
+            Button(
+                onClick = { goToDelete(0) },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFED0A0A),
+                    contentColor = Color.White
                 )
-
-                //Poner estado del vuelo aqui
-
-                Text(
-                    "Detalles del vuelo:"
-                )
-
-                Text(
-                    text = "Hora y fecha: ${reserva.fecha}",
-                    style = androidx.compose.ui.text.TextStyle(
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.onSurface
-
-                    )
-
-                )
-
-                Text(
-                    text = "Ruta: ${reserva.rutaId  }",
-                    style = androidx.compose.ui.text.TextStyle(
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.onSurface
-
-                    )
-                )
-
-                Text(
-                    text = "Aeronave: ${reserva.categoriaId}",
-                    style = androidx.compose.ui.text.TextStyle(
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.onSurface
-
-                    )
-                )
-
-              //Poner duracion vuelo aqui
-
-                //Poner detalles del cliente aqui
-
-                //Poner detalles del precio y pago aqui
-
-
+            ) {
+                Text("Cancelar reserva")
             }
         }
     }
-
-
-
+}
