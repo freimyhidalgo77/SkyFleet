@@ -39,7 +39,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun RutaDetailsScreen(
+fun RutaScreenDetails(
     rutaId: Int?,
     viewModel: RutaViewModel = hiltViewModel(),
     goBack: () -> Unit,
