@@ -65,6 +65,34 @@ sealed class Screen {
     data object CategoriaAeronaveList : Screen()
 
     @Serializable
+    data class ReservaRutaDetails(val reservaRutId:Int) : Screen()
+
+    @Serializable
     data class CategoriaAeronave(val categoriaId: Int?) : Screen()
+
+
+
+
+    @Serializable
+    data class PreReserva(val prereservaId: Int) : Screen()
+
+    @Serializable
+    data class Formulario(val formularioId:Int) : Screen()
+
+    @Serializable
+    data class PagoReserva(val pagoReservaId:Int) : Screen()
+
+    @Serializable
+    data class ReservaDetails(val reservaId: Int) : Screen()
+
+    @Serializable
+    data class ReservaEdit(val reservaId: Int) : Screen()
+
+    @Serializable
+    data class ReservaDelete(val reservaId: Int) : Screen()
+
+
+
+
 
 }
