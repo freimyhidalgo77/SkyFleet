@@ -2,6 +2,9 @@ package edu.ucne.skyplanerent.presentation.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
@@ -12,6 +15,8 @@ import androidx.navigation.navArgument
 import androidx.navigation.toRoute
 import com.google.firebase.auth.FirebaseAuth
 import edu.ucne.skyplanerent.HomeScreen
+import edu.ucne.skyplanerent.data.local.entity.RutaEntity
+import edu.ucne.skyplanerent.data.local.entity.TipoVueloEntity
 import edu.ucne.skyplanerent.presentation.admin.AdminPanelScreen
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveListScreen
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveScreen
@@ -22,7 +27,6 @@ import edu.ucne.skyplanerent.presentation.login.FirstScreen
 import edu.ucne.skyplanerent.presentation.login.LoginScreen
 import edu.ucne.skyplanerent.presentation.login.RegisterScreen
 import edu.ucne.skyplanerent.presentation.reserva.ReservaListScreen
-import edu.ucne.skyplanerent.presentation.ruta_y_viajes.RutaScreenDetails
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.Rutas_Viajes_Screen
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaListScreen
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaScreen
@@ -30,8 +34,16 @@ import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloListS
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloScreen
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveDetailsScreen
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveEvent
-import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaDetailsScreen
+import edu.ucne.skyplanerent.presentation.reserva.PagoReservaListScreen
+import edu.ucne.skyplanerent.presentation.reserva.ReservaDeleteScreen
+import edu.ucne.skyplanerent.presentation.reserva.ReservaDetailsScreen
+import edu.ucne.skyplanerent.presentation.reserva.ReservaEditScreen
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.PreReservaListScreen
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.formulario.FormularioScreen
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.ReservaRutaScreenDetails
+//import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaDetailsScreen
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaEvent
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaScreenDetails
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaViewModel
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloDetailsScreen
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloEvent
@@ -42,6 +54,8 @@ fun AppNavigation() {
     val auth = FirebaseAuth.getInstance()
     val navController = rememberNavController()
     val scope = rememberCoroutineScope()
+    val rutaList by remember { mutableStateOf(emptyList<RutaEntity>()) }
+    val tipoList by remember { mutableStateOf(emptyList<TipoVueloEntity>()) }
 
     NavHost(
         navController = navController,
@@ -72,6 +86,9 @@ fun AppNavigation() {
             LoginScreen(
                 onLoginSuccess = {
                     navController.navigate(Screen.Home)
+                },
+                onNavigateToRegister = {
+                    navController.navigate(Screen.Register)
                 }
             )
         }
@@ -103,16 +120,45 @@ fun AppNavigation() {
                 onDelete = { /* lógica */ },
                 goBackDetails = {
                     navController.navigate(Screen.RutaDetails(0))
+                },
+                goTopreReserva = {
+                    navController.navigate(Screen.PreReserva(0))
+
+                },
+                goToRuta = {id->
+                    navController.navigate(Screen.ReservaRutaDetails(id))
                 }
             )
         }
 
+        composable<Screen.ReservaRutaDetails> {
+            val args = it.toRoute<Screen.ReservaRutaDetails>()
+            ReservaRutaScreenDetails (
+                rutaId = args.reservaRutId,
+                goBack = {
+                    navController.navigate(Screen.ReservaRutaDetails(0))
+                },
+                onEdit = {
+
+                },
+                onDelete = {
+
+                }
+            )
+        }
+
+
+
         composable<Screen.RutaDetails> {
             val args = it.toRoute<Screen.RutaDetails>()
-            RutaScreenDetails(
+            RutaScreenDetails (
                 rutaId = args.rutaId,
                 goBack = {
-                    navController.navigateUp()
+                    navController.navigate(Screen.RutaDetails(0))
+                },
+                 onEdit = {},
+                onDelete = {
+
                 }
             )
         }
@@ -137,7 +183,7 @@ fun AppNavigation() {
             )
         }
 
-        composable<Screen.RutaList> {
+        /*composable<Screen.RutaList> {
             RutaListScreen(
                 goToRuta = { id ->
                     navController.navigate(Screen.RutaDetailsScreen(id))
@@ -147,12 +193,105 @@ fun AppNavigation() {
                 },
                 goBack = { navController.popBackStack() }
             )
+
+        }*/
+
+
+        composable<Screen.PreReserva> {
+            val args = it.toRoute<Screen.PreReserva>()
+            PreReservaListScreen (
+                preReservaId = args.prereservaId,
+                goBack = {
+                    navController.navigate(Screen.PreReserva(0))
+                },
+                goToFormulario = {
+                    navController.navigate(Screen.Formulario(0))
+                },
+                tipoVueloList = tipoList,
+                rutaList = rutaList
+            )
         }
+
+
+        composable<Screen.Formulario> {
+            val args = it.toRoute<Screen.Formulario>()
+            FormularioScreen(
+                formularioId = args.formularioId,
+                goBack = {
+                    navController.navigate(Screen.Formulario(0))
+                },
+                goToPago = {
+                    navController.navigate(Screen.PagoReserva(0))
+                }
+            )
+        }
+
+
+        composable<Screen.ReservaDetails> {
+            val args = it.toRoute<Screen.ReservaDetails>()
+            ReservaDetailsScreen (
+                reservaId = args.reservaId,
+                goBack = {
+                    navController.navigate(Screen.ReservaDetails(0))
+                },
+                scope = scope,
+                goToEdit = {
+                    navController.navigate(Screen.ReservaEdit(0))
+                },
+
+                goToDelete = {
+                    navController.navigate(Screen.ReservaDelete(0))
+                }
+
+            )
+
+        }
+
+
+        composable<Screen.ReservaEdit> {
+            val args = it.toRoute<Screen.ReservaEdit>()
+            ReservaEditScreen (
+                reservaId = args.reservaId,
+                goBack = {
+                    navController.navigate(Screen.ReservaEdit(0))
+                }
+
+            )
+        }
+
+
+        composable<Screen.ReservaDelete> {
+            val args = it.toRoute<Screen.ReservaDelete>()
+            ReservaDeleteScreen(
+                reservaId = args.reservaId,
+                goBack = {
+                    navController.navigate(Screen.ReservaDelete(0))
+                }
+
+            )
+
+        }
+
+        composable<Screen.PagoReserva> {
+            val args = it.toRoute<Screen.PagoReserva>()
+            PagoReservaListScreen (
+                pagoReservaId = args.pagoReservaId,
+                goBack = {
+                    navController.navigate(Screen.Reserva)
+                },
+                rutaList = rutaList,
+                tipoVueloList = tipoList
+
+            )
+        }
+
+
+
 
         composable<Screen.RutaDetailsScreen> { backStack ->
             val args = backStack.toRoute<Screen.RutaDetailsScreen>()
             val viewModel: RutaViewModel = hiltViewModel()
-            RutaDetailsScreen(
+            RutaScreenDetails(
                 rutaId = args.rutaId,
                 viewModel = viewModel,
                 goBack = { navController.popBackStack() },
