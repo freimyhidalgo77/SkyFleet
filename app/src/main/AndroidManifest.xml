@@ -6,7 +6,7 @@
 
     <application
         android:networkSecurityConfig="@xml/network_security_config"
-        android:name=".SkyPlaneRent"
+        android:name="edu.ucne.skyplanerent.SkyPlaneRent"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
