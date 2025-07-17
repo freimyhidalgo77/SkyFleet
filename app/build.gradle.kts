@@ -54,7 +54,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
 
-
+    implementation("androidx.compose.material:material-icons-extended:1.6.1")
 
     //room
     implementation("androidx.room:room-runtime:2.6.1")
