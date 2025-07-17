@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -37,9 +38,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.compose.rememberNavController
 import edu.ucne.skyplanerent.data.local.entity.ReservaEntity
 import edu.ucne.skyplanerent.data.local.entity.RutaEntity
 import edu.ucne.skyplanerent.data.local.entity.TipoVueloEntity
+import edu.ucne.skyplanerent.presentation.navigation.Screen
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloViewModel
 import kotlinx.coroutines.CoroutineScope
 import java.text.SimpleDateFormat
@@ -49,36 +52,37 @@ import java.util.Locale
 
 @Composable
 fun PagoReservaListScreen(
+    pagoReservaId:Int,
     /*TipoVueloviewModel: TipoVueloViewModel = hiltViewModel(),
     RutaviewModel: RutaViewModel = hiltViewModel(),
     tipoVueloId:Int,
-    rutaId:Int,*/
+    RutaId:Int,*/
     tipoVueloList: List<TipoVueloEntity>,
     rutaList: List<RutaEntity>,
     viewModel: ReservaViewModel= hiltViewModel(),
-    scope: CoroutineScope,
-    onCreate:()-> Unit,
-    onEdit:(Int)-> Unit,
-    onDelete:(Int)-> Unit
+    goBack:()->Unit
 
 ){
 
-    /*LaunchedEffect(rutaId, tipoVueloId){
+    /*LaunchedEffect(RutaId, tipoVueloId){
         TipoVueloviewModel.uiState.value.tipovuelo
-        RutaviewModel.uiState.value.rutaId
+        RutaviewModel.uiState.value.RutaId
 
     }*/
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
+
     PagoReservaBodyListScreen(
         uiState = uiState,
-        scope = scope,
+        //scope = scope,
         tipoVueloList = tipoVueloList,
         rutaList = rutaList,
-        onCreate = onCreate,
-        onEdit = onEdit,
-        onDelete = onDelete
+        /* onCreate = onCreate,
+         onEdit = onEdit,
+         onDelete = onDelete,*/
+        PagoReservaId = pagoReservaId,
+        goBack = goBack
     )
 }
 
@@ -86,14 +90,15 @@ fun PagoReservaListScreen(
 @Composable
 fun PagoReservaBodyListScreen(
     uiState: UiState,
-    scope: CoroutineScope,
+    // scope: CoroutineScope,
     tipoVueloList:List<TipoVueloEntity>,
     rutaList:List<RutaEntity>,
-    onCreate:()-> Unit,
-    onEdit:(Int)-> Unit,
-    onDelete:(Int)-> Unit
+    PagoReservaId:Int,
+    goBack:()->Unit
 
-){
+) {
+    val navController = rememberNavController()
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -122,9 +127,9 @@ fun PagoReservaBodyListScreen(
 
         ) {
 
-
             LazyColumn(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize()
+                    .weight(1f),
                 verticalArrangement = Arrangement.spacedBy(10.dp)
 
             ) {
@@ -134,10 +139,27 @@ fun PagoReservaBodyListScreen(
 
                     // Solo si ambos existen, los mostramos
                     if (tipoVuelo != null && ruta != null) {
-                        PagoReservaRow(reserva, tipoVuelo, ruta, onEdit, onDelete)
+                        PagoReservaRow(reserva, tipoVuelo, ruta)
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Button(
+                onClick = { //save()
+                    goBack()
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF0A80ED),
+                    contentColor = Color.White
+                )
+
+            ) {
+                Text("Realizar pago")
+            }
+
         }
     }
 }
@@ -147,10 +169,8 @@ fun PagoReservaRow(
     reserva: ReservaEntity,
     tipoVuelo: TipoVueloEntity,
     ruta: RutaEntity,
-    onEdit: (Int) -> Unit,
-    onDelete: (Int) -> Unit
 
-) {
+    ) {
     var expanded by remember { mutableStateOf(false) }
 
     Card(
@@ -242,7 +262,7 @@ fun PagoReservaRow(
                     )
                 )
 
-              Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(16.dp))
 
                 Text(
                     text = "Desgloce de precios ",
@@ -292,7 +312,7 @@ fun PagoReservaRow(
 
                 Spacer(modifier = Modifier.width(16.dp))
 
-               /* Text(
+                /* Text(
                     text = "Metodo de pago ",
                     style = androidx.compose.ui.text.TextStyle(
                         fontSize = 18.sp,
