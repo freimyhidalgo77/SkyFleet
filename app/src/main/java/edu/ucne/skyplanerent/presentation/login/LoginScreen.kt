@@ -1,6 +1,7 @@
 package edu.ucne.skyplanerent.presentation.login
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -23,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.google.firebase.auth.FirebaseAuth
 import edu.ucne.skyplanerent.R
@@ -31,6 +33,7 @@ import edu.ucne.skyplanerent.presentation.navigation.Screen
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
+    onNavigateToRegister:()-> Unit,
     auth: FirebaseAuth = FirebaseAuth.getInstance()
 ) {
     var email by remember { mutableStateOf("") }
@@ -103,12 +106,13 @@ fun LoginScreen(
         Spacer(modifier = Modifier.weight(1f))
 
         Text(
-            text = "¿No tienes una cuenta?  ¡Regístrate!",
+            text = "¿No tienes una cuenta? ¡Regístrate!",
             modifier = Modifier
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .clickable { (onNavigateToRegister()) },
             color = Color.Gray.copy(alpha = 0.6f),
             style = MaterialTheme.typography.bodyMedium,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            textAlign = TextAlign.Center
         )
 
         Spacer(modifier = Modifier.height(8.dp))
