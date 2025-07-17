@@ -28,8 +28,10 @@ import kotlin.reflect.KFunction1
 
 @Composable
 fun FormularioScreen (
+    formularioId:Int,
     viewModel: FormularioViewModel = hiltViewModel(),
-    goBack: () -> Unit
+    goBack: () -> Unit,
+    goToPago: (Int) -> Unit
 
 ) {
 
@@ -45,8 +47,8 @@ fun FormularioScreen (
         onChangeCiudad = viewModel::onCiudadResidenciaChange,
         save = viewModel::saveFormulario,
         nuevo = viewModel::nuevoFormulario,
-        goBack = goBack
-
+        goBack = goBack,
+        goToPago = goToPago
 
     )
 }
@@ -62,7 +64,8 @@ fun FormularioBodyScreen(
     onChangeCiudad: KFunction1<String, Unit>,
     save:()->Unit,
     nuevo:()->Unit,
-    goBack: () -> Unit
+    goBack: () -> Unit,
+    goToPago:(Int)->Unit
 
 ){
     Column(
@@ -71,6 +74,14 @@ fun FormularioBodyScreen(
             .padding(24.dp),
         verticalArrangement = Arrangement.Top
     ) {
+
+
+        Text(
+            text = "Informacion personal",
+            fontWeight = FontWeight.Bold,
+            fontSize = 16.sp,
+
+            )
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -95,7 +106,7 @@ fun FormularioBodyScreen(
             shape = RoundedCornerShape(16.dp)
 
         )
-        Spacer(modifier = Modifier.height(50.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
             value = uiState.correo,
@@ -107,6 +118,8 @@ fun FormularioBodyScreen(
 
         )
 
+        Spacer(modifier = Modifier.height(16.dp))
+
         OutlinedTextField(
             value = uiState.telefono,
             onValueChange = onChangeTelefono,
@@ -116,20 +129,23 @@ fun FormularioBodyScreen(
             shape = RoundedCornerShape(16.dp)
 
         )
+        Spacer(modifier = Modifier.height(16.dp))
+
 
         OutlinedTextField(
             value = uiState.pasaporte,
-            onValueChange = onChangeTelefono,
+            onValueChange = onChangePasaporte,
             label = { Text("Pasaporte") },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp)
-
         )
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
             value = uiState.ciudadResidencia,
-            onValueChange = onChangeTelefono,
+            onValueChange = onChangeCiudad,
             label = { Text("Ciudad de residencia") },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
@@ -137,9 +153,14 @@ fun FormularioBodyScreen(
 
         )
 
+        Spacer(modifier = Modifier.height(30.dp))
+
 
         Button(
-            onClick = { save() },
+            onClick =
+                { save()
+                    goToPago(0)
+                },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFF0A80ED),
