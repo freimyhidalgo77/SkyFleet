@@ -28,6 +28,6 @@ interface AeronavesManagerApi {
     ): AeronaveDTO
 
     @DELETE("api/Aeronave/{id}")
-    suspend fun deleteAeronave(@Path("id") id: Int): ResponseBody
+    suspend fun deleteAeronave(@Path("id") id: Int)
 
 }

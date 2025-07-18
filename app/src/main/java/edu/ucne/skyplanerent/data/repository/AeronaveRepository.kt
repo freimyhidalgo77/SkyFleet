@@ -51,5 +51,17 @@ class AeronaveRepository @Inject constructor(
 
     suspend fun saveAeronave(aeronaveDTO: AeronaveDTO) = dataSource.PostAeronave(aeronaveDTO)
 
-    suspend fun deleteAeronave(id: Int) = dataSource.deleteAeronave(id)
+    suspend fun deleteAeronave(id: Int): Resource<Unit> {
+        return try {
+            dataSource.deleteAeronave(id)
+            Resource.Success(Unit)
+        } catch (e: HttpException) {
+            val errorMessage = e.response()?.errorBody()?.string() ?: e.message()
+            Log.e("Aeronave", "HttpException: $errorMessage")
+            Resource.Error("Error de conexión: $errorMessage")
+        } catch (e: Exception) {
+            Log.e("Aeronave", "Exception: ${e.message}")
+            Resource.Error("Error desconocido: ${e.message}")
+        }
+    }
 }

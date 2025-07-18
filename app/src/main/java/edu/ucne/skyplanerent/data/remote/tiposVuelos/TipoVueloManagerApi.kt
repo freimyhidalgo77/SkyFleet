@@ -29,6 +29,6 @@ interface TipoVueloManagerApi {
     ): TipoVueloDTO
 
     @DELETE("api/TipoVueloControllers/{id}")
-    suspend fun deleteTipoVuelo(@Path("id") id: Int): ResponseBody
+    suspend fun deleteTipoVuelo(@Path("id") id: Int)
 
 }

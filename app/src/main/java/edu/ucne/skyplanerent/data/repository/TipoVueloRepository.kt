@@ -50,5 +50,17 @@ class TipoVueloRepository @Inject constructor(
 
     suspend fun saveTipoVuelo(tipoVueloDTO: TipoVueloDTO) = dataSource.postTipoVuelo(tipoVueloDTO)
 
-    suspend fun deleteTipoVuelo(id: Int) = dataSource.deleteTipoVuelo(id)
+    suspend fun deleteTipoVuelo(id: Int): Resource<Unit> {
+        return try {
+            dataSource.deleteTipoVuelo(id)
+            Resource.Success(Unit)
+        } catch (e: HttpException) {
+            val errorMessage = e.response()?.errorBody()?.string() ?: e.message()
+            Log.e("TipoVuelo", "HttpException: $errorMessage")
+            Resource.Error("Error de conexión: $errorMessage")
+        } catch (e: Exception) {
+            Log.e("TipoVuelo", "Exception: ${e.message}")
+            Resource.Error("Error desconocido: ${e.message}")
+        }
+    }
 }

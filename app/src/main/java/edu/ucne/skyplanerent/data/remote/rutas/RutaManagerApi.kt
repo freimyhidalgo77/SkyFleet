@@ -1,5 +1,6 @@
 package edu.ucne.skyplanerent.data.remote.rutas
 
+import com.google.android.gms.common.api.Response
 import edu.ucne.skyplanerent.data.remote.dto.AeronaveDTO
 import edu.ucne.skyplanerent.data.remote.dto.RutaDTO
 import okhttp3.ResponseBody
@@ -28,6 +29,5 @@ interface RutaManagerApi {
     ): RutaDTO
 
     @DELETE("api/Ruta/{id}")
-    suspend fun deleteRuta(@Path("id") id: Int): ResponseBody
-
+    suspend fun deleteRuta(@Path("id") id: Int)
 }
