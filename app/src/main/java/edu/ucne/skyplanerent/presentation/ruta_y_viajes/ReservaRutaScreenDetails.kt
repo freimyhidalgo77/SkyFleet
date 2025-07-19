@@ -166,7 +166,7 @@ fun ReservaRutaDetailsBodyScreen(
 
             Button(
                 onClick = {
-                    viewModel.seleccionarRuta(rutaId)
+                    //viewModel.seleccionarRuta(rutaId)
                     //onSelectRuta(rutaId)
                     goBack()},
                 modifier = Modifier

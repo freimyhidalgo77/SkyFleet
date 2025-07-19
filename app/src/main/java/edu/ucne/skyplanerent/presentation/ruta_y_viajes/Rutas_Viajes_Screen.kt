@@ -42,10 +42,10 @@ import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloUiSta
 
 @Composable
 fun Rutas_Viajes_Screen(
-    reservaViewModel: ReservaViewModel = hiltViewModel(),
+    reservaViewModel: ReservaViewModel,
     tipoVueloViewModel: TipoVueloViewModel = hiltViewModel(),
     aeronaveViewModel: AeronaveViewModel = hiltViewModel(),
-    rutaViewModel: RutaViewModel,
+    rutaViewModel: RutaViewModel = hiltViewModel(),
     scope: CoroutineScope,
     goBackDetails: (Int) -> Unit,
     goTopreReserva: (Int)-> Unit,
@@ -86,12 +86,13 @@ fun Rutas_Viajes_Screen(
                     licenciaPiloto = licenciaSeleccionada
 
                 )
-                reservaViewModel.saveReserva(reserva)
+                reservaViewModel.saveReserva()//aqui se pasa a reserva en el metodo saveReserva(reserva:ReservaEntity)
             }
         },
                 goBackDetails = goBackDetails,
         goTopreReserva = goTopreReserva,
         goToRuta = goToRuta,
+        reservaViewModel = reservaViewModel
     )
 }
 
@@ -106,11 +107,12 @@ fun Vuelos_RutasBodyListScreen(
     scope: CoroutineScope,
     rutaViewModel: RutaViewModel = hiltViewModel(),
     tipoVueloViewModel: TipoVueloViewModel = hiltViewModel(),
-    reservaViewModel: ReservaViewModel = hiltViewModel(),
+    reservaViewModel: ReservaViewModel,
     onReserva: (Date) -> Unit,
     goBackDetails: (Int) -> Unit,
     goToRuta: (Int) -> Unit,
     goTopreReserva: (Int)-> Unit,
+
 
 ) {
     var fechaSeleccionada by remember { mutableStateOf<Date?>(null) }
@@ -137,7 +139,7 @@ fun Vuelos_RutasBodyListScreen(
     var selectedRuta by remember { mutableStateOf<RutaDTO?>(null) }
 
 
-    val idSeleccionado by rutaViewModel.rutaSeleccionadaId.collectAsState()
+    val idSeleccionado by reservaViewModel.rutaSeleccionadaId.collectAsState()
     val rutasAMostrar = idSeleccionado?.let { id ->
         if (id > 0) {
             uiState.rutas.filter { it.rutaId == id }
@@ -147,7 +149,7 @@ fun Vuelos_RutasBodyListScreen(
     } ?: uiState.rutas
 
 
-    val ideSeleccionado by tipoVueloViewModel.tipoVueloSeleccionadoId.collectAsState()
+    val ideSeleccionado by reservaViewModel.tipoVueloSeleccionadoId.collectAsState()
     val vuelosAMostrar = ideSeleccionado?.let { id ->
         if (id > 0) {
             vueloUiState.tipovuelo.filter { it.tipoVueloId == id }
@@ -208,7 +210,7 @@ fun Vuelos_RutasBodyListScreen(
                                 .height(60.dp)
                                 .clickable {
                                     selectedTipoVuelo = vuelo
-                                    tipoVueloViewModel.seleccionarTipoVuelo(vuelo.tipoVueloId ?: 0)
+                                    reservaViewModel.seleccionarTipoVuelo(vuelo.tipoVueloId ?: 0)
                                 }
                         ) {
                             Box(
@@ -277,7 +279,7 @@ fun Vuelos_RutasBodyListScreen(
                         .padding(horizontal = 16.dp, vertical = 4.dp)
                         .clickable {
                             selectedRuta = ruta
-                            rutaViewModel.seleccionarRuta(ruta.rutaId!!)
+                            reservaViewModel.seleccionarRuta(ruta.rutaId!!)
                         },
                     colors = CardDefaults.cardColors(containerColor = Color(0xFFE3F2FD)),
                     shape = RoundedCornerShape(12.dp),
@@ -423,9 +425,10 @@ fun Vuelos_RutasBodyListScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
                     onClick = {
-                        // Guarda los datos seleccionados antes de navegar
-                        selectedTipoVuelo?.let { tipoVueloViewModel.seleccionarTipoVuelo(it.tipoVueloId ?: 0,) }
-                        selectedRuta?.let { rutaViewModel.seleccionarRuta(it.rutaId ?: 0) }
+                       //Guarda los datos seleccionados antes de navegar
+                        selectedTipoVuelo?.let { reservaViewModel.seleccionarTipoVuelo(it.tipoVueloId ?: 0,) }
+                        selectedRuta?.let { reservaViewModel.seleccionarRuta(it.rutaId ?: 0) }
+                        ReservaEvent.save
 
                         goTopreReserva(0) // Navega a la próxima pantalla
                     },

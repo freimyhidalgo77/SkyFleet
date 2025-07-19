@@ -56,7 +56,7 @@ fun PreReservaListScreen(
     tipoVueloList: List<TipoVueloEntity>,
     rutaList: List<RutaEntity>,
     tipoVueloViewModel: TipoVueloViewModel = hiltViewModel(),
-    viewModel: ReservaViewModel = hiltViewModel(),
+    viewModel: ReservaViewModel,
     rutaViewModel: RutaViewModel = hiltViewModel(),
     goBack:()->Unit,
     goToFormulario: (Int)-> Unit,
@@ -64,15 +64,17 @@ fun PreReservaListScreen(
 
     ){
 
-   /* LaunchedEffect(RutaId, tipoVueloId){
-        TipoVueloviewModel.uiState.value.tipovuelo
-        RutaviewModel.uiState.value.RutaId
-
-    }*/
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val rutaUiState by rutaViewModel.uiState.collectAsStateWithLifecycle()
     val tipoVueloUiState by tipoVueloViewModel.uiState.collectAsStateWithLifecycle()
+
+
+    /*LaunchedEffect(Unit) {
+        if (rutaUiState.rutas.isEmpty()) {
+            rutaViewModel.getRutas()
+        }
+    }*/
 
     ReservaBodyListScreen(
         uiState = uiState,
@@ -82,7 +84,8 @@ fun PreReservaListScreen(
         goToFormulario = goToFormulario,
         goBack = goBack,
         rutaUiState = rutaUiState,
-        tipoVueloUiState = tipoVueloUiState
+        tipoVueloUiState = tipoVueloUiState,
+        reservaViewModel = viewModel
 
 
     )
@@ -92,7 +95,7 @@ fun PreReservaListScreen(
 @Composable
 fun ReservaBodyListScreen(
     uiState: UiState,
-    reservaViewModel:ReservaViewModel = hiltViewModel(),
+    reservaViewModel:ReservaViewModel,
     tipoVueloViewModel: TipoVueloViewModel = hiltViewModel(),
     rutaViewModel: RutaViewModel = hiltViewModel(),
     tipoVueloList:List<TipoVueloEntity>,
@@ -107,10 +110,10 @@ fun ReservaBodyListScreen(
    /*val tipoVueloSeleccionado by reservaViewModel.tipoVueloSeleccionadoId.collectAsState()
     val rutaSeleccionadaId by  rutaViewModel.rutaSeleccionadaId.collectAsState()*/
 
-    val idTipoVueloSeleccionado by tipoVueloViewModel.tipoVueloSeleccionadoId.collectAsState()
+    val idTipoVueloSeleccionado by reservaViewModel.tipoVueloSeleccionadoId.collectAsState()
     val tipoVueloSeleccionado = tipoVueloUiState.tipovuelo.find { it.tipoVueloId == idTipoVueloSeleccionado }
 
-    val idRutaSeleccionada by rutaViewModel.rutaSeleccionadaId.collectAsState()
+    val idRutaSeleccionada by reservaViewModel.rutaSeleccionadaId.collectAsState()
     val rutaSeleccionada = rutaUiState.rutas.find { it.rutaId == idRutaSeleccionada }
 
 

@@ -32,18 +32,12 @@ class RutaViewModel @Inject constructor(
     private val _uiEvent = Channel<UiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
 
-    private val _rutaSeleccionadaId = MutableStateFlow<Int?>(null)
-    val rutaSeleccionadaId: StateFlow<Int?> = _rutaSeleccionadaId
+
 
 
     init {
         getRutas()
     }
-
-    fun seleccionarRuta(rutaId: Int) {
-        _rutaSeleccionadaId.value = rutaId
-    }
-
 
     fun onEvent(event: RutaEvent) {
         when (event) {
@@ -299,7 +293,7 @@ class RutaViewModel @Inject constructor(
         }
     }
 
-    private fun getRutas() {
+     fun getRutas() {
         viewModelScope.launch {
             rutaRepository.getRutas().collectLatest { result ->
                 when (result) {

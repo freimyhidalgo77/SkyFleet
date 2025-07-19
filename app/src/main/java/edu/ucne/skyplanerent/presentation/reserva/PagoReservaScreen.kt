@@ -102,6 +102,7 @@ fun PagoReservaBodyListScreen(
     uiState: UiState,
     tipoVueloViewModel: TipoVueloViewModel = hiltViewModel(),
     rutaViewModel: RutaViewModel = hiltViewModel(),
+    reservaViewModel: ReservaViewModel = hiltViewModel(),
     // scope: CoroutineScope,
     tipoVueloList:List<TipoVueloEntity>,
     rutaList:List<RutaEntity>,
@@ -113,10 +114,10 @@ fun PagoReservaBodyListScreen(
 ) {
     val navController = rememberNavController()
 
-    val idTipoVueloSeleccionado by tipoVueloViewModel.tipoVueloSeleccionadoId.collectAsState()
+    val idTipoVueloSeleccionado by reservaViewModel.tipoVueloSeleccionadoId.collectAsState()
     val tipoVueloSeleccionado = tipoVueloUiState.tipovuelo.find { it.tipoVueloId == idTipoVueloSeleccionado }
 
-    val idRutaSeleccionada by rutaViewModel.rutaSeleccionadaId.collectAsState()
+    val idRutaSeleccionada by reservaViewModel.rutaSeleccionadaId.collectAsState()
     val rutaSeleccionada = rutaUiState.rutas.find { it.rutaId == idRutaSeleccionada }
 
     Scaffold(

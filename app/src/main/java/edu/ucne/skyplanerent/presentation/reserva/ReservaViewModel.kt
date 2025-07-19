@@ -31,6 +31,19 @@ class ReservaViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(UiState())
     val uiState get() = _uiState.asStateFlow()
 
+    private val _rutaSeleccionadaId = MutableStateFlow<Int?>(null)
+    val rutaSeleccionadaId: StateFlow<Int?> = _rutaSeleccionadaId
+
+    fun seleccionarRuta(rutaId: Int) {
+        _rutaSeleccionadaId.value = rutaId
+    }
+
+    private val _tipoVueloSeleccionadoId = MutableStateFlow<Int?>(null)
+    val tipoVueloSeleccionadoId: StateFlow<Int?> = _tipoVueloSeleccionadoId
+
+    fun seleccionarTipoVuelo(tipoVueloId: Int) {
+        _tipoVueloSeleccionadoId.value = tipoVueloId
+    }
 
     init{
         getReserva()
@@ -44,14 +57,26 @@ class ReservaViewModel @Inject constructor(
 
 
 
-    /* fun onEvent(event: ReservaEvent) {
-         when (event) {
-             //is ReservaEvent.AeronaveChange -> onChangePasajeros(event.aeronaveId)
-             ReservaEvent.Delte-> deleteReserva()
-             ReservaEvent.save -> saveReserva(event
-             )
-         }
-     }*/
+    fun onEvent(event: ReservaEvent) {
+        when (event) {
+            is ReservaEvent.AeronaveChange -> {
+            }
+            is ReservaEvent.FechaChange -> {
+                _uiState.update {
+                    it.copy(fecha = event.fecha)
+                }
+            }
+            is ReservaEvent.PasajeroChange -> {
+                onChangePasajeros(event.pasajero)
+            }
+            is ReservaEvent.RutaChange -> {
+                seleccionarRuta(event.rutaId)
+            }
+            ReservaEvent.Delte -> deleteReserva()
+            ReservaEvent.save -> saveReserva()
+        }
+    }
+
 
 
     fun getReserva(){
@@ -64,7 +89,7 @@ class ReservaViewModel @Inject constructor(
         }
     }
 
-    fun saveReserva(reserva:ReservaEntity){
+    fun saveReserva(){
         viewModelScope.launch {
             try{
                 reservaRepository.saveReserva(_uiState.value.toEntity())

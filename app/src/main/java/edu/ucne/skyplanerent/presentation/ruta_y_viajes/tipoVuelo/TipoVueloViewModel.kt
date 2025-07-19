@@ -28,15 +28,8 @@ class TipoVueloViewModel @Inject constructor(
     private val _uiEvent = Channel<UiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
 
-
-    private val _tipoVueloSeleccionadoId = MutableStateFlow<Int?>(null)
-    val tipoVueloSeleccionadoId: StateFlow<Int?> = _tipoVueloSeleccionadoId
-
     private val _rutaSeleccionadaId = MutableStateFlow<Int?>(null)
 
-    fun seleccionarTipoVuelo(tipoVueloId: Int) {
-        _tipoVueloSeleccionadoId.value = tipoVueloId
-    }
 
 
     init {
