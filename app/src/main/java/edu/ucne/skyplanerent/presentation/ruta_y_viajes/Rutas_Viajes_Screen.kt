@@ -419,9 +419,9 @@ fun Vuelos_RutasBodyListScreen(
             }
 
             item {
-               /* val puedeContinuar = selectedAeronave != null &&
+                val puedeContinuar = /*selectedAeronave != null &&
                         fechaSeleccionada != null &&
-                        (soyPiloto != true || licenciaSeleccionada != null) && selectedRuta == null && selectedTipoVuelo == null*/
+                        (soyPiloto != true || licenciaSeleccionada != null) && */selectedRuta != null && selectedTipoVuelo != null
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
                     onClick = {
@@ -432,12 +432,12 @@ fun Vuelos_RutasBodyListScreen(
 
                         goTopreReserva(0) // Navega a la próxima pantalla
                     },
-                    //enabled = puedeContinuar,
+                    enabled = puedeContinuar,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = /*if (puedeContinuar)*/ Color(0xFF0A80ED) /*else Color.LightGray*/,
+                        containerColor = if (puedeContinuar) Color(0xFF0A80ED) else Color.LightGray,
                         contentColor = Color.White
                     )
                 ) {

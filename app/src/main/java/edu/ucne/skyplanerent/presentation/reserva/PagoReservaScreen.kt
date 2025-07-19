@@ -63,7 +63,7 @@ fun PagoReservaListScreen(
     RutaId:Int,*/
     tipoVueloList: List<TipoVueloEntity>,
     rutaList: List<RutaEntity>,
-    viewModel: ReservaViewModel= hiltViewModel(),
+    viewModel: ReservaViewModel,
     rutaViewModel: RutaViewModel = hiltViewModel(),
     tipoVueloViewModel: TipoVueloViewModel = hiltViewModel(),
     goBack:()->Unit
@@ -92,7 +92,8 @@ fun PagoReservaListScreen(
         PagoReservaId = pagoReservaId,
         goBack = goBack,
         rutaUiState = rutaUiState,
-        tipoVueloUiState = tipoVueloUiState
+        tipoVueloUiState = tipoVueloUiState,
+        reservaViewModel = viewModel
     )
 }
 
@@ -102,7 +103,7 @@ fun PagoReservaBodyListScreen(
     uiState: UiState,
     tipoVueloViewModel: TipoVueloViewModel = hiltViewModel(),
     rutaViewModel: RutaViewModel = hiltViewModel(),
-    reservaViewModel: ReservaViewModel = hiltViewModel(),
+    reservaViewModel: ReservaViewModel,
     // scope: CoroutineScope,
     tipoVueloList:List<TipoVueloEntity>,
     rutaList:List<RutaEntity>,

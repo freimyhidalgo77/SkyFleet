@@ -289,15 +289,22 @@ fun AppNavigation() {
 
         }
 
-        composable<Screen.PagoReserva> {
-            val args = it.toRoute<Screen.PagoReserva>()
+        composable<Screen.PagoReserva> {backStackEntry->
+
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry(Screen.Rutas_y_viajes)
+            }
+
+            val reservaViewModel: ReservaViewModel = hiltViewModel(parentEntry)
+            val args = backStackEntry.toRoute<Screen.PagoReserva>()
             PagoReservaListScreen (
                 pagoReservaId = args.pagoReservaId,
                 goBack = {
                     navController.navigate(Screen.Reserva)
                 },
                 rutaList = rutaList,
-                tipoVueloList = tipoList
+                tipoVueloList = tipoList,
+                viewModel = reservaViewModel
 
             )
         }
