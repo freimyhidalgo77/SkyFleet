@@ -36,20 +36,11 @@ class ReservaViewModel @Inject constructor(
         getReserva()
     }
 
-    private val _tipoVueloSeleccionadoId = MutableStateFlow<Int?>(null)
-    val tipoVueloSeleccionadoId: StateFlow<Int?> = _tipoVueloSeleccionadoId
-
-    private val _rutaSeleccionadaId = MutableStateFlow<Int?>(null)
 
     /*fun seleccionarTipoVuelo(tipoVueloId: Int, tipoVueloDTO: TipoVueloDTO) {
-        _tipoVueloSeleccionadoId.value = tipoVueloId
-        _uiState.update { it.copy(tipoVueloSeleccionado = tipoVueloDTO) }
-    }*/
-
-
-    fun seleccionarTipoVuelo(tipoVueloId: Int) {
-        _tipoVueloSeleccionadoId.value = tipoVueloId
-    }
+       _tipoVueloSeleccionadoId.value = tipoVueloId
+       _uiState.update { it.copy(tipoVueloSeleccionado = tipoVueloDTO) }
+   }*/
 
 
 

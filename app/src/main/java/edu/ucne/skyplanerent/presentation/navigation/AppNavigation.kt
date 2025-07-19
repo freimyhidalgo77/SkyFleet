@@ -216,7 +216,8 @@ fun AppNavigation() {
                     navController.navigate(Screen.Formulario(0))
                 },
                 tipoVueloList = tipoList,
-                rutaList = rutaList
+                rutaList = rutaList,
+
             )
         }
 

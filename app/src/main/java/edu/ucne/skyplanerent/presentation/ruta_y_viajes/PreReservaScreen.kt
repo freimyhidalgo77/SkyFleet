@@ -23,9 +23,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,6 +42,9 @@ import edu.ucne.skyplanerent.data.local.entity.RutaEntity
 import edu.ucne.skyplanerent.data.local.entity.TipoVueloEntity
 import edu.ucne.skyplanerent.presentation.reserva.ReservaViewModel
 import edu.ucne.skyplanerent.presentation.reserva.UiState
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaUiState
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaViewModel
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloUiState
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloViewModel
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -52,6 +57,7 @@ fun PreReservaListScreen(
     rutaList: List<RutaEntity>,
     tipoVueloViewModel: TipoVueloViewModel = hiltViewModel(),
     viewModel: ReservaViewModel = hiltViewModel(),
+    rutaViewModel: RutaViewModel = hiltViewModel(),
     goBack:()->Unit,
     goToFormulario: (Int)-> Unit,
 
@@ -65,6 +71,8 @@ fun PreReservaListScreen(
     }*/
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val rutaUiState by rutaViewModel.uiState.collectAsStateWithLifecycle()
+    val tipoVueloUiState by tipoVueloViewModel.uiState.collectAsStateWithLifecycle()
 
     ReservaBodyListScreen(
         uiState = uiState,
@@ -72,7 +80,10 @@ fun PreReservaListScreen(
         tipoVueloList = tipoVueloList,
         rutaList = rutaList,
         goToFormulario = goToFormulario,
-        goBack = goBack
+        goBack = goBack,
+        rutaUiState = rutaUiState,
+        tipoVueloUiState = tipoVueloUiState
+
 
     )
 }
@@ -81,12 +92,28 @@ fun PreReservaListScreen(
 @Composable
 fun ReservaBodyListScreen(
     uiState: UiState,
+    reservaViewModel:ReservaViewModel = hiltViewModel(),
+    tipoVueloViewModel: TipoVueloViewModel = hiltViewModel(),
+    rutaViewModel: RutaViewModel = hiltViewModel(),
     tipoVueloList:List<TipoVueloEntity>,
     rutaList:List<RutaEntity>,
     goToFormulario: (Int)-> Unit,
+    rutaUiState: RutaUiState,
+    tipoVueloUiState: TipoVueloUiState,
     goBack:()->Unit,
+    )
+{
 
-    ){
+   /*val tipoVueloSeleccionado by reservaViewModel.tipoVueloSeleccionadoId.collectAsState()
+    val rutaSeleccionadaId by  rutaViewModel.rutaSeleccionadaId.collectAsState()*/
+
+    val idTipoVueloSeleccionado by tipoVueloViewModel.tipoVueloSeleccionadoId.collectAsState()
+    val tipoVueloSeleccionado = tipoVueloUiState.tipovuelo.find { it.tipoVueloId == idTipoVueloSeleccionado }
+
+    val idRutaSeleccionada by rutaViewModel.rutaSeleccionadaId.collectAsState()
+    val rutaSeleccionada = rutaUiState.rutas.find { it.rutaId == idRutaSeleccionada }
+
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -112,20 +139,47 @@ fun ReservaBodyListScreen(
                 .fillMaxSize()
 
         ) {
-            LazyColumn(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
 
-            ) {
-                items(uiState.reservas) { reserva ->
-                    val tipoVuelo = tipoVueloList.find { it.vueloId == reserva.tipoVueloId }
-                    val ruta = rutaList.find { it.rutaId == reserva.rutaId }
+            Column(modifier = Modifier.padding(16.dp)) {
 
-                    // Solo si ambos existen, los mostramos
-                    if (tipoVuelo != null && ruta != null) {
-                        PreReservaRow(reserva, tipoVuelo, ruta, uiState)
-                    }
+                Text(
+                    text = "Tipo de vuelo: ${tipoVueloSeleccionado?.nombreVuelo ?: "No seleccionado"}",
+                    style = androidx.compose.ui.text.TextStyle(
+                        fontSize = 18.sp,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Text(
+                    text = rutaSeleccionada?.let { "Origen: ${it.origen}"} ?: "No seleccionado"
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Text(
+                    text = rutaSeleccionada?.let { "Destino: ${it.destino}"} ?: "No seleccionado"
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                if (uiState.fecha != null) {
+                    Text("Fecha: ${SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(uiState.fecha)}")
                 }
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Text(
+                    text = rutaSeleccionada?.let { "Duracion estimada: ${it.duracion}"} ?: "duracion: No disponible"
+                )
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Text(
+                    text =  "Piloto?"
+                )
+
             }
 
 
@@ -148,95 +202,4 @@ fun ReservaBodyListScreen(
         }
     }
 }
-
-@Composable
-fun PreReservaRow(
-    reserva: ReservaEntity,
-    tipoVuelo: TipoVueloEntity,
-    ruta:RutaEntity,
-    uiState: UiState,
-
-    ) {
-    var expanded by remember { mutableStateOf(false) }
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-                .background(MaterialTheme.colorScheme.surfaceVariant),
-            horizontalArrangement = Arrangement.SpaceBetween
-
-        ) {
-            Column(
-                modifier = Modifier.weight(5f),
-                verticalArrangement = Arrangement.Center
-            ) {
-
-                Text(
-                    text = "Detalles del vuelo:",
-                    style = androidx.compose.ui.text.TextStyle(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-
-                )
-
-                Text(
-                    text = "Tipo de vuelo: ${uiState.tipoVueloSeleccionado?.descripcionTipoVuelo}",
-                    style = androidx.compose.ui.text.TextStyle(
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.onSurface
-
-                    )
-
-                )
-
-                Text(
-                    text = "Ruta: ${reserva.rutaId}",
-                    style = androidx.compose.ui.text.TextStyle(
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.onSurface
-
-                    )
-                )
-
-
-                Text(
-                    text = "Fecha del vuelo: ${
-                        reserva.fecha?.let {
-                            SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(it)
-                        } ?: "No especificada"
-                    }",
-                    style = androidx.compose.ui.text.TextStyle(
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                )
-
-                /*  Text(
-                      text = "Hora: ${ruta.hora}",
-                      style = androidx.compose.ui.text.TextStyle(
-                          fontSize = 18.sp,
-                          color = MaterialTheme.colorScheme.onSurface
-
-                      )
-                  )*/
-
-
-                Text(
-                    text = "Tiempo: ${ruta.duracionEstimada}",
-                    style = androidx.compose.ui.text.TextStyle(
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.onSurface
-
-                    )
-                )
-
-            }
-        }
-    }
-
-
 
