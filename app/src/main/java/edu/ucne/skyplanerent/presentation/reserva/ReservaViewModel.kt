@@ -45,6 +45,13 @@ class ReservaViewModel @Inject constructor(
         _tipoVueloSeleccionadoId.value = tipoVueloId
     }
 
+    private val _tipoAeronaveSeleccionadaId = MutableStateFlow<Int?>(null)
+    val tipoAeronaveSeleccionadaId: StateFlow<Int?> = _tipoAeronaveSeleccionadaId
+
+    fun seleccionarTipoAeronave(tipoAeronaveId: Int) {
+        _tipoAeronaveSeleccionadaId.value = tipoAeronaveId
+    }
+
     init{
         getReserva()
     }

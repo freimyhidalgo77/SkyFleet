@@ -40,6 +40,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edu.ucne.skyplanerent.data.local.entity.ReservaEntity
 import edu.ucne.skyplanerent.data.local.entity.RutaEntity
 import edu.ucne.skyplanerent.data.local.entity.TipoVueloEntity
+import edu.ucne.skyplanerent.presentation.aeronave.AeronaveUiState
+import edu.ucne.skyplanerent.presentation.aeronave.AeronaveViewModel
 import edu.ucne.skyplanerent.presentation.reserva.ReservaViewModel
 import edu.ucne.skyplanerent.presentation.reserva.UiState
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaUiState
@@ -55,6 +57,7 @@ fun PreReservaListScreen(
     preReservaId:Int,
     tipoVueloList: List<TipoVueloEntity>,
     rutaList: List<RutaEntity>,
+    aeronaevViewModel: AeronaveViewModel = hiltViewModel(),
     tipoVueloViewModel: TipoVueloViewModel = hiltViewModel(),
     viewModel: ReservaViewModel,
     rutaViewModel: RutaViewModel = hiltViewModel(),
@@ -68,6 +71,7 @@ fun PreReservaListScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val rutaUiState by rutaViewModel.uiState.collectAsStateWithLifecycle()
     val tipoVueloUiState by tipoVueloViewModel.uiState.collectAsStateWithLifecycle()
+    val aeronaevUiState by aeronaevViewModel.uiState.collectAsStateWithLifecycle()
 
 
     /*LaunchedEffect(Unit) {
@@ -85,8 +89,8 @@ fun PreReservaListScreen(
         goBack = goBack,
         rutaUiState = rutaUiState,
         tipoVueloUiState = tipoVueloUiState,
+        aeronaveUiState = aeronaevUiState,
         reservaViewModel = viewModel
-
 
     )
 }
@@ -101,6 +105,7 @@ fun ReservaBodyListScreen(
     tipoVueloList:List<TipoVueloEntity>,
     rutaList:List<RutaEntity>,
     goToFormulario: (Int)-> Unit,
+    aeronaveUiState: AeronaveUiState,
     rutaUiState: RutaUiState,
     tipoVueloUiState: TipoVueloUiState,
     goBack:()->Unit,
@@ -115,6 +120,9 @@ fun ReservaBodyListScreen(
 
     val idRutaSeleccionada by reservaViewModel.rutaSeleccionadaId.collectAsState()
     val rutaSeleccionada = rutaUiState.rutas.find { it.rutaId == idRutaSeleccionada }
+
+    val idAeronaveSeleccionada by reservaViewModel.tipoAeronaveSeleccionadaId.collectAsState()
+    val aeronaveSeleccionada = aeronaveUiState.aeronaves.find { it.aeronaveId == idAeronaveSeleccionada }
 
 
     Scaffold(
@@ -165,6 +173,16 @@ fun ReservaBodyListScreen(
                     text = rutaSeleccionada?.let { "Destino: ${it.destino}"} ?: "No seleccionado"
                 )
 
+                Spacer(modifier = Modifier.height(20.dp))
+
+
+                Text(
+                    text = "Aeronave seleccionada: ${aeronaveSeleccionada?.modeloAvion ?: "No seleccionado"}",
+                    style = androidx.compose.ui.text.TextStyle(
+                        fontSize = 18.sp,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                )
                 Spacer(modifier = Modifier.height(20.dp))
 
                 if (uiState.fecha != null) {

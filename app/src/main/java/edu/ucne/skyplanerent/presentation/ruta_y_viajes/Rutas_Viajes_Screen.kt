@@ -159,7 +159,6 @@ fun Vuelos_RutasBodyListScreen(
     } ?:   vueloUiState.tipovuelo
 
 
-
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -414,7 +413,10 @@ fun Vuelos_RutasBodyListScreen(
                 AeronaveDropdown(
                     aeronaves = uiStateA.aeronaves,
                     selectedAeronave = selectedAeronave,
-                    onAeronaveSelected = { selectedAeronave = it }
+                    onAeronaveSelected = { selectedAeronave = it
+                        reservaViewModel.seleccionarTipoAeronave(it.aeronaveId ?: 0)
+
+                    }
                 )
             }
 
@@ -428,6 +430,7 @@ fun Vuelos_RutasBodyListScreen(
                        //Guarda los datos seleccionados antes de navegar
                         selectedTipoVuelo?.let { reservaViewModel.seleccionarTipoVuelo(it.tipoVueloId ?: 0,) }
                         selectedRuta?.let { reservaViewModel.seleccionarRuta(it.rutaId ?: 0) }
+
                         ReservaEvent.save
 
                         goTopreReserva(0) // Navega a la próxima pantalla
@@ -449,13 +452,13 @@ fun Vuelos_RutasBodyListScreen(
 }
 
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AeronaveDropdown(
     aeronaves: List<AeronaveDTO>,
     selectedAeronave: AeronaveDTO?,
     onAeronaveSelected: (AeronaveDTO) -> Unit,
+
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -486,7 +489,9 @@ fun AeronaveDropdown(
             if (aeronaves.isEmpty()) {
                 DropdownMenuItem(
                     text = { Text("No hay aeronaves disponibles") },
-                    onClick = {}
+                    onClick = {
+
+                    }
                 )
             }
 
