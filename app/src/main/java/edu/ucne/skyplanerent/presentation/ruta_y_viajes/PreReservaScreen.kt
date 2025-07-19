@@ -22,6 +22,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,6 +40,7 @@ import edu.ucne.skyplanerent.data.local.entity.RutaEntity
 import edu.ucne.skyplanerent.data.local.entity.TipoVueloEntity
 import edu.ucne.skyplanerent.presentation.reserva.ReservaViewModel
 import edu.ucne.skyplanerent.presentation.reserva.UiState
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloViewModel
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -48,6 +50,7 @@ fun PreReservaListScreen(
     preReservaId:Int,
     tipoVueloList: List<TipoVueloEntity>,
     rutaList: List<RutaEntity>,
+    tipoVueloViewModel: TipoVueloViewModel = hiltViewModel(),
     viewModel: ReservaViewModel = hiltViewModel(),
     goBack:()->Unit,
     goToFormulario: (Int)-> Unit,
@@ -55,7 +58,7 @@ fun PreReservaListScreen(
 
     ){
 
-    /*LaunchedEffect(RutaId, tipoVueloId){
+   /* LaunchedEffect(RutaId, tipoVueloId){
         TipoVueloviewModel.uiState.value.tipovuelo
         RutaviewModel.uiState.value.RutaId
 
@@ -120,7 +123,7 @@ fun ReservaBodyListScreen(
 
                     // Solo si ambos existen, los mostramos
                     if (tipoVuelo != null && ruta != null) {
-                        PreReservaRow(reserva, tipoVuelo, ruta)
+                        PreReservaRow(reserva, tipoVuelo, ruta, uiState)
                     }
                 }
             }
@@ -151,19 +154,11 @@ fun PreReservaRow(
     reserva: ReservaEntity,
     tipoVuelo: TipoVueloEntity,
     ruta:RutaEntity,
-
+    uiState: UiState,
 
     ) {
     var expanded by remember { mutableStateOf(false) }
 
-    Card(
-        shape = MaterialTheme.shapes.medium,
-        modifier = Modifier
-            .padding(horizontal = 16.dp)
-            .fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(6.dp)
-
-    ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
@@ -189,7 +184,7 @@ fun PreReservaRow(
                 )
 
                 Text(
-                    text = "Tipo de vuelo: ${tipoVuelo.descripcionTipoVuelo}",
+                    text = "Tipo de vuelo: ${uiState.tipoVueloSeleccionado?.descripcionTipoVuelo}",
                     style = androidx.compose.ui.text.TextStyle(
                         fontSize = 18.sp,
                         color = MaterialTheme.colorScheme.onSurface
@@ -243,6 +238,5 @@ fun PreReservaRow(
         }
     }
 
-}
 
 

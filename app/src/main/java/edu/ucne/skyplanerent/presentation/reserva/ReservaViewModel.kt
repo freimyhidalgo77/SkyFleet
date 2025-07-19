@@ -4,8 +4,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.ucne.skyplanerent.data.local.entity.ReservaEntity
+import edu.ucne.skyplanerent.data.remote.dto.TipoVueloDTO
 import edu.ucne.skyplanerent.data.repository.ReservaRepository
+import edu.ucne.skyplanerent.data.repository.RutaRepository
+import edu.ucne.skyplanerent.data.repository.TipoVueloRepository
+import edu.ucne.skyplanerent.presentation.UiEvent
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaEvent
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.toEntity
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -14,7 +22,9 @@ import javax.inject.Inject
 @HiltViewModel
 class ReservaViewModel @Inject constructor(
 
-    private val reservaRepository: ReservaRepository
+    private val reservaRepository: ReservaRepository,
+    private val tipoRutaRepository: TipoVueloRepository,
+    private val rutaRepository: RutaRepository
 
 ): ViewModel() {
 
@@ -24,8 +34,34 @@ class ReservaViewModel @Inject constructor(
 
     init{
         getReserva()
-
     }
+
+    private val _tipoVueloSeleccionadoId = MutableStateFlow<Int?>(null)
+    val tipoVueloSeleccionadoId: StateFlow<Int?> = _tipoVueloSeleccionadoId
+
+    private val _rutaSeleccionadaId = MutableStateFlow<Int?>(null)
+
+    /*fun seleccionarTipoVuelo(tipoVueloId: Int, tipoVueloDTO: TipoVueloDTO) {
+        _tipoVueloSeleccionadoId.value = tipoVueloId
+        _uiState.update { it.copy(tipoVueloSeleccionado = tipoVueloDTO) }
+    }*/
+
+
+    fun seleccionarTipoVuelo(tipoVueloId: Int) {
+        _tipoVueloSeleccionadoId.value = tipoVueloId
+    }
+
+
+
+    /* fun onEvent(event: ReservaEvent) {
+         when (event) {
+             //is ReservaEvent.AeronaveChange -> onChangePasajeros(event.aeronaveId)
+             ReservaEvent.Delte-> deleteReserva()
+             ReservaEvent.save -> saveReserva(event
+             )
+         }
+     }*/
+
 
     fun getReserva(){
         viewModelScope.launch {
@@ -37,7 +73,7 @@ class ReservaViewModel @Inject constructor(
         }
     }
 
-    fun saveReserva(){
+    fun saveReserva(reserva:ReservaEntity){
         viewModelScope.launch {
             try{
                 reservaRepository.saveReserva(_uiState.value.toEntity())
@@ -120,10 +156,10 @@ class ReservaViewModel @Inject constructor(
         }
     }
 
-    /*fun onChangeAreonave(aeronave:String){
+    /*fun onChangeAreonave(aeronaves:String){
         _uiState.update {
             it.copy(
-                aeronave = aeronave
+                aeronave = aeronaves
             )
         }
     }*/
@@ -165,7 +201,8 @@ class ReservaViewModel @Inject constructor(
         fecha = fecha,
         impuesto = impuesto?:0.0,
         tarifa = tarifa?:0.0,
-        precioTotal = precioTotal
+        precioTotal = precioTotal,
+        tipoCliente = tipoCliente?:false
 
     )
 

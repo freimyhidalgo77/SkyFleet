@@ -1,5 +1,6 @@
 package edu.ucne.skyplanerent.presentation.navigation
 
+import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -47,8 +48,10 @@ import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaScreenDetails
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaViewModel
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloDetailsScreen
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloEvent
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloUiState
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloViewModel
 
+@SuppressLint("RememberReturnType")
 @Composable
 fun AppNavigation() {
     val auth = FirebaseAuth.getInstance()
@@ -103,46 +106,51 @@ fun AppNavigation() {
             )
         }
 
+
         composable<Screen.Reserva> {
             ReservaListScreen(
                 scope = scope,
                 onCreate = { /* navController.navigate(...) */ },
-                onEdit = { /* navController.navigate(...) */ },
-                onDelete = { /* lógica */ }
+                onDetails = {navController.navigate(Screen.ReservaDetails(0))},
+                onEdit = { navController.navigate(Screen.ReservaEdit(0)) },
+                onDelete = {navController.navigate(Screen.ReservaDelete(0)) }
             )
         }
 
-        composable<Screen.Rutas_y_viajes> {
+        composable<Screen.Rutas_y_viajes> { backStackEntry ->
+
+            val rutaViewModel: RutaViewModel = hiltViewModel(backStackEntry)
+
             Rutas_Viajes_Screen(
-                scope = scope,
-                onCreate = { /* navController.navigate(...) */ },
-                onEdit = { /* navController.navigate(...) */ },
-                onDelete = { /* lógica */ },
+                rutaViewModel = rutaViewModel,
+                goToRuta = { id ->
+                    navController.navigate(Screen.ReservaRutaDetails(id))
+                },
                 goBackDetails = {
                     navController.navigate(Screen.RutaDetails(0))
                 },
                 goTopreReserva = {
                     navController.navigate(Screen.PreReserva(0))
-
                 },
-                goToRuta = {id->
-                    navController.navigate(Screen.ReservaRutaDetails(id))
-                }
+                scope = scope
             )
         }
 
-        composable<Screen.ReservaRutaDetails> {
-            val args = it.toRoute<Screen.ReservaRutaDetails>()
-            ReservaRutaScreenDetails (
+        composable<Screen.ReservaRutaDetails> { backStackEntry ->
+            val args = backStackEntry.toRoute<Screen.ReservaRutaDetails>()
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry(Screen.ReservaRutaDetails)//Aqui tambien puede ir Ruta_Viajes
+            }
+            val rutaViewModel: RutaViewModel = hiltViewModel(parentEntry)
+
+            ReservaRutaScreenDetails(
                 rutaId = args.reservaRutId,
+                viewModel = rutaViewModel,
+                onSelectRuta = {
+                    rutaViewModel.seleccionarRuta(0)
+                },
                 goBack = {
-                    navController.navigate(Screen.ReservaRutaDetails(0))
-                },
-                onEdit = {
-
-                },
-                onDelete = {
-
+                    navController.navigate(Screen.Rutas_y_viajes)
                 }
             )
         }

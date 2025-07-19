@@ -1,6 +1,5 @@
 package edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,23 +8,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -46,9 +34,8 @@ import kotlinx.coroutines.launch
 fun ReservaRutaScreenDetails(
     rutaId: Int?,
     viewModel: RutaViewModel = hiltViewModel(),
-    goBack: () -> Unit,
-    onDelete: (Int) -> Unit,
-    onEdit: (Int) -> Unit
+    onSelectRuta: (Int) -> Unit,
+    goBack:() -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
@@ -83,10 +70,10 @@ fun ReservaRutaScreenDetails(
         goBack = goBack,
         onDelete = {
             viewModel.onEvent(RutaEvent.Delete)
-            onDelete(rutaId ?: 0)
         },
-        onEdit = { onEdit(rutaId ?: 0) },
-        snackbarHostState = snackbarHostState
+        onSelectRuta = { onSelectRuta(rutaId ?: 0) },
+        snackbarHostState = snackbarHostState,
+        rutaId = rutaId!!
     )
 }
 
@@ -94,17 +81,21 @@ fun ReservaRutaScreenDetails(
 @Composable
 fun ReservaRutaDetailsBodyScreen(
     uiState: RutaUiState,
+    viewModel: RutaViewModel = hiltViewModel(),
     goBack: () -> Unit,
     onDelete: () -> Unit,
-    onEdit: () -> Unit,
-    snackbarHostState: SnackbarHostState
+    onSelectRuta: (Int) -> Unit,
+    snackbarHostState: SnackbarHostState,
+    rutaId:Int
+
+
 ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 20.dp, vertical = 16.dp)
     ) {
-        // ✅ Título centrado arriba
+
         Text(
             text = "Detalles de la ruta",
             fontSize = 20.sp,
@@ -174,7 +165,10 @@ fun ReservaRutaDetailsBodyScreen(
             Spacer(modifier = Modifier.weight(1f))
 
             Button(
-                onClick = onEdit,
+                onClick = {
+                    viewModel.seleccionarRuta(rutaId)
+                    //onSelectRuta(rutaId)
+                    goBack()},
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 32.dp)

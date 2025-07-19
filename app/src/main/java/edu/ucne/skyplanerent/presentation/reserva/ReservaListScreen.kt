@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -52,8 +53,9 @@ fun ReservaListScreen(
     viewModel: ReservaViewModel = hiltViewModel(),
     scope: CoroutineScope,
     onCreate:()-> Unit,
-    onEdit:(Int)-> Unit,
-    onDelete:(Int)-> Unit
+    onDetails: (ReservaEntity) -> Unit,
+    onEdit:(ReservaEntity)-> Unit,
+    onDelete:(ReservaEntity)-> Unit
 
 ){
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -63,7 +65,8 @@ fun ReservaListScreen(
         scope = scope,
         onCreate = onCreate,
         onEdit = onEdit,
-        onDelete = onDelete
+        onDelete = onDelete,
+        onDetails = onDetails
     )
 }
 
@@ -73,8 +76,9 @@ fun ReservaBodyListScreen(
     uiState: UiState,
     scope: CoroutineScope,
     onCreate:()-> Unit,
-    onEdit:(Int)-> Unit,
-    onDelete:(Int)-> Unit
+    onDetails: (ReservaEntity) -> Unit,
+    onEdit:(ReservaEntity)-> Unit,
+    onDelete:(ReservaEntity)-> Unit
 
 ){
     Scaffold(
@@ -95,7 +99,7 @@ fun ReservaBodyListScreen(
         },
 
 
-    ){innerPadding->
+        ){innerPadding->
         Column (
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
@@ -119,7 +123,7 @@ fun ReservaBodyListScreen(
 
             ){
                 items(uiState.reservas){reserva->
-                    ReservaRow(reserva,onEdit,onDelete)
+                    ReservaRow(reserva,onDetails)
                 }
             }
         }
@@ -129,10 +133,9 @@ fun ReservaBodyListScreen(
 @Composable
 fun ReservaRow(
     reserva: ReservaEntity,
-    onEdit: (Int) -> Unit,
-    onDelete: (Int) -> Unit
+    onDetails: (ReservaEntity) -> Unit,
 
-) {
+    ) {
     var expanded by remember { mutableStateOf(false) }
 
     Card(
@@ -187,9 +190,34 @@ fun ReservaRow(
                     )
                 )
 
-                 }
+            }
+
+            IconButton(
+                onClick = { expanded = !expanded },
+                modifier = Modifier.weight(1f)
+            ) {
+                Icon(Icons.Filled.MoreVert, contentDescription = "Mas opciones")
+            }
+
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.background(MaterialTheme.colorScheme.surface)
+            ) {
+
+                DropdownMenuItem(
+                    text = { Text("Detalles") },
+                    leadingIcon = { Icon(Icons.Filled.List, contentDescription = "Detalles") },
+                    onClick = {
+                        expanded = false
+                        onDetails(reserva)
+                    }
+                )
+
             }
         }
     }
+}
+
 
 

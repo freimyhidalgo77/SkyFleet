@@ -23,4 +23,5 @@ data class AeronaveEntity(
     val AltitudMaxima:Int  = 0,
     val Licencia:String
 
+
 )

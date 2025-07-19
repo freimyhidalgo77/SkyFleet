@@ -36,7 +36,8 @@ import edu.ucne.skyplanerent.data.remote.dto.AeronaveDTO
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveUiState
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveViewModel
 import androidx.compose.material.icons.filled.CalendarToday
-
+import edu.ucne.skyplanerent.presentation.reserva.ReservaEvent
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloUiState
 
 
 @Composable
@@ -44,12 +45,8 @@ fun Rutas_Viajes_Screen(
     reservaViewModel: ReservaViewModel = hiltViewModel(),
     tipoVueloViewModel: TipoVueloViewModel = hiltViewModel(),
     aeronaveViewModel: AeronaveViewModel = hiltViewModel(),
-    rutaViewModel: RutaViewModel = hiltViewModel(),
-    // rutas: List<RutaDTO>,
+    rutaViewModel: RutaViewModel,
     scope: CoroutineScope,
-    onCreate: () -> Unit,
-    onEdit: (Int) -> Unit,
-    onDelete: (Int) -> Unit,
     goBackDetails: (Int) -> Unit,
     goTopreReserva: (Int)-> Unit,
     goToRuta: (Int) -> Unit,
@@ -61,31 +58,41 @@ fun Rutas_Viajes_Screen(
     val tipoVueloUiState by tipoVueloViewModel.uiState.collectAsStateWithLifecycle()
     val aeronavesUiState by aeronaveViewModel.uiState.collectAsStateWithLifecycle()
 
+    var selectedTipoVuelo by remember { mutableStateOf<TipoVueloDTO?>(null) }
+    var selectedRuta by remember { mutableStateOf<RutaDTO?>(null) }
+    var selectedAeronave by remember { mutableStateOf<AeronaveDTO?>(null) }
+    var soyPiloto by remember { mutableStateOf<Boolean?>(null) }
+    var licenciaSeleccionada by remember { mutableStateOf<String?>(null) }
+
+
 
     Vuelos_RutasBodyListScreen(
         uiState = rutaUiState,
         uiStateA = aeronavesUiState,
+        vueloUiState = tipoVueloUiState,
         tiposDeVuelo = tipoVueloUiState.tipovuelo,
-        // rutas = rutas,
         scope = scope,
-        onCreate = onCreate,
-        onEdit = onEdit,
-        onDelete = onDelete,
         onReserva = { fecha ->
-            val reserva = ReservaEntity(
-                tipoVueloId = 1,
-                rutaId = 1,
-                fecha = fecha,
-                pasajeros = 1,
-                impuesto = 0.0,
-                tarifa = 1000.0,
-                precioTotal = 0.0
-            )
-            reservaViewModel.saveReserva()
+            if (selectedTipoVuelo != null && selectedRuta != null && selectedAeronave != null) {
+                val reserva = ReservaEntity(
+                    tipoVueloId = selectedTipoVuelo!!.tipoVueloId,
+                    rutaId = selectedRuta!!.rutaId,
+                    fecha = fecha,
+                    pasajeros = 1,
+                    impuesto = 0.0,
+                    tarifa = 1000.0,
+                    precioTotal = 0.0,
+                    categoriaId = selectedAeronave!!.aeronaveId,
+                    tipoCliente = soyPiloto ?: false,
+                    licenciaPiloto = licenciaSeleccionada
+
+                )
+                reservaViewModel.saveReserva(reserva)
+            }
         },
-        goBackDetails = goBackDetails,
+                goBackDetails = goBackDetails,
         goTopreReserva = goTopreReserva,
-        goToRuta = goToRuta
+        goToRuta = goToRuta,
     )
 }
 
@@ -94,12 +101,13 @@ fun Rutas_Viajes_Screen(
 @Composable
 fun Vuelos_RutasBodyListScreen(
     uiState: RutaUiState,
+    vueloUiState: TipoVueloUiState,
     uiStateA: AeronaveUiState,
     tiposDeVuelo: List<TipoVueloDTO>,
     scope: CoroutineScope,
-    onCreate: () -> Unit,
-    onEdit: (Int) -> Unit,
-    onDelete: (Int) -> Unit,
+    rutaViewModel: RutaViewModel = hiltViewModel(),
+    tipoVueloViewModel: TipoVueloViewModel = hiltViewModel(),
+    reservaViewModel: ReservaViewModel = hiltViewModel(),
     onReserva: (Date) -> Unit,
     goBackDetails: (Int) -> Unit,
     goToRuta: (Int) -> Unit,
@@ -107,7 +115,6 @@ fun Vuelos_RutasBodyListScreen(
 
 ) {
     var fechaSeleccionada by remember { mutableStateOf<Date?>(null) }
-    val navController = rememberNavController()
     var selectedAeronave by remember { mutableStateOf<AeronaveDTO?>(null) }
 
 
@@ -127,6 +134,28 @@ fun Vuelos_RutasBodyListScreen(
     var mostrarLicencias by remember { mutableStateOf(false) }
     var expandedLicencia by remember { mutableStateOf(false) }
 
+    var selectedTipoVuelo by remember { mutableStateOf<TipoVueloDTO?>(null) }
+    var selectedRuta by remember { mutableStateOf<RutaDTO?>(null) }
+
+
+    val idSeleccionado by rutaViewModel.rutaSeleccionadaId.collectAsState()
+    val rutasAMostrar = idSeleccionado?.let { id ->
+        if (id > 0) {
+            uiState.rutas.filter { it.rutaId == id }
+        } else {
+            uiState.rutas
+        }
+    } ?: uiState.rutas
+
+
+    val ideSeleccionado by reservaViewModel.tipoVueloSeleccionadoId.collectAsState()
+    val vuelosAMostrar = ideSeleccionado?.let { id ->
+        if (id > 0) {
+            vueloUiState.tipovuelo.filter { it.tipoVueloId == id }
+        } else {
+            vueloUiState.tipovuelo
+        }
+    } ?:   vueloUiState.tipovuelo
 
 
     LaunchedEffect(uiStateA.aeronaves) {
@@ -162,8 +191,78 @@ fun Vuelos_RutasBodyListScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
+           /* item {
+                ListaDeTiposDeVuelo(
+                    tiposDeVuelo = tiposDeVuelo,
+                    onTipoVueloSeleccionado = {
+                        selectedTipoVuelo = it
+                        reservaViewModel.seleccionarTipoVuelo(it.tipoVueloId!!, it)
+
+                    }
+
+                )
+            }*/
+
             item {
-                ListaDeTiposDeVuelo(tiposDeVuelo = tiposDeVuelo)
+                Text(
+                    text = "Tipos de vuelo",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+            }
+
+            item {
+                LazyRow(
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(vuelosAMostrar) { vuelo ->
+                        Card(
+                            shape = RoundedCornerShape(12.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color(0xFFBBDEFB)),
+                            elevation = CardDefaults.cardElevation(2.dp),
+                            modifier = Modifier
+                                .width(160.dp)
+                                .height(60.dp)
+                                .clickable {
+                                    selectedTipoVuelo = vuelo
+                                    reservaViewModel.seleccionarTipoVuelo(vuelo.tipoVueloId ?: 0)
+                                }
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(horizontal = 16.dp),
+                                contentAlignment = Alignment.CenterStart
+                            ) {
+                                Text(
+                                    text = vuelo.nombreVuelo,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = Color.Black
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+
+            val idTipoVueloSeleccionado = idSeleccionado
+            if (idTipoVueloSeleccionado != null && idTipoVueloSeleccionado > 0) {
+                item {
+                    val tipoVueloSeleccionado = vueloUiState.tipovuelo.find { it.tipoVueloId == idTipoVueloSeleccionado }
+
+                    if (tipoVueloSeleccionado != null) {
+                        Text(
+                            text = "Tipo Vuelo Seleccionado: ${tipoVueloSeleccionado.descripcionTipoVuelo}",
+                            fontSize = 16.sp,
+                            color = Color(0xFF0A80ED),
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
+                    }
+                }
             }
 
             item {
@@ -175,13 +274,65 @@ fun Vuelos_RutasBodyListScreen(
                 )
             }
 
-            items(uiState.rutas) { ruta ->
-                RutasRow(
-                    it = ruta,
-                    goToRuta = { goToRuta(ruta.rutaId ?: 0) }
-                )
-                Spacer(modifier = Modifier.height(8.dp))
+
+            val idRutaSeleccionada = idSeleccionado
+            if (idRutaSeleccionada != null && idRutaSeleccionada > 0) {
+                item {
+                    val rutaSeleccionada = uiState.rutas.find { it.rutaId == idRutaSeleccionada }
+
+                    if (rutaSeleccionada != null) {
+                        Text(
+                            text = "Ruta seleccionada: ${rutaSeleccionada.origen} → ${rutaSeleccionada.destino}",
+                            fontSize = 16.sp,
+                            color = Color(0xFF0A80ED),
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
+                    }
+                }
             }
+
+
+            items(rutasAMostrar) { ruta ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 4.dp)
+                        .clickable {
+                            selectedRuta = ruta
+                            rutaViewModel.seleccionarRuta(ruta.rutaId ?: 0)
+                        },
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFE3F2FD)),
+                    shape = RoundedCornerShape(12.dp),
+                    elevation = CardDefaults.cardElevation(4.dp)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = "Ruta: ${ruta.rutaId}",
+                            color = Color.Gray,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
+                        )
+                        Text(
+                            text = "${ruta.origen} → ${ruta.destino}",
+                            fontSize = 16.sp
+                        )
+                        Text(
+                            text = "Distancia: ${ruta.distancia}",
+                            color = Color.Gray,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
+                        )
+                        Text(
+                            text = "Duracion: ${ruta.duracion}",
+                            color = Color.Gray,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
+                        )
+
+                    }
+                }
+            }
+
 
 
             item {
@@ -290,13 +441,15 @@ fun Vuelos_RutasBodyListScreen(
             }
 
             item {
-                /*val puedeContinuar = selectedAeronave != null &&
+                val puedeContinuar = selectedAeronave != null &&
                         fechaSeleccionada != null &&
-                        (soyPiloto != true || licenciaSeleccionada != null)*/
+                        (soyPiloto != true || licenciaSeleccionada != null) && selectedRuta == null && selectedTipoVuelo == null
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
-                    onClick = { goTopreReserva(0) },
-                    //enabled = puedeContinuar,
+                    onClick = { goTopreReserva(0)
+                        ReservaEvent.save
+                              },
+                    enabled = puedeContinuar,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
@@ -364,14 +517,16 @@ fun AeronaveDropdown(
                 )
             }
         }
-
     }
 }
 
 
 
 @Composable
-fun ListaDeTiposDeVuelo(tiposDeVuelo: List<TipoVueloDTO>) {
+fun ListaDeTiposDeVuelo(
+    tiposDeVuelo: List<TipoVueloDTO>,
+    onTipoVueloSeleccionado: (TipoVueloDTO) -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -384,26 +539,27 @@ fun ListaDeTiposDeVuelo(tiposDeVuelo: List<TipoVueloDTO>) {
             modifier = Modifier.padding(vertical = 8.dp)
         )
 
-        LazyRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             items(tiposDeVuelo) { vuelo ->
-                TipoVueloCard(vuelo)
+                TipoVueloCard(vuelo = vuelo, onClick = { onTipoVueloSeleccionado(vuelo) })
             }
         }
     }
 }
 
+
 @Composable
-fun TipoVueloCard(vuelo: TipoVueloDTO) {
+fun TipoVueloCard(vuelo: TipoVueloDTO, onClick: () -> Unit) {
     Card(
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFBBDEFB)),
         elevation = CardDefaults.cardElevation(2.dp),
         modifier = Modifier
-            .fillMaxWidth()
+            .width(160.dp)
             .height(60.dp)
-            .padding(horizontal = 8.dp)
+            .clickable { onClick(
+
+            ) }
     ) {
         Box(
             modifier = Modifier
@@ -421,33 +577,6 @@ fun TipoVueloCard(vuelo: TipoVueloDTO) {
     }
 }
 
-
-@Composable
-private fun RutasRow(
-    it: RutaDTO,
-    goToRuta: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 12.dp)
-    ){
-        Text(
-            text = "Ruta ${it.rutaId}",
-            fontWeight = FontWeight.Bold,
-            fontSize = 16.sp
-        )
-        Text(
-            text = "Origen: ${it.origen}, Destino: ${it.destino}",
-            fontSize = 14.sp,
-            color = Color.Gray
-        )
-        IconButton(onClick = goToRuta) {
-            Icon(Icons.Default.ArrowForward, contentDescription = "Modificar/Eliminar", tint = MaterialTheme.colorScheme.primary)
-        }
-    }
-    HorizontalDivider()
-}
 
 @Composable
 fun FechaSelector(

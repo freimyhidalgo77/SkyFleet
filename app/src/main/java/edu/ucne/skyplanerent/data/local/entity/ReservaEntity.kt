@@ -18,7 +18,10 @@ data class ReservaEntity(
     val fecha: Date?,
     val impuesto: Double,
     val tarifa:Double,
-    val precioTotal:Double
+    val precioTotal:Double,
+    val tipoCliente:Boolean?,
+    val licenciaPiloto:String? = null,
+    //val aeronaveId:Int = 0,
 
 ){
     /*val costoVuelo: Double
