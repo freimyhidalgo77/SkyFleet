@@ -19,7 +19,7 @@ class TipoVueloRepository @Inject constructor(
         emit(Resource.Loading())
         try {
             val tipoVuelo = dataSource.getTipoVuelo(tipoVueloId)
-            dao.save(listOf(tipoVuelo.toEntity())) // Guardar localmente
+            dao.save(listOf(tipoVuelo.toEntity().copy(isPendingSync = false)))
             emit(Resource.Success(listOf(tipoVuelo)))
         } catch (e: HttpException) {
             val errorMessage = e.response()?.errorBody()?.string() ?: e.message()
@@ -44,31 +44,53 @@ class TipoVueloRepository @Inject constructor(
     fun getTipoVuelos(): Flow<Resource<List<TipoVueloDTO>>> = flow {
         emit(Resource.Loading())
         try {
+            // Limpiar tipos de vuelo inválidos con vueloId = 0
+            dao.clearInvalidTiposVuelo()
+
+            // Sincronizar tipos de vuelo pendientes
+            val pendingTiposVuelo = dao.getPendingSync()
+            for (pending in pendingTiposVuelo) {
+                try {
+                    val savedTipoVuelo = dataSource.postTipoVuelo(pending.toDto())
+                    dao.deletePending(pending.vueloId)
+                    dao.save(listOf(savedTipoVuelo.toEntity().copy(isPendingSync = false)))
+                } catch (e: Exception) {
+                    Log.e("TipoVueloRepository", "Error al sincronizar tipo de vuelo ${pending.vueloId}: ${e.message}")
+                }
+            }
+
+            // Obtener tipos de vuelo del servidor
             val tiposVuelosFetched = dataSource.getTiposVuelos()
-            val listaEntity = tiposVuelosFetched.map { it.toEntity() }
-            dao.save(listaEntity) // Guardar localmente
+            val listaEntity = tiposVuelosFetched.map { it.toEntity().copy(isPendingSync = false) }
+            dao.save(listaEntity)
+
+            // Emitir tipos de vuelo locales actualizados
+            val listaRetorno = dao.getAll()
+            val listaDto = listaRetorno.map { it.toDto() }
+            emit(Resource.Success(listaDto))
         } catch (e: Exception) {
             Log.e("TipoVueloRepository", "Exception al obtener tipos de vuelo: ${e.message}")
+            val listaRetorno = dao.getAll()
+            val listaDto = listaRetorno.map { it.toDto() }
+            emit(Resource.Success(listaDto))
         }
-        val listaRetorno = dao.getAll()
-        val listaDto = listaRetorno.map { it.toDto() }
-        emit(Resource.Success(listaDto))
     }
 
     suspend fun update(id: Int, tipoVueloDTO: TipoVueloDTO) {
         try {
             dataSource.putTipoVuelo(id, tipoVueloDTO)
+            dao.save(listOf(tipoVueloDTO.toEntity().copy(isPendingSync = false)))
         } catch (e: Exception) {
             Log.e("TipoVueloRepository", "Error al actualizar remoto: ${e.message}")
+            dao.save(listOf(tipoVueloDTO.toEntity().copy(isPendingSync = true)))
         }
-        dao.save(listOf(tipoVueloDTO.toEntity())) // Guardar localmente
     }
 
     fun find(id: Int): Flow<Resource<TipoVueloDTO>> = flow {
         emit(Resource.Loading())
         try {
             val tipoVuelo = dataSource.getTipoVuelo(id)
-            dao.save(listOf(tipoVuelo.toEntity())) // Actualiza localmente
+            dao.save(listOf(tipoVuelo.toEntity().copy(isPendingSync = false)))
             emit(Resource.Success(tipoVuelo))
         } catch (e: HttpException) {
             val errorMessage = e.response()?.errorBody()?.string() ?: e.message()
@@ -90,13 +112,23 @@ class TipoVueloRepository @Inject constructor(
         }
     }
 
-    suspend fun saveTipoVuelo(tipoVueloDTO: TipoVueloDTO) {
-        try {
-            dataSource.postTipoVuelo(tipoVueloDTO)
+    suspend fun saveTipoVuelo(tipoVueloDTO: TipoVueloDTO): Resource<TipoVueloDTO> {
+        return try {
+            val savedTipoVuelo = dataSource.postTipoVuelo(tipoVueloDTO)
+            dao.save(listOf(savedTipoVuelo.toEntity().copy(isPendingSync = false)))
+            Resource.Success(savedTipoVuelo)
+        } catch (e: HttpException) {
+            val errorMessage = e.response()?.errorBody()?.string() ?: e.message()
+            Log.e("TipoVueloRepository", "HttpException al guardar remoto: $errorMessage")
+            val localTipoVuelo = tipoVueloDTO.copy(tipoVueloId = null)
+            dao.save(listOf(localTipoVuelo.toEntity().copy(isPendingSync = true, vueloId = null)))
+            Resource.Success(localTipoVuelo)
         } catch (e: Exception) {
-            Log.e("TipoVueloRepository", "Error al guardar remoto: ${e.message}")
+            Log.e("TipoVueloRepository", "Exception al guardar remoto: ${e.message}")
+            val localTipoVuelo = tipoVueloDTO.copy(tipoVueloId = null)
+            dao.save(listOf(localTipoVuelo.toEntity().copy(isPendingSync = true, vueloId = null)))
+            Resource.Success(localTipoVuelo)
         }
-        dao.save(listOf(tipoVueloDTO.toEntity())) // Guardar localmente
     }
 
     suspend fun deleteTipoVuelo(id: Int): Resource<Unit> {
@@ -116,10 +148,15 @@ class TipoVueloRepository @Inject constructor(
         }
     }
 
+    suspend fun cleanInvalidTiposVuelo() {
+        dao.clearInvalidTiposVuelo()
+    }
+
     private fun TipoVueloDTO.toEntity() = TipoVueloEntity(
         vueloId = this.tipoVueloId,
         nombreVuelo = this.nombreVuelo,
-        descripcionTipoVuelo = this.descripcionTipoVuelo
+        descripcionTipoVuelo = this.descripcionTipoVuelo,
+        isPendingSync = false
     )
 
     private fun TipoVueloEntity.toDto() = TipoVueloDTO(

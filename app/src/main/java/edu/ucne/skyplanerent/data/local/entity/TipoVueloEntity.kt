@@ -6,8 +6,9 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName="TipoVuelo")
 data class TipoVueloEntity(
-    @PrimaryKey(autoGenerate = true)
+    @PrimaryKey
     val vueloId:Int? = null,
     val nombreVuelo: String = "",
     val descripcionTipoVuelo:String = "",
+    val isPendingSync: Boolean = false // Nuevo campo
 )

@@ -8,7 +8,6 @@ import edu.ucne.skyplanerent.data.local.entity.RutaEntity
 
 @Dao
 interface RutaDao {
-
     @Upsert
     suspend fun save(ruta: List<RutaEntity>)
 
@@ -21,4 +20,12 @@ interface RutaDao {
     @Query("SELECT * FROM Rutas")
     suspend fun getAll(): List<RutaEntity>
 
+    @Query("SELECT * FROM Rutas WHERE isPendingSync = 1")
+    suspend fun getPendingSync(): List<RutaEntity>
+
+    @Query("DELETE FROM Rutas WHERE isPendingSync = 1 AND (rutaId IS :id OR rutaId = 0)")
+    suspend fun deletePending(id: Int?)
+
+    @Query("DELETE FROM Rutas WHERE rutaId = 0")
+    suspend fun clearInvalidRoutes()
 }

@@ -20,7 +20,7 @@ class RutaRepository @Inject constructor(
         emit(Resource.Loading())
         try {
             val ruta = dataSource.getRuta(rutaId)
-            dao.save(listOf(ruta.toEntity()))
+            dao.save(listOf(ruta.toEntity().copy(isPendingSync = false)))
             emit(Resource.Success(listOf(ruta)))
         } catch (e: HttpException) {
             val errorMessage = e.response()?.errorBody()?.string() ?: e.message()
@@ -45,31 +45,53 @@ class RutaRepository @Inject constructor(
     fun getRutas(): Flow<Resource<List<RutaDTO>>> = flow {
         emit(Resource.Loading())
         try {
+            // Limpiar rutas inválidas con rutaId = 0
+            dao.clearInvalidRoutes()
+
+            // Sincronizar rutas pendientes
+            val pendingRutas = dao.getPendingSync()
+            for (pending in pendingRutas) {
+                try {
+                    val savedRuta = dataSource.postRuta(pending.toDto())
+                    dao.deletePending(pending.rutaId) // Eliminar la ruta pendiente
+                    dao.save(listOf(savedRuta.toEntity().copy(isPendingSync = false)))
+                } catch (e: Exception) {
+                    Log.e("Ruta", "Error al sincronizar ruta ${pending.rutaId}: ${e.message}")
+                }
+            }
+
+            // Obtener rutas del servidor
             val listaRutasFetched = dataSource.getRutas()
-            val listaEntity = listaRutasFetched.map { it.toEntity() }
+            val listaEntity = listaRutasFetched.map { it.toEntity().copy(isPendingSync = false) }
             dao.save(listaEntity)
+
+            // Emitir rutas locales actualizadas
+            val listaRetorno = dao.getAll()
+            val listaDto = listaRetorno.map { it.toDto() }
+            emit(Resource.Success(listaDto))
         } catch (e: Exception) {
             Log.e("Ruta", "Exception al obtener rutas: ${e.message}")
+            val listaRetorno = dao.getAll()
+            val listaDto = listaRetorno.map { it.toDto() }
+            emit(Resource.Success(listaDto))
         }
-        val listaRetorno = dao.getAll()
-        val listaDto = listaRetorno.map { it.toDto() }
-        emit(Resource.Success(listaDto))
     }
 
     suspend fun update(id: Int, rutaDTO: RutaDTO) {
         try {
             dataSource.putRuta(id, rutaDTO)
+            dao.save(listOf(rutaDTO.toEntity().copy(isPendingSync = false)))
         } catch (e: Exception) {
             Log.e("Ruta", "Error al actualizar remoto: ${e.message}")
+            dao.save(listOf(rutaDTO.toEntity().copy(isPendingSync = true)))
         }
-        dao.save(listOf(rutaDTO.toEntity()))
     }
 
     fun find(id: Int): Flow<Resource<RutaDTO>> = flow {
         emit(Resource.Loading())
         try {
             val ruta = dataSource.getRuta(id)
-            dao.save(listOf(ruta.toEntity())) // Actualiza localmente
+            dao.save(listOf(ruta.toEntity().copy(isPendingSync = false)))
             emit(Resource.Success(ruta))
         } catch (e: HttpException) {
             val errorMessage = e.response()?.errorBody()?.string() ?: e.message()
@@ -91,13 +113,23 @@ class RutaRepository @Inject constructor(
         }
     }
 
-    suspend fun saveRuta(rutaDTO: RutaDTO) {
-        try {
-            dataSource.postRuta(rutaDTO)
+    suspend fun saveRuta(rutaDTO: RutaDTO): Resource<RutaDTO> {
+        return try {
+            val savedRuta = dataSource.postRuta(rutaDTO)
+            dao.save(listOf(savedRuta.toEntity().copy(isPendingSync = false)))
+            Resource.Success(savedRuta)
+        } catch (e: HttpException) {
+            val errorMessage = e.response()?.errorBody()?.string() ?: e.message()
+            Log.e("Ruta", "HttpException al guardar remoto: $errorMessage")
+            val localRuta = rutaDTO.copy(rutaId = null)
+            dao.save(listOf(localRuta.toEntity().copy(isPendingSync = true, rutaId = null)))
+            Resource.Success(localRuta)
         } catch (e: Exception) {
-            Log.e("Ruta", "Error al guardar remoto: ${e.message}")
+            Log.e("Ruta", "Exception al guardar remoto: ${e.message}")
+            val localRuta = rutaDTO.copy(rutaId = null)
+            dao.save(listOf(localRuta.toEntity().copy(isPendingSync = true, rutaId = null)))
+            Resource.Success(localRuta)
         }
-        dao.save(listOf(rutaDTO.toEntity()))
     }
 
     suspend fun deleteRuta(id: Int): Resource<Unit> {
@@ -121,15 +153,16 @@ class RutaRepository @Inject constructor(
         rutaId = this.rutaId,
         origen = this.origen ?: "",
         destino = this.destino ?: "",
-        distancia = this.distancia,
-        duracion = this.duracion ?: 0
+        distancia = this.distancia ?: 0.0,
+        duracion = this.duracion ?: 0,
+        isPendingSync = false
     )
 
     private fun RutaEntity.toDto() = RutaDTO(
         rutaId = this.rutaId,
-        origen = this.origen ?: "",
-        destino = this.destino ?: "",
+        origen = this.origen,
+        destino = this.destino,
         distancia = this.distancia,
-        duracion = this.duracion ?: 0
+        duracion = this.duracion
     )
 }

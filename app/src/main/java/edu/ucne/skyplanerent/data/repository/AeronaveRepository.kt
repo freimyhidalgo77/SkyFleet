@@ -13,13 +13,13 @@ import javax.inject.Inject
 
 class AeronaveRepository @Inject constructor(
     private val dataSource: AeronavesDataSource,
-    private val dao: AeronaveDao // Agregamos el DAO
+    private val dao: AeronaveDao
 ) {
     fun getAeronave(aeronaveId: Int): Flow<Resource<List<AeronaveDTO>>> = flow {
         emit(Resource.Loading())
         try {
             val aeronave = dataSource.getAeronave(aeronaveId)
-            dao.save(listOf(aeronave.toEntity())) // Guardar localmente
+            dao.save(listOf(aeronave.toEntity().copy(isPendingSync = false)))
             emit(Resource.Success(listOf(aeronave)))
         } catch (e: HttpException) {
             val errorMessage = e.response()?.errorBody()?.string() ?: e.message()
@@ -44,31 +44,53 @@ class AeronaveRepository @Inject constructor(
     fun getAeronaves(): Flow<Resource<List<AeronaveDTO>>> = flow {
         emit(Resource.Loading())
         try {
+            // Limpiar aeronaves inválidas con AeronaveId = 0
+            dao.clearInvalidAeronaves()
+
+            // Sincronizar aeronaves pendientes
+            val pendingAeronaves = dao.getPendingSync()
+            for (pending in pendingAeronaves) {
+                try {
+                    val savedAeronave = dataSource.PostAeronave(pending.toDto())
+                    dao.deletePending(pending.AeronaveId)
+                    dao.save(listOf(savedAeronave.toEntity().copy(isPendingSync = false)))
+                } catch (e: Exception) {
+                    Log.e("Aeronave", "Error al sincronizar aeronave ${pending.AeronaveId}: ${e.message}")
+                }
+            }
+
+            // Obtener aeronaves del servidor
             val aeronavesFetched = dataSource.getAeronaves()
-            val listaEntity = aeronavesFetched.map { it.toEntity() }
-            dao.save(listaEntity) // Guardar localmente
+            val listaEntity = aeronavesFetched.map { it.toEntity().copy(isPendingSync = false) }
+            dao.save(listaEntity)
+
+            // Emitir aeronaves locales actualizadas
+            val listaRetorno = dao.getAll()
+            val listaDto = listaRetorno.map { it.toDto() }
+            emit(Resource.Success(listaDto))
         } catch (e: Exception) {
             Log.e("Aeronave", "Exception al obtener aeronaves: ${e.message}")
+            val listaRetorno = dao.getAll()
+            val listaDto = listaRetorno.map { it.toDto() }
+            emit(Resource.Success(listaDto))
         }
-        val listaRetorno = dao.getAll()
-        val listaDto = listaRetorno.map { it.toDto() }
-        emit(Resource.Success(listaDto))
     }
 
     suspend fun update(id: Int, aeronaveDTO: AeronaveDTO) {
         try {
             dataSource.putAeronave(id, aeronaveDTO)
+            dao.save(listOf(aeronaveDTO.toEntity().copy(isPendingSync = false)))
         } catch (e: Exception) {
             Log.e("Aeronave", "Error al actualizar remoto: ${e.message}")
+            dao.save(listOf(aeronaveDTO.toEntity().copy(isPendingSync = true)))
         }
-        dao.save(listOf(aeronaveDTO.toEntity())) // Guardar localmente
     }
 
     fun find(id: Int): Flow<Resource<AeronaveDTO>> = flow {
         emit(Resource.Loading())
         try {
             val aeronave = dataSource.getAeronave(id)
-            dao.save(listOf(aeronave.toEntity())) // Actualiza localmente
+            dao.save(listOf(aeronave.toEntity().copy(isPendingSync = false)))
             emit(Resource.Success(aeronave))
         } catch (e: HttpException) {
             val errorMessage = e.response()?.errorBody()?.string() ?: e.message()
@@ -90,13 +112,23 @@ class AeronaveRepository @Inject constructor(
         }
     }
 
-    suspend fun saveAeronave(aeronaveDTO: AeronaveDTO) {
-        try {
-            dataSource.PostAeronave(aeronaveDTO)
+    suspend fun saveAeronave(aeronaveDTO: AeronaveDTO): Resource<AeronaveDTO> {
+        return try {
+            val savedAeronave = dataSource.PostAeronave(aeronaveDTO)
+            dao.save(listOf(savedAeronave.toEntity().copy(isPendingSync = false)))
+            Resource.Success(savedAeronave)
+        } catch (e: HttpException) {
+            val errorMessage = e.response()?.errorBody()?.string() ?: e.message()
+            Log.e("Aeronave", "HttpException al guardar remoto: $errorMessage")
+            val localAeronave = aeronaveDTO.copy(aeronaveId = null)
+            dao.save(listOf(localAeronave.toEntity().copy(isPendingSync = true, AeronaveId = null)))
+            Resource.Success(localAeronave)
         } catch (e: Exception) {
-            Log.e("Aeronave", "Error al guardar remoto: ${e.message}")
+            Log.e("Aeronave", "Exception al guardar remoto: ${e.message}")
+            val localAeronave = aeronaveDTO.copy(aeronaveId = null)
+            dao.save(listOf(localAeronave.toEntity().copy(isPendingSync = true, AeronaveId = null)))
+            Resource.Success(localAeronave)
         }
-        dao.save(listOf(aeronaveDTO.toEntity())) // Guardar localmente
     }
 
     suspend fun deleteAeronave(id: Int): Resource<Unit> {
@@ -116,6 +148,10 @@ class AeronaveRepository @Inject constructor(
         }
     }
 
+    suspend fun cleanInvalidAeronaves() {
+        dao.clearInvalidAeronaves()
+    }
+
     private fun AeronaveDTO.toEntity() = AeronaveEntity(
         AeronaveId = this.aeronaveId,
         estadoId = this.estadoId ?: 0,
@@ -132,7 +168,8 @@ class AeronaveRepository @Inject constructor(
         Rango = this.rango,
         CapacidadPasajeros = this.capacidadPasajeros,
         AltitudMaxima = this.altitudMaxima,
-        Licencia = this.licencia
+        Licencia = this.licencia,
+        isPendingSync = false
     )
 
     private fun AeronaveEntity.toDto() = AeronaveDTO(

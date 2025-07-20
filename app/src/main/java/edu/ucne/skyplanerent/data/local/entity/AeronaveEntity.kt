@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "Aeronaves")
 data class AeronaveEntity(
-    @PrimaryKey(autoGenerate = true)
+    @PrimaryKey
     val AeronaveId:Int? = null,
     val estadoId:Int? = null,
     val ModeloAvion:String,
@@ -21,7 +21,8 @@ data class AeronaveEntity(
     val Rango:Int = 0 ,
     val CapacidadPasajeros:Int = 0,
     val AltitudMaxima:Int  = 0,
-    val Licencia:String
+    val Licencia:String,
+    val isPendingSync: Boolean = false // Nuevo campo
 
 
 )
