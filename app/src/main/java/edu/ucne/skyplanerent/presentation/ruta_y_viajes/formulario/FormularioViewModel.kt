@@ -152,6 +152,12 @@ class FormularioViewModel @Inject constructor(
         }
     }
 
+    fun onChangePasajero(pasajero: Int) {
+        _uiState.update {
+            it.copy(cantidadPasajeros = pasajero)
+        }
+    }
+
     fun FormularioUiState.toEntity() = FormularioEntity(
         formularioId = formularioId,
         nombre  = nombre?: "",
@@ -159,6 +165,9 @@ class FormularioViewModel @Inject constructor(
         correo = correo ?: "",
         telefono = telefono ?: "",
         pasaporte = pasaporte ?: "",
-        ciudadResidencia = ciudadResidencia ?: ""
+        ciudadResidencia = ciudadResidencia ?: "",
+        cantidadPasajeros = cantidadPasajeros?:0
+
+
     )
 }

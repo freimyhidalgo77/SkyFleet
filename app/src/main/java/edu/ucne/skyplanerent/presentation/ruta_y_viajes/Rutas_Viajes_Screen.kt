@@ -315,18 +315,12 @@ fun Vuelos_RutasBodyListScreen(
             item {
                 FechaSelector(
                     fechaSeleccionada = fechaSeleccionada,
-                    onFechaSeleccionada = { nuevaFecha -> fechaSeleccionada = nuevaFecha }
-                )
-            }
+                    onFechaSeleccionada = { nuevaFecha ->
+                        fechaSeleccionada = nuevaFecha
+                        reservaViewModel.seleccionarFecha(nuevaFecha)
+                    }
 
-            item {
-                Button(
-                    onClick = { fechaSeleccionada?.let { onReserva(it) } },
-                    enabled = fechaSeleccionada != null,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Reservar con fecha")
-                }
+                )
             }
 
             item {
@@ -421,8 +415,8 @@ fun Vuelos_RutasBodyListScreen(
             }
 
             item {
-                val puedeContinuar = /*selectedAeronave != null &&
-                        fechaSeleccionada != null &&
+                val puedeContinuar = selectedAeronave != null &&
+                        /*fechaSeleccionada != null &&
                         (soyPiloto != true || licenciaSeleccionada != null) && */selectedRuta != null && selectedTipoVuelo != null
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(

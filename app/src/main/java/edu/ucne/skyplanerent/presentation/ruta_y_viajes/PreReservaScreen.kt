@@ -109,21 +109,23 @@ fun ReservaBodyListScreen(
     rutaUiState: RutaUiState,
     tipoVueloUiState: TipoVueloUiState,
     goBack:()->Unit,
-    )
-{
+    ) {
 
-   /*val tipoVueloSeleccionado by reservaViewModel.tipoVueloSeleccionadoId.collectAsState()
+    /*val tipoVueloSeleccionado by reservaViewModel.tipoVueloSeleccionadoId.collectAsState()
     val rutaSeleccionadaId by  rutaViewModel.rutaSeleccionadaId.collectAsState()*/
 
     val idTipoVueloSeleccionado by reservaViewModel.tipoVueloSeleccionadoId.collectAsState()
-    val tipoVueloSeleccionado = tipoVueloUiState.tipovuelo.find { it.tipoVueloId == idTipoVueloSeleccionado }
+    val tipoVueloSeleccionado =
+        tipoVueloUiState.tipovuelo.find { it.tipoVueloId == idTipoVueloSeleccionado }
 
     val idRutaSeleccionada by reservaViewModel.rutaSeleccionadaId.collectAsState()
     val rutaSeleccionada = rutaUiState.rutas.find { it.rutaId == idRutaSeleccionada }
 
     val idAeronaveSeleccionada by reservaViewModel.tipoAeronaveSeleccionadaId.collectAsState()
-    val aeronaveSeleccionada = aeronaveUiState.aeronaves.find { it.aeronaveId == idAeronaveSeleccionada }
+    val aeronaveSeleccionada =
+        aeronaveUiState.aeronaves.find { it.aeronaveId == idAeronaveSeleccionada }
 
+    val fechaVuelo by reservaViewModel.fechaSeleccionada.collectAsState()
 
     Scaffold(
         topBar = {
@@ -141,86 +143,101 @@ fun ReservaBodyListScreen(
                 )
             )
         },
-    ){innerPadding->
-        Column (
-            horizontalAlignment = Alignment.CenterHorizontally,
+    ) { innerPadding ->
+        LazyColumn(
             modifier = Modifier
                 .padding(innerPadding)
                 .padding(8.dp)
-                .fillMaxSize()
-
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
+            horizontalAlignment = Alignment.Start
         ) {
 
-            Column(modifier = Modifier.padding(16.dp)) {
-
+            item {
                 Text(
                     text = "Tipo de vuelo: ${tipoVueloSeleccionado?.nombreVuelo ?: "No seleccionado"}",
                     style = androidx.compose.ui.text.TextStyle(
                         fontSize = 18.sp,
                         color = MaterialTheme.colorScheme.onSurface
-                    )
+                    ),
+                    modifier = Modifier.padding(horizontal = 16.dp)
                 )
+            }
 
-                Spacer(modifier = Modifier.height(20.dp))
-
+            item {
                 Text(
-                    text = rutaSeleccionada?.let { "Origen: ${it.origen}"} ?: "No seleccionado"
+                    text = rutaSeleccionada?.let { "Origen: ${it.origen}" } ?: "No seleccionado",
+                    modifier = Modifier.padding(horizontal = 16.dp)
                 )
+            }
 
-                Spacer(modifier = Modifier.height(20.dp))
-
+            item {
                 Text(
-                    text = rutaSeleccionada?.let { "Destino: ${it.destino}"} ?: "No seleccionado"
+                    text = rutaSeleccionada?.let { "Destino: ${it.destino}" } ?: "No seleccionado",
+                    modifier = Modifier.padding(horizontal = 16.dp)
                 )
+            }
 
-                Spacer(modifier = Modifier.height(20.dp))
-
-
+            item {
                 Text(
                     text = "Aeronave seleccionada: ${aeronaveSeleccionada?.modeloAvion ?: "No seleccionado"}",
                     style = androidx.compose.ui.text.TextStyle(
                         fontSize = 18.sp,
                         color = MaterialTheme.colorScheme.onSurface
-                    )
+                    ),
+                    modifier = Modifier.padding(horizontal = 16.dp)
                 )
-                Spacer(modifier = Modifier.height(20.dp))
+            }
 
-                if (uiState.fecha != null) {
-                    Text("Fecha: ${SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(uiState.fecha)}")
+            fechaVuelo?.let { fecha ->
+                val formato = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                val fechaFormateada = formato.format(fecha)
+
+                item {
+                    Text(
+                        text = "Fecha seleccionada: $fechaFormateada",
+                        fontSize = 16.sp,
+                        color = Color(0xFF0A80ED),
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                item {
+                    Text(
+                        text = rutaSeleccionada?.let { "Duración estimada: ${it.duracion}" }
+                            ?: "Duración: No disponible",
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+                }
 
-                Text(
-                    text = rutaSeleccionada?.let { "Duracion estimada: ${it.duracion}"} ?: "duracion: No disponible"
-                )
+                item {
+                    Text(
+                        text = "¿Es Piloto?",
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+                }
 
-                Spacer(modifier = Modifier.height(20.dp))
+                item {
+                    Spacer(modifier = Modifier.height(12.dp))
 
-                Text(
-                    text =  "Piloto?"
-                )
-
+                    Button(
+                        onClick = { goToFormulario(0) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF0A80ED),
+                            contentColor = Color.White
+                        )
+                    ) {
+                        Text("Continuar reserva")
+                    }
+                }
             }
-
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Button(
-                onClick = { //save()
-                    goToFormulario(0)
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF0A80ED),
-                    contentColor = Color.White
-                )
-
-            ) {
-                Text("Continuar reserva")
-            }
-
         }
     }
+
 }
+
+
 

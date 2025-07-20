@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.Date
 import javax.inject.Inject
 
 @HiltViewModel
@@ -51,6 +52,14 @@ class ReservaViewModel @Inject constructor(
     fun seleccionarTipoAeronave(tipoAeronaveId: Int) {
         _tipoAeronaveSeleccionadaId.value = tipoAeronaveId
     }
+
+    private val _fechaSeleccionada = MutableStateFlow<Date?>(null)
+    val fechaSeleccionada: StateFlow<Date?> = _fechaSeleccionada
+
+    fun seleccionarFecha(fecha: Date) {
+        _fechaSeleccionada.value = fecha
+    }
+
 
     init{
         getReserva()

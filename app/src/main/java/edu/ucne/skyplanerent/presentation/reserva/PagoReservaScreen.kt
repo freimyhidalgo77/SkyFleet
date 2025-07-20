@@ -130,6 +130,8 @@ fun PagoReservaBodyListScreen(
     val idAeronaveSeleccionada by reservaViewModel.tipoAeronaveSeleccionadaId.collectAsState()
     val aeronaveSeleccionada = aeronaveUiState.aeronaves.find { it.aeronaveId == idAeronaveSeleccionada }
 
+    val fechaVuelo by reservaViewModel.fechaSeleccionada.collectAsState()
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -202,7 +204,7 @@ fun PagoReservaBodyListScreen(
                 Spacer(modifier = Modifier.height(20.dp))
 
                 Text(
-                    text =  "Piloto?"
+                    text =  "¿Es Piloto?"
                 )
 
             }
