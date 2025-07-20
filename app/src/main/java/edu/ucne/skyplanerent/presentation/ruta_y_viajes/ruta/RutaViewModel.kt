@@ -19,6 +19,9 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.State
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.mapLatest
 
 import javax.inject.Inject
 
@@ -32,11 +35,26 @@ class RutaViewModel @Inject constructor(
     private val _uiEvent = Channel<UiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
 
+    // Variables para búsqueda
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
-
+    private val _searchResults = MutableStateFlow<List<RutaDTO>>(emptyList())
+    val searchResults: StateFlow<List<RutaDTO>> = _searchResults.asStateFlow()
 
     init {
         getRutas()
+        viewModelScope.launch {
+            _searchQuery
+                .debounce(600)
+                .distinctUntilChanged()
+                .mapLatest { query ->
+                    filterRutas(query)
+                }
+                .collectLatest { filtered ->
+                    _searchResults.value = filtered
+                }
+        }
     }
 
     fun onEvent(event: RutaEvent) {
@@ -57,6 +75,21 @@ class RutaViewModel @Inject constructor(
             is RutaEvent.DuracionEstimadaChange -> duracionEstimadaChange(event.duracionEstimada)
             RutaEvent.Save -> saveRuta()
             is RutaEvent.DistanciaChange -> distanciaChange(event.distancia)
+        }
+    }
+
+    fun onSearchQueryChanged(query: String) {
+        _searchQuery.value = query
+    }
+
+    private fun filterRutas(query: String): List<RutaDTO> {
+        return if (query.isBlank()) {
+            _uiState.value.rutas
+        } else {
+            _uiState.value.rutas.filter {
+                it.origen.contains(query, ignoreCase = true) ||
+                        it.destino.contains(query, ignoreCase = true)
+            }
         }
     }
 

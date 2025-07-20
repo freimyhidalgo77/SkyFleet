@@ -1,5 +1,7 @@
 package edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta
 
+import android.widget.Toast
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,34 +12,52 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edu.ucne.skyplanerent.data.remote.dto.RutaDTO
+import kotlinx.coroutines.delay
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RutaListScreen(
     viewModel: RutaViewModel = hiltViewModel(),
@@ -46,10 +66,33 @@ fun RutaListScreen(
     goBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val query by viewModel.searchQuery.collectAsStateWithLifecycle()
+    val searchResults by viewModel.searchResults.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    var lastRetentionCount by remember { mutableStateOf(0) }
+
+    LaunchedEffect(Unit) {
+        delay(180000) // Actualizar cada 3 minutos
+        viewModel.onEvent(RutaEvent.GetRutas)
+    }
+
+    LaunchedEffect(uiState.rutas) {
+        if (uiState.rutas.size > lastRetentionCount) {
+            Toast.makeText(
+                context,
+                "Nueva ruta: ${uiState.rutas.lastOrNull()?.origen} -> ${uiState.rutas.lastOrNull()?.destino}",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+        lastRetentionCount = uiState.rutas.size
+    }
 
     RutaListBodyScreen(
         uiState = uiState,
-        goToRuta = { id -> goToRuta(id) },
+        query = query,
+        searchResults = searchResults,
+        onSearchQueryChanged = viewModel::onSearchQueryChanged,
+        goToRuta = goToRuta,
         onEvent = viewModel::onEvent,
         createRuta = createRuta,
         goBack = goBack
@@ -60,14 +103,16 @@ fun RutaListScreen(
 @Composable
 fun RutaListBodyScreen(
     uiState: RutaUiState,
+    query: String,
+    searchResults: List<RutaDTO>,
+    onSearchQueryChanged: (String) -> Unit,
     goToRuta: (Int) -> Unit,
     onEvent: (RutaEvent) -> Unit,
     createRuta: () -> Unit,
     goBack: () -> Unit
 ) {
-    val refreshing = uiState.isLoading
     val pullRefreshState = rememberPullRefreshState(
-        refreshing = refreshing,
+        refreshing = uiState.isLoading,
         onRefresh = { onEvent(RutaEvent.GetRutas) }
     )
 
@@ -77,9 +122,11 @@ fun RutaListBodyScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = " Rutas ",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = Color.White
+                        text = "Lista de Rutas",
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
                     )
                 },
                 navigationIcon = {
@@ -91,30 +138,50 @@ fun RutaListBodyScreen(
                         )
                     }
                 },
+                actions = {
+                    IconButton(
+                        onClick = { onEvent(RutaEvent.GetRutas) },
+                        enabled = !uiState.isLoading
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Refresh,
+                            contentDescription = "Refrescar",
+                            tint = Color.White
+                        )
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color(0xFF272D4D)
                 )
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = createRuta) {
-                Icon(Icons.Filled.Add, "Agregar nueva")
+            FloatingActionButton(
+                onClick = createRuta,
+                contentColor = Color.White,
+                containerColor = MaterialTheme.colorScheme.primary
+            ) {
+                Icon(Icons.Filled.Add, contentDescription = "Agregar nueva ruta")
             }
         }
     ) { padding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .pullRefresh(pullRefreshState)
                 .padding(padding)
+                .pullRefresh(pullRefreshState)
         ) {
-            Column(
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                if (uiState.rutas.isEmpty()) {
+            when {
+                uiState.isLoading && uiState.rutas.isEmpty() -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                uiState.rutas.isEmpty() -> {
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth()
+                            .fillMaxSize()
                             .padding(24.dp),
                         contentAlignment = Alignment.Center
                     ) {
@@ -124,13 +191,24 @@ fun RutaListBodyScreen(
                             color = Color.Gray
                         )
                     }
-                } else {
+                }
+                else -> {
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(8.dp)
+                            .padding(16.dp)
                     ) {
-                        items(uiState.rutas) { ruta ->
+                        item {
+                            SearchBar(
+                                query = query,
+                                onQueryChanged = onSearchQueryChanged
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
+
+                        val rutasToShow = if (query.isNotBlank()) searchResults else uiState.rutas
+
+                        items(rutasToShow) { ruta ->
                             RutasRow(
                                 it = ruta,
                                 goToRuta = { goToRuta(ruta.rutaId ?: 0) }
@@ -139,60 +217,134 @@ fun RutaListBodyScreen(
                         }
                     }
                 }
-
-                if (!uiState.errorMessage.isNullOrEmpty()) {
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.CenterHorizontally)
-                            .padding(16.dp)
-                    ) {
-                        Text(
-                            text = uiState.errorMessage,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                }
             }
 
             PullRefreshIndicator(
-                refreshing = refreshing,
+                refreshing = uiState.isLoading,
                 state = pullRefreshState,
-                modifier = Modifier.align(Alignment.TopCenter)
+                modifier = Modifier.align(Alignment.TopCenter),
+                contentColor = MaterialTheme.colorScheme.primary
             )
+
+            if (!uiState.errorMessage.isNullOrEmpty()) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(16.dp)
+                ) {
+                    Text(
+                        text = uiState.errorMessage,
+                        color = Color.Red,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
         }
     }
 }
 
 @Composable
-private fun RutasRow(
+fun SearchBar(
+    query: String,
+    onQueryChanged: (String) -> Unit
+) {
+    OutlinedTextField(
+        value = query,
+        onValueChange = onQueryChanged,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        label = { Text("Buscar rutas por origen o destino") },
+        singleLine = true
+    )
+}
+
+@Composable
+fun RutasRow(
     it: RutaDTO,
     goToRuta: () -> Unit
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
+    Card(
+        elevation = CardDefaults.cardElevation(4.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
+            .padding(horizontal = 8.dp, vertical = 4.dp)
+            .clickable { goToRuta() },
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        ),
+        shape = RoundedCornerShape(12.dp)
     ) {
-        Text(
-            modifier = Modifier.weight(1f),
-            text = "Ruta ${it.rutaId}",
-            color = Color.Black
-        )
-        Text(
-            modifier = Modifier.weight(2f),
-            text = "Origen: ${it.origen}, Destino: ${it.destino}",
-            style = MaterialTheme.typography.titleMedium,
-            color = Color.Blue
-        )
-        Text(
-            modifier = Modifier.weight(2f),
-            text = "Distancia: ${it.distancia}, Duracion: ${it.duracion}",
-            color = Color.Blue
-        )
-        IconButton(onClick = goToRuta) {
-            Icon(Icons.Default.ArrowForward, contentDescription = "Modificar/Eliminar", tint = MaterialTheme.colorScheme.primary)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Ruta ${it.rutaId ?: "N/A"}",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("Origen: ")
+                        }
+                        append(it.origen)
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("Destino: ")
+                        }
+                        append(it.destino)
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("Distancia: ")
+                        }
+                        append("${it.distancia} km")
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = buildAnnotatedString {
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append("Duración: ")
+                        }
+                        append("${it.duracion} min")
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            IconButton(onClick = goToRuta) {
+                Icon(
+                    Icons.Default.ArrowForward,
+                    contentDescription = "Ver/Editar ruta",
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
         }
     }
-    HorizontalDivider()
 }
