@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -121,48 +122,43 @@ fun RutaListBodyScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = "Lista de Rutas",
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp), // Mueve el título hacia abajo
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Rutas",
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface // Color que contrasta con el fondo
+                            )
                         )
-                    )
+                    }
                 },
                 navigationIcon = {
                     IconButton(onClick = goBack) {
                         Icon(
                             Icons.Default.ArrowBack,
                             contentDescription = "Volver",
-                            tint = Color.White
+                            tint = MaterialTheme.colorScheme.onSurface // Color que contrasta
                         )
                     }
                 },
                 actions = {
                     IconButton(
-                        onClick = { onEvent(RutaEvent.GetRutas) },
+                        onClick = createRuta,
                         enabled = !uiState.isLoading
                     ) {
                         Icon(
-                            imageVector = Icons.Filled.Refresh,
-                            contentDescription = "Refrescar",
-                            tint = Color.White
+                            imageVector = Icons.Filled.Add,
+                            contentDescription = "Agregar nueva ruta",
+                            tint = MaterialTheme.colorScheme.onSurface // Color que contrasta
                         )
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF272D4D)
-                )
+                }
             )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = createRuta,
-                contentColor = Color.White,
-                containerColor = MaterialTheme.colorScheme.primary
-            ) {
-                Icon(Icons.Filled.Add, contentDescription = "Agregar nueva ruta")
-            }
         }
     ) { padding ->
         Box(
@@ -255,7 +251,14 @@ fun SearchBar(
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
         label = { Text("Buscar rutas por origen o destino") },
-        singleLine = true
+        singleLine = true,
+        leadingIcon = {
+            Icon(
+                imageVector = Icons.Default.Search,
+                contentDescription = "Buscar",
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
     )
 }
 
@@ -291,7 +294,7 @@ fun RutasRow(
                 )
                 Text(
                     text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color.Blue)) {
                             append("Origen: ")
                         }
                         append(it.origen)
@@ -303,7 +306,7 @@ fun RutasRow(
                 )
                 Text(
                     text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color.Blue)) {
                             append("Destino: ")
                         }
                         append(it.destino)
@@ -315,7 +318,7 @@ fun RutasRow(
                 )
                 Text(
                     text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color.Blue)) {
                             append("Distancia: ")
                         }
                         append("${it.distancia} km")
@@ -327,7 +330,7 @@ fun RutasRow(
                 )
                 Text(
                     text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color.Blue)) {
                             append("Duración: ")
                         }
                         append("${it.duracion} min")
