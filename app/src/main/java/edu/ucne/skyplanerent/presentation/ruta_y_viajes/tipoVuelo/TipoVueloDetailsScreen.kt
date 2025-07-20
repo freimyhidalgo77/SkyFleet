@@ -1,6 +1,7 @@
 package edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,8 +31,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -129,75 +133,97 @@ fun TipoVueloDetailsBodyScreen(
             }
         }
     ) { padding ->
-        LazyColumn(
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
                 .padding(padding)
-                .padding(8.dp)
         ) {
-            item {
-                if (uiState.tipoVueloId != null) {
-                    // Información General
-                    Text(
-                        text = "Información General",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = Color.Black
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "ID Tipo Vuelo: ${uiState.tipoVueloId}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Blue
-                    )
-                    Text(
-                        text = "Nombre: ${uiState.nombreVuelo ?: "N/A"}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Blue
-                    )
-                    Text(
-                        text = "Descripción: ${uiState.descripcionTipoVuelo ?: "N/A"}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Blue
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
+            ) {
+                item {
+                    if (uiState.isLoading) {
+                        // Mostrar indicador de carga mientras se obtienen los datos
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    } else if (uiState.tipoVueloId != null) {
+                        // Información General
+                        Text(
+                            text = "Información General",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = Color.Black
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "ID Tipo Vuelo: ${uiState.tipoVueloId}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Blue
+                        )
+                        Text(
+                            text = "Nombre: ${uiState.nombreVuelo ?: "N/A"}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Blue
+                        )
+                        Text(
+                            text = "Descripción: ${uiState.descripcionTipoVuelo ?: "N/A"}",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Blue
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
 
-                    // Botones
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 16.dp),
-                        horizontalArrangement = Arrangement.SpaceEvenly
-                    ) {
-                        Button(
-                            onClick = onDelete,
-                            colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                        // Botones
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 16.dp),
+                            horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
-                            Text("Eliminar Tipo Vuelo", color = Color.White)
+                            Button(
+                                onClick = onDelete,
+                                colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                            ) {
+                                Text("Eliminar Tipo Vuelo", color = Color.White)
+                            }
+                            Button(
+                                onClick = onEdit,
+                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                            ) {
+                                Text("Modificar Tipo Vuelo", color = Color.White)
+                            }
                         }
-                        Button(
-                            onClick = onEdit,
-                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
-                        ) {
-                            Text("Modificar Tipo Vuelo", color = Color.White)
-                        }
+                    } else {
+                        Text(
+                            text = "No se encontraron detalles del tipo de vuelo",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = Color.Gray,
+                            modifier = Modifier.padding(16.dp)
+                        )
                     }
-                } else {
-                    Text(
-                        text = "No se encontraron detalles del tipo de vuelo",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = Color.Gray,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
 
-                uiState.errorMessage?.let {
-                    Text(
-                        text = it,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Red,
-                        modifier = Modifier.padding(16.dp)
-                    )
+                    uiState.errorMessage?.let {
+                        Text(
+                            text = it,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Red,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
                 }
+            }
+
+            // Indicador de carga como capa superpuesta si está activo
+            if (uiState.isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center)
+                )
             }
         }
     }
