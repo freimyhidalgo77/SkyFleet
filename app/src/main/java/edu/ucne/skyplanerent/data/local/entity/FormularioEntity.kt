@@ -12,5 +12,6 @@ data class FormularioEntity(
     val correo: String = "",
     val telefono:String = "",
     val pasaporte:String = "",
-    val ciudadResidencia:String = ""
+    val ciudadResidencia:String = "",
+    val cantidadPasajeros:Int = 0
 )

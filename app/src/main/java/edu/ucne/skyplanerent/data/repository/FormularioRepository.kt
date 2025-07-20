@@ -11,7 +11,9 @@ class FormularioRepository @Inject constructor(
     val formularioDao: FormularioDao
 
 ){
-    suspend fun saveFormulario(formulario: FormularioEntity) = formularioDao.save(formulario)
+    suspend fun saveFormulario(formulario: FormularioEntity): Int {
+        return formularioDao.save(formulario).toInt()
+    }
 
     suspend fun findFormulario(Id:Int): FormularioEntity = formularioDao.find(Id)
 

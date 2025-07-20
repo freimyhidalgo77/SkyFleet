@@ -25,6 +25,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,7 +44,11 @@ import androidx.navigation.compose.rememberNavController
 import edu.ucne.skyplanerent.data.local.entity.ReservaEntity
 import edu.ucne.skyplanerent.data.local.entity.RutaEntity
 import edu.ucne.skyplanerent.data.local.entity.TipoVueloEntity
+import edu.ucne.skyplanerent.presentation.aeronave.AeronaveUiState
+import edu.ucne.skyplanerent.presentation.aeronave.AeronaveViewModel
 import edu.ucne.skyplanerent.presentation.navigation.Screen
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.formulario.FormularioUiState
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.formulario.FormularioViewModel
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaUiState
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaViewModel
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloUiState
@@ -65,20 +70,24 @@ fun PagoReservaListScreen(
     rutaList: List<RutaEntity>,
     viewModel: ReservaViewModel,
     rutaViewModel: RutaViewModel = hiltViewModel(),
+    aeronaveViewModel: AeronaveViewModel = hiltViewModel(),
     tipoVueloViewModel: TipoVueloViewModel = hiltViewModel(),
+    formularioViewModel: FormularioViewModel = hiltViewModel(),
     goBack:()->Unit
 
 ){
 
-    /*LaunchedEffect(RutaId, tipoVueloId){
-        TipoVueloviewModel.uiState.value.tipovuelo
-        RutaviewModel.uiState.value.RutaId
-
-    }*/
+    LaunchedEffect(pagoReservaId) {
+        if (pagoReservaId > 0) {
+            formularioViewModel.selectedFormulario(pagoReservaId)
+        }
+    }
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val rutaUiState by rutaViewModel.uiState.collectAsStateWithLifecycle()
     val tipoVueloUiState by tipoVueloViewModel.uiState.collectAsStateWithLifecycle()
+    val aeronaevUiState by aeronaveViewModel.uiState.collectAsStateWithLifecycle()
+    val formularioUiState by formularioViewModel.uiState.collectAsStateWithLifecycle()
 
 
     PagoReservaBodyListScreen(
@@ -93,7 +102,9 @@ fun PagoReservaListScreen(
         goBack = goBack,
         rutaUiState = rutaUiState,
         tipoVueloUiState = tipoVueloUiState,
-        reservaViewModel = viewModel
+        reservaViewModel = viewModel,
+        aeronaveUiState = aeronaevUiState,
+        formularioUiState = formularioUiState
     )
 }
 
@@ -109,24 +120,44 @@ fun PagoReservaBodyListScreen(
     rutaList:List<RutaEntity>,
     PagoReservaId:Int,
     rutaUiState: RutaUiState,
+    aeronaveUiState:AeronaveUiState,
     tipoVueloUiState: TipoVueloUiState,
+    formularioUiState: FormularioUiState,
     goBack:()->Unit
 
 ) {
     val navController = rememberNavController()
 
     val idTipoVueloSeleccionado by reservaViewModel.tipoVueloSeleccionadoId.collectAsState()
-    val tipoVueloSeleccionado = tipoVueloUiState.tipovuelo.find { it.tipoVueloId == idTipoVueloSeleccionado }
+    val tipoVueloSeleccionado =
+        tipoVueloUiState.tipovuelo.find { it.tipoVueloId == idTipoVueloSeleccionado }
 
     val idRutaSeleccionada by reservaViewModel.rutaSeleccionadaId.collectAsState()
     val rutaSeleccionada = rutaUiState.rutas.find { it.rutaId == idRutaSeleccionada }
+
+    val idAeronaveSeleccionada by reservaViewModel.tipoAeronaveSeleccionadaId.collectAsState()
+    val aeronaveSeleccionada = aeronaveUiState.aeronaves.find { it.aeronaveId == idAeronaveSeleccionada }
+
+    val fechaVuelo by reservaViewModel.fechaSeleccionada.collectAsState()
+
+    // Valores base
+    val duracionVuelo = rutaUiState.duracionEstimada?.toDouble() ?: 0.0
+   // val costoXHora = aeronaveUiState.CostoXHora ?: 0.0
+
+    val costoXHora: Int =  150 //esta variable es mientrastanto para probar
+
+// Calcular
+    val tarifaBase = duracionVuelo * costoXHora
+    val impuesto = tarifaBase * 0.10
+    val precioTotal = tarifaBase + impuesto
+
 
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "Resumen de la reserva",
+                        text = "Pre-Reserva",
                         fontWeight = FontWeight.Bold,
                         fontSize = 26.sp,
                         color = Color.Black
@@ -137,237 +168,176 @@ fun PagoReservaBodyListScreen(
                 )
             )
         },
-
-
-        ){innerPadding->
-        Column (
-            horizontalAlignment = Alignment.CenterHorizontally,
+    ) { innerPadding ->
+        LazyColumn(
             modifier = Modifier
                 .padding(innerPadding)
                 .padding(8.dp)
-                .fillMaxSize()
-
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
+            horizontalAlignment = Alignment.Start
         ) {
 
-            Column(modifier = Modifier.padding(16.dp)) {
-
+            item {
                 Text(
                     text = "Tipo de vuelo: ${tipoVueloSeleccionado?.nombreVuelo ?: "No seleccionado"}",
                     style = androidx.compose.ui.text.TextStyle(
                         fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.Bold,
+                    ),
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+            }
+
+            item {
+                Text(
+                    text = rutaSeleccionada?.let { "Origen: ${it.origen}" } ?: "No seleccionado",
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+            }
+
+            item {
+                Text(
+                    text = rutaSeleccionada?.let { "Destino: ${it.destino}" } ?: "No seleccionado",
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+
+            item {
+                Text(
+                    text = "Aeronave seleccionada: ${aeronaveSeleccionada?.modeloAvion ?: "No seleccionado"}",
+                    style = androidx.compose.ui.text.TextStyle(
+                        fontSize = 18.sp,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.Bold,
+                    ),
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+            }
+
+            fechaVuelo?.let { fecha ->
+                val formato = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                val fechaFormateada = formato.format(fecha)
+
+                item {
+                    Text(
+                        text = "Fecha seleccionada: $fechaFormateada",
+                        fontSize = 16.sp,
+                        color = Color(0xFF0A80ED),
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(horizontal = 16.dp)
                     )
-                )
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Text(
-                    text = rutaSeleccionada?.let { "Origen: ${it.origen}"} ?: "No seleccionado"
-                )
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Text(
-                    text = rutaSeleccionada?.let { "Destino: ${it.destino}"} ?: "No seleccionado"
-                )
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                if (uiState.fecha != null) {
-                    Text("Fecha: ${SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(uiState.fecha)}")
                 }
 
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Text(
-                    text = rutaSeleccionada?.let { "Duracion estimada: ${it.duracion}"} ?: "duracion: No disponible"
-                )
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                Text(
-                    text =  "Piloto?"
-                )
-
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Button(
-                onClick = { //save()
-                    goBack()
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF0A80ED),
-                    contentColor = Color.White
-                )
-
-            ) {
-                Text("Realizar pago")
-            }
-
-        }
-    }
-}
-
-@Composable
-fun PagoReservaRow(
-    reserva: ReservaEntity,
-    tipoVuelo: TipoVueloEntity,
-    ruta: RutaEntity,
-
-    ) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Card(
-        shape = MaterialTheme.shapes.medium,
-        modifier = Modifier
-            .padding(horizontal = 16.dp)
-            .fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(6.dp)
-
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-                .background(MaterialTheme.colorScheme.surfaceVariant),
-            horizontalArrangement = Arrangement.SpaceBetween
-
-        ) {
-            Column(
-                modifier = Modifier.weight(5f),
-                verticalArrangement = Arrangement.Center
-            ) {
-
-                Text(
-                    text = "Detalles del vuelo:",
-                    style = androidx.compose.ui.text.TextStyle(
+                item {
+                    Text(
+                        text = rutaSeleccionada?.let { "Duración estimada: ${it.duracion}" }
+                            ?: "Duración: No disponible",
+                        modifier = Modifier.padding(horizontal = 16.dp),
                         fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.onSurface
                     )
+                }
 
-                )
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                Text(
-                    text = "Tipo de vuelo: ${tipoVuelo.descripcionTipoVuelo}",
-                    style = androidx.compose.ui.text.TextStyle(
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.onSurface
-
-                    )
-
-                )
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                Text(
-                    text = "Ruta: ${reserva.rutaId}",
-                    style = androidx.compose.ui.text.TextStyle(
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.onSurface
-
-                    )
-                )
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                Text(
-                    text = "Fecha del vuelo: ${
-                        reserva.fecha?.let {
-                            SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(it)
-                        } ?: "No especificada"
-                    }",
-                    style = androidx.compose.ui.text.TextStyle(
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                )
-
-                /*  Text(
-                      text = "Hora: ${ruta.hora}",
-                      style = androidx.compose.ui.text.TextStyle(
-                          fontSize = 18.sp,
-                          color = MaterialTheme.colorScheme.onSurface
-
-                      )
-                  )*/
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                Text(
-                    text = "Tiempo: ${ruta.duracion}",
-                    style = androidx.compose.ui.text.TextStyle(
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.onSurface
-
-                    )
-                )
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                Text(
-                    text = "Desgloce de precios ",
-                    style = androidx.compose.ui.text.TextStyle(
-                        fontSize = 18.sp,
+                item {
+                    Text(
+                        text = "Nombre ${formularioUiState.nombre} Apellido ${formularioUiState.apellido}",
+                        modifier = Modifier.padding(horizontal = 16.dp),
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
                     )
-                )
+                }
 
-                Spacer(modifier = Modifier.width(20.dp))
-
-
-                Text(
-                    text = "Costo del vuelo" +
-                            "${reserva.tarifa} ",
-                    style = androidx.compose.ui.text.TextStyle(
-                        fontSize = 18.sp,
+                item {
+                    Text(
+                        text = "Pasaporte ${formularioUiState.pasaporte}",
+                        modifier = Modifier.padding(horizontal = 16.dp),
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
                     )
-                )
+                }
 
-                Spacer(modifier = Modifier.width(16.dp))
 
-                Text(
-                    text = "Impueto" +
-                            "${reserva.impuesto}",
-                    style = androidx.compose.ui.text.TextStyle(
-                        fontSize = 18.sp,
+                item {
+                    Text(
+                        text = "Cantidad pasajeros ${formularioUiState.cantidadPasajeros}",
+                        modifier = Modifier.padding(horizontal = 16.dp),
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
                     )
-                )
+                }
 
-                Spacer(modifier = Modifier.width(16.dp))
 
-                Text(
-                    text = "Precio total" +
-                            "${reserva.precioTotal}",
-                    style = androidx.compose.ui.text.TextStyle(
-                        fontSize = 18.sp,
+                item {
+                    Text(
+                        text = "¿Es Piloto?",
+                        modifier = Modifier.padding(horizontal = 16.dp),
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
+
                     )
-                )
+                }
 
-                Spacer(modifier = Modifier.width(16.dp))
-
-                /* Text(
-                    text = "Metodo de pago ",
-                    style = androidx.compose.ui.text.TextStyle(
-                        fontSize = 18.sp,
+                item {
+                    Text(
+                        text = "Desgloce de precio: $tarifaBase",
+                        modifier = Modifier.padding(horizontal = 16.dp),
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
                     )
-                )*/
+                }
 
+                item {
+                    Text(
+                        text = "Impuesto: $impuesto",
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+
+                item {
+                    Text(
+                        text = "Precio total: $precioTotal",
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+
+
+                item {
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Button(
+                        onClick = {
+
+                            val rutaId = rutaSeleccionada?.rutaId ?: return@Button
+                            val tipoVueloId = tipoVueloSeleccionado?.tipoVueloId ?: return@Button
+                            val aeronaveId = aeronaveSeleccionada?.aeronaveId ?: return@Button
+                            //val fechaFormateada = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(fechaVuelo ?: Date())
+                            val tipoCliente = uiState?.tipoCliente ?: return@Button
+
+                            reservaViewModel.guardarReserva(
+                                rutaId = rutaId,
+                                tipoVueloId = tipoVueloId,
+                                aeronaveId = aeronaveId,
+                                fecha = uiState.fecha,
+                                tarifaBase = tarifaBase,
+                                impuesto = impuesto,
+                                precioTotal = precioTotal,
+                                tipoCliente = tipoCliente
+                            )
+
+                            goBack()
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF0A80ED),
+                            contentColor = Color.White
+                        )
+                    ) {
+                        Text("Realizar pago")
+                    }
+
+                }
             }
         }
     }

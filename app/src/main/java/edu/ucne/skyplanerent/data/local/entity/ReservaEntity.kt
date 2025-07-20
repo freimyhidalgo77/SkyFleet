@@ -24,13 +24,6 @@ data class ReservaEntity(
     //val aeronaveId:Int = 0,
 
 ){
-    /*val costoVuelo: Double
-        get() = precioPorHora * horas
 
-    val impuesto: Double
-        get() = costoVuelo * impuestoPorcentaje
-
-    val total: Double
-        get() = costoVuelo + impuesto*/
 
 }

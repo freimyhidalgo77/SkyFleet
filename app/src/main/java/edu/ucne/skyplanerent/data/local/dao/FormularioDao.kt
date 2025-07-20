@@ -2,6 +2,8 @@ package edu.ucne.skyplanerent.data.local.dao
 
 import androidx.room.Dao
 import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Upsert
 import edu.ucne.skyplanerent.data.local.entity.FormularioEntity
@@ -11,8 +13,9 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface FormularioDao {
 
-    @Upsert
-    suspend fun save(fromualrio:FormularioEntity )
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun save(formulario: FormularioEntity): Long
+
 
     @Query("SELECT * FROM Formularios WHERE formularioId = :id LIMIT 1")
     suspend fun find(id: Int): FormularioEntity

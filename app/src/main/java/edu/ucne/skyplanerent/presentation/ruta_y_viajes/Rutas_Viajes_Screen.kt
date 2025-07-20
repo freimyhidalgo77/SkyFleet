@@ -52,7 +52,7 @@ fun Rutas_Viajes_Screen(
     goToRuta: (Int) -> Unit,
 
 
-) {
+    ) {
 
     val rutaUiState by rutaViewModel.uiState.collectAsStateWithLifecycle()
     val tipoVueloUiState by tipoVueloViewModel.uiState.collectAsStateWithLifecycle()
@@ -86,10 +86,19 @@ fun Rutas_Viajes_Screen(
                     licenciaPiloto = licenciaSeleccionada
 
                 )
-                reservaViewModel.saveReserva()//aqui se pasa a reserva en el metodo saveReserva(reserva:ReservaEntity)
+                reservaViewModel.guardarReserva(
+                    rutaId = selectedRuta?.rutaId!!,
+                    tipoVueloId = selectedTipoVuelo?.tipoVueloId!!,
+                    aeronaveId = selectedAeronave?.aeronaveId!!,
+                    fecha = fecha,
+                    tarifaBase = 1000.0,
+                    impuesto = 0.0,
+                    precioTotal = 0.0,
+                    tipoCliente = soyPiloto ?: false
+                )//aqui se pasa a reserva en el metodo saveReserva(reserva:ReservaEntity)
             }
         },
-                goBackDetails = goBackDetails,
+        goBackDetails = goBackDetails,
         goTopreReserva = goTopreReserva,
         goToRuta = goToRuta,
         reservaViewModel = reservaViewModel
@@ -114,7 +123,7 @@ fun Vuelos_RutasBodyListScreen(
     goTopreReserva: (Int)-> Unit,
 
 
-) {
+    ) {
     var fechaSeleccionada by remember { mutableStateOf<Date?>(null) }
     var selectedAeronave by remember { mutableStateOf<AeronaveDTO?>(null) }
 
@@ -315,18 +324,12 @@ fun Vuelos_RutasBodyListScreen(
             item {
                 FechaSelector(
                     fechaSeleccionada = fechaSeleccionada,
-                    onFechaSeleccionada = { nuevaFecha -> fechaSeleccionada = nuevaFecha }
-                )
-            }
+                    onFechaSeleccionada = { nuevaFecha ->
+                        fechaSeleccionada = nuevaFecha
+                        reservaViewModel.seleccionarFecha(nuevaFecha)
+                    }
 
-            item {
-                Button(
-                    onClick = { fechaSeleccionada?.let { onReserva(it) } },
-                    enabled = fechaSeleccionada != null,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Reservar con fecha")
-                }
+                )
             }
 
             item {
@@ -421,13 +424,13 @@ fun Vuelos_RutasBodyListScreen(
             }
 
             item {
-                val puedeContinuar = /*selectedAeronave != null &&
-                        fechaSeleccionada != null &&
+                val puedeContinuar = selectedAeronave != null &&
+                        /*fechaSeleccionada != null &&
                         (soyPiloto != true || licenciaSeleccionada != null) && */selectedRuta != null && selectedTipoVuelo != null
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
                     onClick = {
-                       //Guarda los datos seleccionados antes de navegar
+                        //Guarda los datos seleccionados antes de navegar
                         selectedTipoVuelo?.let { reservaViewModel.seleccionarTipoVuelo(it.tipoVueloId ?: 0,) }
                         selectedRuta?.let { reservaViewModel.seleccionarRuta(it.rutaId ?: 0) }
 
@@ -459,7 +462,7 @@ fun AeronaveDropdown(
     selectedAeronave: AeronaveDTO?,
     onAeronaveSelected: (AeronaveDTO) -> Unit,
 
-) {
+    ) {
     var expanded by remember { mutableStateOf(false) }
 
     ExposedDropdownMenuBox(

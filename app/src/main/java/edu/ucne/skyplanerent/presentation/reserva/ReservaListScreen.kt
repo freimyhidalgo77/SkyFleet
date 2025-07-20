@@ -190,6 +190,16 @@ fun ReservaRow(
                     )
                 )
 
+                Text(
+                    text = "Precio Total: ${reserva.precioTotal}",
+                    style = androidx.compose.ui.text.TextStyle(
+                        fontSize = 18.sp,
+                        color = MaterialTheme.colorScheme.onSurface
+
+                    )
+
+                )
+
             }
 
             IconButton(

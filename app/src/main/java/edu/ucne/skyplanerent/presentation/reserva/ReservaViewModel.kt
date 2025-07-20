@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.Date
 import javax.inject.Inject
 
 @HiltViewModel
@@ -52,6 +53,13 @@ class ReservaViewModel @Inject constructor(
         _tipoAeronaveSeleccionadaId.value = tipoAeronaveId
     }
 
+    private val _fechaSeleccionada = MutableStateFlow<Date?>(null)
+    val fechaSeleccionada: StateFlow<Date?> = _fechaSeleccionada
+
+    fun seleccionarFecha(fecha: Date) {
+        _fechaSeleccionada.value = fecha
+    }
+
     init{
         getReserva()
     }
@@ -64,7 +72,7 @@ class ReservaViewModel @Inject constructor(
 
 
 
-    fun onEvent(event: ReservaEvent) {
+   /* fun onEvent(event: ReservaEvent) {
         when (event) {
             is ReservaEvent.AeronaveChange -> {
             }
@@ -80,9 +88,9 @@ class ReservaViewModel @Inject constructor(
                 seleccionarRuta(event.rutaId)
             }
             ReservaEvent.Delte -> deleteReserva()
-            ReservaEvent.save -> saveReserva()
+            ReservaEvent.save -> guardarReserva()
         }
-    }
+    }*/
 
 
 
@@ -96,25 +104,32 @@ class ReservaViewModel @Inject constructor(
         }
     }
 
-    fun saveReserva(){
+    fun guardarReserva(
+        rutaId: Int,
+        tipoVueloId: Int,
+        aeronaveId: Int,
+        fecha: Date?,
+        tarifaBase: Double,
+        impuesto: Double,
+        precioTotal: Double,
+        tipoCliente:Boolean?
+    ) {
         viewModelScope.launch {
-            try{
-                reservaRepository.saveReserva(_uiState.value.toEntity())
-                _uiState.update {
-                    it.copy(
-                        successMessage = "Reserva guardada con exito!", errorMessage = null
-                    )
-                }
-               // nuevaReserva()
-            }catch(e:Exception){
-                _uiState.update {
-                    it.copy(
-                        errorMessage = "Ha ocurrido un error al guardar la reserva", successMessage = null
-                    )
-                }
-            }
+            val reserva = ReservaEntity(
+                rutaId = rutaId,
+                tipoVueloId = tipoVueloId,
+                categoriaId = aeronaveId,
+                fecha = fecha,
+                tarifa = tarifaBase,
+                impuesto = impuesto,
+                tipoCliente = tipoCliente,
+                precioTotal = precioTotal
+            )
+            reservaRepository.saveReserva(reserva)
+            // puedes emitir estado o recargar lista si lo necesitas
         }
     }
+
 
     fun deleteReserva(){
         viewModelScope.launch {

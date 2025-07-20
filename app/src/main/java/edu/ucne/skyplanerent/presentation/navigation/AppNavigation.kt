@@ -237,8 +237,8 @@ fun AppNavigation() {
                 goBack = {
                     navController.navigate(Screen.Formulario(0))
                 },
-                goToPago = {
-                    navController.navigate(Screen.PagoReserva(0))
+                goToPago = {pagoId->
+                    navController.navigate(Screen.PagoReserva(pagoId))
                 }
             )
         }

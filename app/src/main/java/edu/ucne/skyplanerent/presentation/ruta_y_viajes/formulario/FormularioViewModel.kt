@@ -44,23 +44,32 @@ class FormularioViewModel @Inject constructor(
         getFormulario()
     }
 
-     fun saveFormulario() {
+    fun saveAndReturnId(onSaved: (Int) -> Unit) {
         viewModelScope.launch {
-            if (_uiState.value.nombre.isBlank() || _uiState.value.apellido.isBlank() ||
-                _uiState.value.telefono.isBlank() || _uiState.value.correo.isBlank() ||
-                _uiState.value.pasaporte.isBlank() ||
-                _uiState.value.ciudadResidencia.isBlank())
-            {
+            val state = _uiState.value
+
+            if (state.nombre.isBlank() || state.apellido.isBlank() ||
+                state.telefono.isBlank() || state.correo.isBlank() ||
+                state.pasaporte.isBlank() || state.ciudadResidencia.isBlank()
+            ) {
                 _uiState.update {
                     it.copy(errorMessage = "Todos los campos deben ser rellenados")
                 }
-            } else {
-                formularioRepository.saveFormulario(_uiState.value.toEntity())
+                return@launch
             }
+
+            val id = formularioRepository.saveFormulario(state.toEntity())
+            _uiState.update {
+                it.copy(errorMessage = null)
+            }
+
+            onSaved(id)
         }
     }
 
-     fun nuevoFormulario() {
+
+
+    fun nuevoFormulario() {
         _uiState.update {
             it.copy(
                 formularioId = null,
@@ -88,6 +97,7 @@ class FormularioViewModel @Inject constructor(
                         telefono = formulario?.telefono ?: "",
                         pasaporte = formulario?.pasaporte ?: "",
                         ciudadResidencia = formulario?.ciudadResidencia ?: "",
+                        cantidadPasajeros = formulario?.cantidadPasajeros?:0
                     )
                 }
             }
@@ -149,6 +159,12 @@ class FormularioViewModel @Inject constructor(
       fun onCiudadResidenciaChange(ciudad: String) {
         _uiState.update {
             it.copy(ciudadResidencia = ciudad)
+        }
+    }
+
+    fun onChangePasajero(pasajero: Int) {
+        _uiState.update {
+            it.copy(cantidadPasajeros = pasajero)
         }
     }
 
