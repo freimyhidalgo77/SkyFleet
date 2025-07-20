@@ -8,8 +8,6 @@ import androidx.room.PrimaryKey
 data class TipoVueloEntity(
     @PrimaryKey(autoGenerate = true)
     val vueloId:Int? = null,
-    val rutaId: Int = 0,
-    val tipoClienteId:Int = 0,
+    val nombreVuelo: String = "",
     val descripcionTipoVuelo:String = "",
-    val precio:Double = 0.0,
 )
