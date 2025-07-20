@@ -43,6 +43,8 @@ import androidx.navigation.compose.rememberNavController
 import edu.ucne.skyplanerent.data.local.entity.ReservaEntity
 import edu.ucne.skyplanerent.data.local.entity.RutaEntity
 import edu.ucne.skyplanerent.data.local.entity.TipoVueloEntity
+import edu.ucne.skyplanerent.presentation.aeronave.AeronaveUiState
+import edu.ucne.skyplanerent.presentation.aeronave.AeronaveViewModel
 import edu.ucne.skyplanerent.presentation.navigation.Screen
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaUiState
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaViewModel
@@ -65,6 +67,7 @@ fun PagoReservaListScreen(
     rutaList: List<RutaEntity>,
     viewModel: ReservaViewModel,
     rutaViewModel: RutaViewModel = hiltViewModel(),
+    aeronaveViewModel: AeronaveViewModel = hiltViewModel(),
     tipoVueloViewModel: TipoVueloViewModel = hiltViewModel(),
     goBack:()->Unit
 
@@ -79,6 +82,7 @@ fun PagoReservaListScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val rutaUiState by rutaViewModel.uiState.collectAsStateWithLifecycle()
     val tipoVueloUiState by tipoVueloViewModel.uiState.collectAsStateWithLifecycle()
+    val aeronaevUiState by aeronaveViewModel.uiState.collectAsStateWithLifecycle()
 
 
     PagoReservaBodyListScreen(
@@ -93,7 +97,8 @@ fun PagoReservaListScreen(
         goBack = goBack,
         rutaUiState = rutaUiState,
         tipoVueloUiState = tipoVueloUiState,
-        reservaViewModel = viewModel
+        reservaViewModel = viewModel,
+        aeronaveUiState = aeronaevUiState
     )
 }
 
@@ -109,6 +114,7 @@ fun PagoReservaBodyListScreen(
     rutaList:List<RutaEntity>,
     PagoReservaId:Int,
     rutaUiState: RutaUiState,
+    aeronaveUiState:AeronaveUiState,
     tipoVueloUiState: TipoVueloUiState,
     goBack:()->Unit
 
@@ -120,6 +126,9 @@ fun PagoReservaBodyListScreen(
 
     val idRutaSeleccionada by reservaViewModel.rutaSeleccionadaId.collectAsState()
     val rutaSeleccionada = rutaUiState.rutas.find { it.rutaId == idRutaSeleccionada }
+
+    val idAeronaveSeleccionada by reservaViewModel.tipoAeronaveSeleccionadaId.collectAsState()
+    val aeronaveSeleccionada = aeronaveUiState.aeronaves.find { it.aeronaveId == idAeronaveSeleccionada }
 
     Scaffold(
         topBar = {
@@ -171,6 +180,13 @@ fun PagoReservaBodyListScreen(
                     text = rutaSeleccionada?.let { "Destino: ${it.destino}"} ?: "No seleccionado"
                 )
 
+                Text(
+                    text = "Aeronave seleccionada: ${aeronaveSeleccionada?.modeloAvion ?: "No seleccionado"}",
+                    style = androidx.compose.ui.text.TextStyle(
+                        fontSize = 18.sp,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                )
                 Spacer(modifier = Modifier.height(20.dp))
 
                 if (uiState.fecha != null) {
