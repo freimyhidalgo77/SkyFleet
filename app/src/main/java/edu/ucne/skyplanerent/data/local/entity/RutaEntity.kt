@@ -7,10 +7,8 @@ import androidx.room.PrimaryKey
 data class RutaEntity(
     @PrimaryKey(autoGenerate = true)
     val rutaId:Int? = null,
-    val aeronaveId: Int = 0,
     val origen:String = "",
     val destino:String = "",
-    val distancia:String = "",
-    val duracionEstimada:String = "",
-
+    val distancia:Double? = 0.0,
+    val duracion:Int = 0,
     )
