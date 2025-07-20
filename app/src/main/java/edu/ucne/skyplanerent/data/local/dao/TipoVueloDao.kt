@@ -11,15 +11,15 @@ import kotlinx.coroutines.flow.Flow
 interface TipoVueloDao {
 
     @Upsert
-    suspend fun save(tipovuelo: TipoVueloEntity)
+    suspend fun save(tipovuelo: List<TipoVueloEntity>)
 
     @Query("SELECT * FROM TipoVuelo WHERE vueloId = :id LIMIT 1")
-    suspend fun find(id: Int): TipoVueloEntity
+    suspend fun find(id: Int): TipoVueloEntity?
 
-    @Delete
-    suspend fun delete(mensaje: TipoVueloEntity)
+    @Query("DELETE FROM TipoVuelo WHERE vueloId = :id")
+    suspend fun delete(id: Int)
 
     @Query("SELECT * FROM TipoVuelo")
-    fun getAll(): Flow<List<TipoVueloEntity>>
+    suspend fun getAll(): List<TipoVueloEntity>
 
 }
