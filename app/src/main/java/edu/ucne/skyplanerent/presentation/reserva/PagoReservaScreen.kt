@@ -301,7 +301,7 @@ fun PagoReservaRow(
                 Spacer(modifier = Modifier.width(16.dp))
 
                 Text(
-                    text = "Tiempo: ${ruta.duracionEstimada}",
+                    text = "Tiempo: ${ruta.duracion}",
                     style = androidx.compose.ui.text.TextStyle(
                         fontSize = 18.sp,
                         color = MaterialTheme.colorScheme.onSurface
