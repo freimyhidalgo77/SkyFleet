@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -184,13 +185,17 @@ fun ReservaRow(
                 color = Color.DarkGray
             )
 
-            // Botón "Ver más"
+            //Ver mas
             androidx.compose.material3.Button(
                 onClick = { onDetails(reserva) },
                 modifier = Modifier
                     .padding(top = 12.dp)
                     .align(Alignment.Start),
-                shape = MaterialTheme.shapes.large
+                shape = MaterialTheme.shapes.large,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF0A80ED),
+                    contentColor = Color.White
+                )
             ) {
                 Text("Ver más")
             }
