@@ -39,7 +39,7 @@ fun HomeScreen(
 ) {
     val items = listOf(
         BottomNavItem("Reservas", Icons.Default.List, Screen.Reserva),
-        BottomNavItem("Aronaves", Icons.Default.List, Screen.Aeronaves),
+        BottomNavItem("Aronaves", Icons.Default.List, Screen.CategoriaAeronaveReservaList),
         BottomNavItem("Rutas y Viajes", Icons.Default.List, Screen.Rutas_y_viajes),
         BottomNavItem("Perfil", Icons.Default.Person, Screen.Perfil),
         //BottomNavItem("Inicio", Icons.Default.Home, Screen.Home),

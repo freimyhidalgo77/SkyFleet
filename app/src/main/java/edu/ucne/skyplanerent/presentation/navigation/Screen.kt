@@ -64,12 +64,24 @@ sealed class Screen {
     @Serializable
     data object CategoriaAeronaveList : Screen()
 
+    //Navegacion a aeronaves
+    @Serializable
+    data object CategoriaAeronaveReservaList : Screen()
+
+    //Tipo aeronave
+    @Serializable
+    data class TipoAeronaveScreenList(val aeronaveId: Int?): Screen()
+
+    //Detalles de tipo aeronave
+    @Serializable
+    data class TipoAeronaveDetails(val aeronaveId: Int?): Screen()
+
+
     @Serializable
     data class ReservaRutaDetails(val reservaRutId:Int) : Screen()
 
     @Serializable
     data class CategoriaAeronave(val categoriaId: Int?) : Screen()
-
 
 
 
@@ -90,6 +102,9 @@ sealed class Screen {
 
     @Serializable
     data class ReservaDelete(val reservaId: Int) : Screen()
+
+
+
 
 
 

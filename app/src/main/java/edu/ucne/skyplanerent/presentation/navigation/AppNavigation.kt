@@ -36,6 +36,11 @@ import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloListS
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloScreen
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveDetailsScreen
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveEvent
+import edu.ucne.skyplanerent.presentation.aeronave.TipoAeronaveDetailsScreen
+import edu.ucne.skyplanerent.presentation.aeronave.TipoAeronaveListScreen
+//import edu.ucne.skyplanerent.presentation.aeronave.CategoriaReservaAeronaveScreen
+//import edu.ucne.skyplanerent.presentation.aeronave.TipoAeronaveScreen
+import edu.ucne.skyplanerent.presentation.categoriaaeronave.CategoriaReservaAeronaveScreen
 import edu.ucne.skyplanerent.presentation.reserva.PagoReservaListScreen
 import edu.ucne.skyplanerent.presentation.reserva.ReservaDeleteScreen
 import edu.ucne.skyplanerent.presentation.reserva.ReservaDetailsScreen
@@ -113,9 +118,9 @@ fun AppNavigation() {
             ReservaListScreen(
                 scope = scope,
                 onCreate = { /* navController.navigate(...) */ },
-                onDetails = {navController.navigate(Screen.ReservaDetails(0))},
+                onDetails = { navController.navigate(Screen.ReservaDetails(0)) },
                 onEdit = { navController.navigate(Screen.ReservaEdit(0)) },
-                onDelete = {navController.navigate(Screen.ReservaDelete(0)) }
+                onDelete = { navController.navigate(Screen.ReservaDelete(0)) }
             )
         }
         composable<Screen.Rutas_y_viajes> { backStackEntry ->
@@ -136,7 +141,7 @@ fun AppNavigation() {
             )
         }
 
-       /* composable<Screen.ReservaRutaDetails> { backStackEntry ->
+        /* composable<Screen.ReservaRutaDetails> { backStackEntry ->
             val args = backStackEntry.toRoute<Screen.ReservaRutaDetails>()
             val parentEntry = remember(backStackEntry) {
                 navController.getBackStackEntry(Screen.ReservaRutaDetails)//Aqui tambien puede ir Ruta_Viajes
@@ -159,12 +164,12 @@ fun AppNavigation() {
 
         composable<Screen.RutaDetails> {
             val args = it.toRoute<Screen.RutaDetails>()
-            RutaScreenDetails (
+            RutaScreenDetails(
                 rutaId = args.rutaId,
                 goBack = {
                     navController.navigate(Screen.RutaDetails(0))
                 },
-                 onEdit = {},
+                onEdit = {},
                 onDelete = {
 
                 }
@@ -205,8 +210,7 @@ fun AppNavigation() {
         }*/
 
 
-        composable<Screen.PreReserva> {backStackEntry->
-
+        composable<Screen.PreReserva> { backStackEntry ->
             val parentEntry = remember(backStackEntry) {
                 navController.getBackStackEntry(Screen.Rutas_y_viajes)
             }
@@ -214,7 +218,7 @@ fun AppNavigation() {
             val reservaViewModel: ReservaViewModel = hiltViewModel(parentEntry)
 
             val args = backStackEntry.toRoute<Screen.PreReserva>()
-            PreReservaListScreen (
+            PreReservaListScreen(
                 preReservaId = args.prereservaId,
                 goBack = {
                     navController.navigate(Screen.PreReserva(0))
@@ -237,7 +241,7 @@ fun AppNavigation() {
                 goBack = {
                     navController.navigate(Screen.Formulario(0))
                 },
-                goToPago = {pagoId->
+                goToPago = { pagoId ->
                     navController.navigate(Screen.PagoReserva(pagoId))
                 }
             )
@@ -246,7 +250,7 @@ fun AppNavigation() {
 
         composable<Screen.ReservaDetails> {
             val args = it.toRoute<Screen.ReservaDetails>()
-            ReservaDetailsScreen (
+            ReservaDetailsScreen(
                 reservaId = args.reservaId,
                 goBack = {
                     navController.navigate(Screen.ReservaDetails(0))
@@ -267,10 +271,10 @@ fun AppNavigation() {
 
         composable<Screen.ReservaEdit> {
             val args = it.toRoute<Screen.ReservaEdit>()
-            ReservaEditScreen (
+            ReservaEditScreen(
                 reservaId = args.reservaId,
-                goBack = {
-                    navController.navigate(Screen.ReservaEdit(0))
+                goBack = { id ->
+                    navController.navigate(Screen.ReservaEdit(id))
                 }
 
             )
@@ -282,22 +286,21 @@ fun AppNavigation() {
             ReservaDeleteScreen(
                 reservaId = args.reservaId,
                 goBack = {
-                    navController.navigate(Screen.ReservaDelete(0))
+                    navController.navigate(Screen.Reserva)
                 }
 
             )
 
         }
 
-        composable<Screen.PagoReserva> {backStackEntry->
-
+        composable<Screen.PagoReserva> { backStackEntry ->
             val parentEntry = remember(backStackEntry) {
                 navController.getBackStackEntry(Screen.Rutas_y_viajes)
             }
 
             val reservaViewModel: ReservaViewModel = hiltViewModel(parentEntry)
             val args = backStackEntry.toRoute<Screen.PagoReserva>()
-            PagoReservaListScreen (
+            PagoReservaListScreen(
                 pagoReservaId = args.pagoReservaId,
                 goBack = {
                     navController.navigate(Screen.Reserva)
@@ -308,8 +311,6 @@ fun AppNavigation() {
 
             )
         }
-
-
 
 
         composable<Screen.RutaDetailsScreen> { backStack ->
@@ -376,21 +377,17 @@ fun AppNavigation() {
             )
         }
 
-        composable<Screen.CategoriaAeronave> { backStack ->
-            val args = backStack.toRoute<Screen.CategoriaAeronave>()
-            CategoriaAeronaveScreen(
-                categoriaId = args.categoriaId,
+        //Pantalas de aeronave reserva
+        composable<Screen.CategoriaAeronaveReservaList> {
+            CategoriaReservaAeronaveScreen (
+                goToCategoria = { categoriaId ->
+                    navController.navigate("aeronaveList?categoriaId=$categoriaId")
+                },
                 goBack = { navController.popBackStack() }
             )
         }
 
-        composable<Screen.AdminPanel> {
-            AdminPanelScreen(
-                navController = navController,
-                goBack = { navController.popBackStack() }
-            )
-        }
-
+        //Lista de aeronaves por la categoria seleccionada
         composable(
             route = "aeronaveList?categoriaId={categoriaId}",
             arguments = listOf(
@@ -405,9 +402,9 @@ fun AppNavigation() {
             LaunchedEffect(categoriaId) {
                 if (categoriaId != -1) viewModel.filterAeronavesByCategoria(categoriaId)
             }
-            AeronaveListScreen(
+            TipoAeronaveListScreen (
                 goToAeronave = { id ->
-                    navController.navigate(Screen.AeronaveDetailsScreen(id))
+                    navController.navigate(Screen.TipoAeronaveScreenList(id))
                 },
                 createAeronave = {
                     navController.navigate(Screen.Aeronave(null))
@@ -416,29 +413,83 @@ fun AppNavigation() {
             )
         }
 
-        composable<Screen.Aeronave> { backStack ->
-            val args = backStack.toRoute<Screen.Aeronave>()
-            AeronaveScreen(
-                aeronaveId = args.aeronaveId,
-                goBack = { navController.popBackStack() }
-            )
-        }
-
-        composable<Screen.AeronaveDetailsScreen> { backStack ->
-            val args = backStack.toRoute<Screen.AeronaveDetailsScreen>()
+        //Detalles de la aeronave
+        composable<Screen.TipoAeronaveDetails> { backStack ->
+            val args = backStack.toRoute<Screen.TipoAeronaveDetails>()
             val viewModel: AeronaveViewModel = hiltViewModel()
-            AeronaveDetailsScreen(
+            TipoAeronaveDetailsScreen(
                 aeronaveId = args.aeronaveId,
                 viewModel = viewModel,
                 goBack = { navController.popBackStack() },
-                onDelete = { id ->
-                    viewModel.onEvent(AeronaveEvent.Delete)
-                },
-                onEdit = { id ->
-                    navController.navigate(Screen.Aeronave(id))
-                }
             )
         }
-    }
-}
+
+
+            composable<Screen.CategoriaAeronave> { backStack ->
+                val args = backStack.toRoute<Screen.CategoriaAeronave>()
+                CategoriaAeronaveScreen(
+                    categoriaId = args.categoriaId,
+                    goBack = { navController.popBackStack() }
+                )
+            }
+
+            composable<Screen.AdminPanel> {
+                AdminPanelScreen(
+                    navController = navController,
+                    goBack = { navController.popBackStack() }
+                )
+            }
+
+            composable(
+                route = "aeronaveList?categoriaId={categoriaId}",
+                arguments = listOf(
+                    navArgument("categoriaId") {
+                        type = NavType.IntType
+                        defaultValue = -1
+                    }
+                )
+            ) { backStackEntry ->
+                val categoriaId = backStackEntry.arguments?.getInt("categoriaId") ?: -1
+                val viewModel: AeronaveViewModel = hiltViewModel()
+                LaunchedEffect(categoriaId) {
+                    if (categoriaId != -1) viewModel.filterAeronavesByCategoria(categoriaId)
+                }
+                AeronaveListScreen(
+                    goToAeronave = { id ->
+                        navController.navigate(Screen.AeronaveDetailsScreen(id))
+                    },
+                    createAeronave = {
+                        navController.navigate(Screen.Aeronave(null))
+                    },
+                    goBack = { navController.popBackStack() }
+                )
+            }
+
+            composable<Screen.Aeronave> { backStack ->
+                val args = backStack.toRoute<Screen.Aeronave>()
+                AeronaveScreen(
+                    aeronaveId = args.aeronaveId,
+                    goBack = { navController.popBackStack() }
+                )
+            }
+
+            composable<Screen.AeronaveDetailsScreen> { backStack ->
+                val args = backStack.toRoute<Screen.AeronaveDetailsScreen>()
+                val viewModel: AeronaveViewModel = hiltViewModel()
+                AeronaveDetailsScreen(
+                    aeronaveId = args.aeronaveId,
+                    viewModel = viewModel,
+                    goBack = { navController.popBackStack() },
+                    onDelete = { id ->
+                        viewModel.onEvent(AeronaveEvent.Delete)
+                    },
+                    onEdit = { id ->
+                        navController.navigate(Screen.Aeronave(id))
+                    }
+                )
+
+                 }
+            }
+        }
+
 
