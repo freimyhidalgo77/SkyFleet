@@ -244,20 +244,21 @@ fun AppNavigation() {
         }
 
 
+
         composable<Screen.ReservaDetails> {
             val args = it.toRoute<Screen.ReservaDetails>()
             ReservaDetailsScreen (
                 reservaId = args.reservaId,
-                goBack = {
-                    navController.navigate(Screen.ReservaDetails(0))
+                goBack = {reservaId->
+                    navController.navigate(Screen.ReservaDetails(reservaId))
                 },
                 scope = scope,
-                goToEdit = {
-                    navController.navigate(Screen.ReservaEdit(0))
+                goToEdit = {reservaId->
+                    navController.navigate(Screen.ReservaEdit(reservaId))
                 },
 
-                goToDelete = {
-                    navController.navigate(Screen.ReservaDelete(0))
+                goToDelete = {reservaId->
+                    navController.navigate(Screen.ReservaDelete(reservaId))
                 }
 
             )
@@ -269,21 +270,22 @@ fun AppNavigation() {
             val args = it.toRoute<Screen.ReservaEdit>()
             ReservaEditScreen (
                 reservaId = args.reservaId,
-                goBack = {
-                    navController.navigate(Screen.ReservaEdit(0))
+                goBack = {reservaid->
+                    navController.navigate(Screen.ReservaEdit(reservaid))
                 }
 
             )
         }
 
 
-        composable<Screen.ReservaDelete> {
-            val args = it.toRoute<Screen.ReservaDelete>()
+        composable<Screen.ReservaDelete> {backStackEntry->
+            val args = backStackEntry.toRoute<Screen.ReservaDelete>()
             ReservaDeleteScreen(
                 reservaId = args.reservaId,
                 goBack = {
-                    navController.navigate(Screen.ReservaDelete(0))
-                }
+                    navController.navigate(Screen.Reserva)
+                },
+                onSuccess = {}
 
             )
 
@@ -308,8 +310,6 @@ fun AppNavigation() {
 
             )
         }
-
-
 
 
         composable<Screen.RutaDetailsScreen> { backStack ->

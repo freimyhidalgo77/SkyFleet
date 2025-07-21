@@ -23,7 +23,4 @@ data class ReservaEntity(
     val licenciaPiloto:String? = null,
     //val aeronaveId:Int = 0,
 
-){
-
-
-}
+)

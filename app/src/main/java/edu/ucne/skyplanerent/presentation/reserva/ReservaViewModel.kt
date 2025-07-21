@@ -1,5 +1,6 @@
 package edu.ucne.skyplanerent.presentation.reserva
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,6 +16,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Date
@@ -59,6 +61,9 @@ class ReservaViewModel @Inject constructor(
     fun seleccionarFecha(fecha: Date) {
         _fechaSeleccionada.value = fecha
     }
+
+    private var reservaSeleccionada: ReservaEntity? = null
+
 
     init{
         getReserva()
@@ -130,26 +135,25 @@ class ReservaViewModel @Inject constructor(
         }
     }
 
-
-    fun deleteReserva(){
+    fun eliminarReserva(reservaId: Int, onSuccess: () -> Unit) {
         viewModelScope.launch {
-            try{
-                reservaRepository.deleteReserva(_uiState.value.toEntity())
-                _uiState.update {
-                    it.copy(
-                        successMessage = "Reserva  eliminada!", errorMessage = null
-                    )
-                }
-
-            }catch(e:Exception){
-                _uiState.update {
-                    it.copy(
-                        errorMessage = "Ha ocurrido un error al eliminar la reserva"
-                    )
-                }
+            try {
+                val reserva = reservaRepository.findReserva(reservaId)
+                reservaRepository.deleteReserva(reserva!!)
+                onSuccess()
+            } catch (e: Exception) {
+                Log.e("ReservaViewModel", "Error al eliminar reserva", e)
             }
         }
+    }
 
+
+
+    fun cargarReservas() {
+        viewModelScope.launch {
+            val reservas = reservaRepository.getAll().first()
+            _uiState.value = _uiState.value.copy(reservas = reservas)
+        }
     }
 
     /*fun nuevaReserva(){
@@ -162,29 +166,41 @@ class ReservaViewModel @Inject constructor(
 
     }*/
 
-    fun selectReserva(reservaId:Int){
+    fun testPrintReservas() {
         viewModelScope.launch {
-            val reserva = reservaRepository.findReserva(reservaId)
-            if(reservaId > 0){
-                _uiState.update {
-                    it.copy(
-                        reservaId = reserva?.reservaId,
-                        rutaId = reserva?.rutaId,
-                        estadoId = reserva?.estadoId,
-                        formularioId = reserva?.formularioId,
-                        metodoPagoId = reserva?.metodoPagoId,
-                        tipoVueloId = reserva?.tipoVueloId,
-                        categoriaId = reserva?.categoriaId,
-                        pasajeros = reserva?.pasajeros,
-                        fecha = reserva?.fecha,
-                        impuesto = reserva?.impuesto?:0.0,
-                        tarifa = reserva.tarifa?:0.0
-
-                    )
-                }
+            val reservas = reservaRepository.getAll().first()
+            reservas.forEach {
+                Log.d("TEST", "Reserva ID: ${it.reservaId}, Total: ${it.precioTotal}")
             }
         }
     }
+
+
+    fun selectReserva(id: Int) {
+        viewModelScope.launch {
+            val reserva = reservaRepository.findReserva(id)
+            if (reserva == null) {
+                _uiState.value = _uiState.value.copy(errorMessage = "Reserva no encontrada")
+                return@launch
+            }
+
+            reservaSeleccionada = reserva
+            _uiState.value = _uiState.value.copy(
+                reservaId = reserva.reservaId,
+                fecha = reserva.fecha,
+                rutaId = reserva.rutaId,
+                tipoVueloId = reserva.tipoVueloId,
+                categoriaId = reserva.categoriaId,
+                tarifa = reserva.tarifa,
+                impuesto = reserva.impuesto,
+                precioTotal = reserva.precioTotal,
+                tipoCliente = reserva.tipoCliente,
+                errorMessage = null // limpiar error anterior
+            )
+        }
+    }
+
+
 
     fun nuevaReserva(){
         _uiState.update {

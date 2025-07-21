@@ -48,7 +48,7 @@ fun ReservaDetailsScreen(
     viewModel: ReservaViewModel = hiltViewModel(),
     rutaViewModel: RutaViewModel = hiltViewModel(),
     scope: CoroutineScope,
-    goBack:()->Unit,
+    goBack:(Int)->Unit,
     goToEdit: (Int)->Unit,
     goToDelete:(Int)->Unit,
 
@@ -71,7 +71,7 @@ fun ReservaDetailsScreen(
 fun ReservaDetailsBodyScreen(
     uiState: UiState,
     scope: CoroutineScope,
-    goBack:()->Unit,
+    goBack:(Int)->Unit,
     goToEdit: (Int)->Unit,
     goToDelete:(Int)->Unit
 

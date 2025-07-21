@@ -14,10 +14,10 @@ interface ReservaDao {
     suspend fun save(reserva: ReservaEntity)
 
     @Query("SELECT * FROM Reservas WHERE reservaId = :id LIMIT 1")
-    suspend fun find(id: Int): ReservaEntity
+    suspend fun find(id: Int): ReservaEntity?
 
     @Delete
-    suspend fun delete(mensaje: ReservaEntity)
+    suspend fun delete(reserva: ReservaEntity)
 
     @Query("SELECT * FROM Reservas")
     fun getAll(): Flow<List<ReservaEntity>>

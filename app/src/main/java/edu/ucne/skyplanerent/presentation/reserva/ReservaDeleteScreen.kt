@@ -24,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,16 +37,48 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import edu.ucne.skyplanerent.data.local.entity.ReservaEntity
+import edu.ucne.skyplanerent.presentation.aeronave.AeronaveViewModel
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaViewModel
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloUiState
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReservaDeleteScreen(
     reservaId: Int,
     viewModel: ReservaViewModel = hiltViewModel(),
-    goBack: (Int) -> Unit
+    rutaViewModel: RutaViewModel = hiltViewModel(),
+    tipoVueloViewModel: TipoVueloViewModel = hiltViewModel(),
+    aeronaveViewModel: AeronaveViewModel = hiltViewModel(),
+    goBack: () -> Unit,
+    onSuccess:()->Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val tipoVueloUiState by tipoVueloViewModel.uiState.collectAsStateWithLifecycle()
+    val rutaUiState by rutaViewModel.uiState.collectAsStateWithLifecycle()
+    val aeronaveUiState by aeronaveViewModel.uiState.collectAsStateWithLifecycle()
+
     var showDialog by remember { mutableStateOf(false) }
+
+    val idTipoVueloSeleccionado by viewModel.tipoVueloSeleccionadoId.collectAsState()
+    val tipoVueloSeleccionado =
+        tipoVueloUiState.tipovuelo.find { it.tipoVueloId == idTipoVueloSeleccionado }
+
+    val idRutaSeleccionada by viewModel.rutaSeleccionadaId.collectAsState()
+    val rutaSeleccionada = rutaUiState.rutas.find { it.rutaId == idRutaSeleccionada }
+
+    val idAeronaveSeleccionada by viewModel.tipoAeronaveSeleccionadaId.collectAsState()
+    val aeronaveSeleccionada = aeronaveUiState.aeronaves.find { it.aeronaveId == idAeronaveSeleccionada }
+
+
+    val fechaVuelo by viewModel.fechaSeleccionada.collectAsState()
+
+
+    val tarifaBase = uiState.tarifa
+    val impuesto = uiState.impuesto
+    val precioTotal = uiState.precioTotal
+
 
     LaunchedEffect(reservaId) {
         viewModel.selectReserva(reservaId)
@@ -66,7 +99,7 @@ fun ReservaDeleteScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = {goBack(0)}) {
+                    IconButton(onClick = {goBack()}) {
                         Icon(Icons.Filled.ArrowBack, contentDescription = "Regresar")
                     }
                 },
@@ -110,7 +143,7 @@ fun ReservaDeleteScreen(
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 Button(
-                    onClick = {goBack(0)},
+                    onClick = {goBack()},
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
                 ) {
                     Text(text = "Cancelar")
@@ -145,9 +178,20 @@ fun ReservaDeleteScreen(
             confirmButton = {
                 Button(
                     onClick = {
-                        viewModel.deleteReserva()
-                        showDialog = false
-                        goBack(0)
+                        val reserva = ReservaEntity(
+                            reservaId = uiState.reservaId,
+                            rutaId = rutaSeleccionada?.rutaId,
+                            tipoVueloId = tipoVueloSeleccionado?.tipoVueloId,
+                            categoriaId = aeronaveSeleccionada?.aeronaveId,
+                            fecha = uiState.fecha,
+                            tarifa = uiState.tarifa,
+                            impuesto = uiState.impuesto,
+                            precioTotal = uiState.precioTotal,
+                            tipoCliente = uiState.tipoCliente
+                        )
+
+                        viewModel.eliminarReserva(reservaId, onSuccess)
+                        goBack()
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
                 ) {

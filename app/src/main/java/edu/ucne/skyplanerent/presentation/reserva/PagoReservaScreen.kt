@@ -80,6 +80,7 @@ fun PagoReservaListScreen(
     LaunchedEffect(pagoReservaId) {
         if (pagoReservaId > 0) {
             formularioViewModel.selectedFormulario(pagoReservaId)
+            //viewModel.selectReserva(pagoReservaId)
         }
     }
 
@@ -140,13 +141,11 @@ fun PagoReservaBodyListScreen(
 
     val fechaVuelo by reservaViewModel.fechaSeleccionada.collectAsState()
 
-    // Valores base
     val duracionVuelo = rutaUiState.duracionEstimada?.toDouble() ?: 0.0
    // val costoXHora = aeronaveUiState.CostoXHora ?: 0.0
 
-    val costoXHora: Int =  150 //esta variable es mientrastanto para probar
+    val costoXHora =  150 //esta variable es mientrastanto para probar
 
-// Calcular
     val tarifaBase = duracionVuelo * costoXHora
     val impuesto = tarifaBase * 0.10
     val precioTotal = tarifaBase + impuesto
@@ -310,7 +309,6 @@ fun PagoReservaBodyListScreen(
                             val rutaId = rutaSeleccionada?.rutaId ?: return@Button
                             val tipoVueloId = tipoVueloSeleccionado?.tipoVueloId ?: return@Button
                             val aeronaveId = aeronaveSeleccionada?.aeronaveId ?: return@Button
-                            //val fechaFormateada = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(fechaVuelo ?: Date())
                             val tipoCliente = uiState?.tipoCliente ?: return@Button
 
                             reservaViewModel.guardarReserva(
@@ -323,6 +321,7 @@ fun PagoReservaBodyListScreen(
                                 precioTotal = precioTotal,
                                 tipoCliente = tipoCliente
                             )
+                            reservaViewModel.testPrintReservas()
 
                             goBack()
                         },
@@ -336,7 +335,6 @@ fun PagoReservaBodyListScreen(
                     ) {
                         Text("Realizar pago")
                     }
-
                 }
             }
         }
