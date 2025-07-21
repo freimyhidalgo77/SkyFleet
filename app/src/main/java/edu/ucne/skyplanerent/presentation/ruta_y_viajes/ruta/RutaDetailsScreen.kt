@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -25,6 +26,7 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -41,6 +43,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edu.ucne.skyplanerent.presentation.UiEvent
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -101,6 +106,7 @@ fun RutaDetailsBodyScreen(
     snackbarHostState: SnackbarHostState
 ) {
     val refreshing = uiState.isLoading // Usamos el estado de carga del UI
+    var showDeleteDialog by remember { mutableStateOf(false) } // Estado para controlar el diálogo
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -130,7 +136,6 @@ fun RutaDetailsBodyScreen(
                         )
                     }
                 },
-
                 colors = TopAppBarDefaults.topAppBarColors()
             )
         },
@@ -164,17 +169,14 @@ fun RutaDetailsBodyScreen(
                             CircularProgressIndicator()
                         }
                     } else if (uiState.rutaId != null) {
-
                         Spacer(modifier = Modifier.height(16.dp))
 
                         Text(
-
                             text = "Detalle de la ruta",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = Color.Black
                         )
-                        // Título centrado con ID de la ruta (redundante aquí, ya está en TopAppBar)
                         Spacer(modifier = Modifier.height(16.dp))
 
                         // Origen y Destino
@@ -258,7 +260,7 @@ fun RutaDetailsBodyScreen(
                                 Text("Modificar Ruta", color = Color.White)
                             }
                             Button(
-                                onClick = onDelete,
+                                onClick = { showDeleteDialog = true }, // Muestra el diálogo al hacer clic
                                 colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
                             ) {
                                 Text("Eliminar Ruta", color = Color.White)
@@ -288,6 +290,44 @@ fun RutaDetailsBodyScreen(
             if (uiState.isLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center)
+                )
+            }
+
+            // Diálogo de confirmación para eliminar
+            if (showDeleteDialog) {
+                AlertDialog(
+                    onDismissRequest = { showDeleteDialog = false },
+                    title = {
+                        Text(
+                            text = "Confirmar eliminación",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = Color.Black
+                        )
+                    },
+                    text = {
+                        Text(
+                            text = "¿Seguro que quieres eliminar esta ruta?",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = Color.Black
+                        )
+                    },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                onDelete()
+                                showDeleteDialog = false
+                            }
+                        ) {
+                            Text("Confirmar", color = MaterialTheme.colorScheme.primary)
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = { showDeleteDialog = false }
+                        ) {
+                            Text("Cancelar", color = MaterialTheme.colorScheme.primary)
+                        }
+                    }
                 )
             }
         }
