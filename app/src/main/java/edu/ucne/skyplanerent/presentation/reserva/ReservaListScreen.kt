@@ -143,85 +143,57 @@ fun ReservaBodyListScreen(
 fun ReservaRow(
     reserva: ReservaEntity,
     onDetails: (ReservaEntity) -> Unit,
-    rutaUiState:RutaUiState,
-    reservaViewModel: ReservaViewModel = hiltViewModel(),
-
-
+    rutaUiState: RutaUiState,
+    reservaViewModel: ReservaViewModel = hiltViewModel()
 ) {
-    var expanded by remember { mutableStateOf(false) }
-    val formato = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    val formato = SimpleDateFormat("MMMM d, yyyy • h:mm a", Locale("es", "ES"))
     val fechaFormateada = reserva.fecha?.let { formato.format(it) } ?: "Sin fecha"
 
     val ruta = rutaUiState.rutas.find { it.rutaId == reserva.rutaId }
-
 
     Card(
         shape = MaterialTheme.shapes.medium,
         modifier = Modifier
             .padding(horizontal = 16.dp)
             .fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(6.dp)
+        elevation = CardDefaults.cardElevation(2.dp)
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+                .background(Color.White)
+                .padding(16.dp)
         ) {
-            Column(
-                modifier = Modifier.weight(5f),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
+            Text(
+                text = "Reserva #${reserva.reservaId}",
+                fontSize = 14.sp,
+                color = Color.Gray
+            )
+
+            Text(
+                text = fechaFormateada,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black,
+                modifier = Modifier.padding(top = 4.dp, bottom = 2.dp)
+            )
+
+            Text(
+                text = ruta?.let { "Desde: ${it.origen} hacia ${it.destino}" } ?: "Ruta no disponible",
+                fontSize = 15.sp,
+                color = Color.DarkGray
+            )
+
+            // Botón "Ver más"
+            androidx.compose.material3.Button(
+                onClick = { onDetails(reserva) },
+                modifier = Modifier
+                    .padding(top = 12.dp)
+                    .align(Alignment.Start),
+                shape = MaterialTheme.shapes.large
             ) {
-                Text(
-                    text = "Reserva NO.#: ${reserva.reservaId}",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-
-                Text(
-                    text = "Fecha: $fechaFormateada",
-                    fontSize = 16.sp,
-                    color = Color(0xFF0A80ED)
-                )
-
-                Text(
-                    text = ruta?.let { "Ruta:  ${it.origen} -> ${it.destino}" } ?: "Ruta no disponible",
-                    fontSize = 16.sp,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-
-                Text(
-                    text = "Precio Total: ${reserva.precioTotal}",
-                    fontSize = 16.sp,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
-
-            IconButton(
-                onClick = { expanded = !expanded },
-                modifier = Modifier.weight(1f)
-            ) {
-                Icon(Icons.Filled.MoreVert, contentDescription = "Más opciones")
-            }
-
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-                modifier = Modifier.background(MaterialTheme.colorScheme.surface)
-            ) {
-                DropdownMenuItem(
-                    text = { Text("Detalles") },
-                    leadingIcon = { Icon(Icons.Filled.List, contentDescription = "Detalles") },
-                    onClick = {
-                        expanded = false
-                        onDetails(reserva)
-                    }
-                )
+                Text("Ver más")
             }
         }
     }
 }
-
