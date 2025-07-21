@@ -64,9 +64,11 @@ fun AppNavigation() {
     val rutaList by remember { mutableStateOf(emptyList<RutaEntity>()) }
     val tipoList by remember { mutableStateOf(emptyList<TipoVueloEntity>()) }
 
+    val isLoggedIn = auth.currentUser != null
+
     NavHost(
         navController = navController,
-        startDestination = Screen.FirstScreen
+        startDestination = if (isLoggedIn) Screen.Home else Screen.FirstScreen
     ) {
         composable<Screen.FirstScreen> {
             FirstScreen(navController)
@@ -76,8 +78,9 @@ fun AppNavigation() {
             HomeScreen(
                 navController = navController,
                 onLogout = {
+                    auth.signOut()
                     navController.navigate(Screen.FirstScreen) {
-                        popUpTo(Screen.Home) { inclusive = true }
+                        popUpTo(0) { inclusive = true }
                     }
                 },
                 onNavigateToReserva = {
@@ -92,13 +95,16 @@ fun AppNavigation() {
         composable<Screen.Login> {
             LoginScreen(
                 onLoginSuccess = {
-                    navController.navigate(Screen.Home)
+                    navController.navigate(Screen.Home) {
+                        popUpTo(0) { inclusive = true }
+                    }
                 },
                 onNavigateToRegister = {
                     navController.navigate(Screen.Register)
                 }
             )
         }
+
 
         composable<Screen.Register> {
             RegisterScreen(
