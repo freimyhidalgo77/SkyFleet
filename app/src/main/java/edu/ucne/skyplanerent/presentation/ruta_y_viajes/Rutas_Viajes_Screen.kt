@@ -37,6 +37,7 @@ import edu.ucne.skyplanerent.presentation.aeronave.AeronaveUiState
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveViewModel
 import androidx.compose.material.icons.filled.CalendarToday
 import edu.ucne.skyplanerent.presentation.reserva.ReservaEvent
+import edu.ucne.skyplanerent.presentation.reserva.UiState
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloUiState
 
 
@@ -57,6 +58,7 @@ fun Rutas_Viajes_Screen(
     val rutaUiState by rutaViewModel.uiState.collectAsStateWithLifecycle()
     val tipoVueloUiState by tipoVueloViewModel.uiState.collectAsStateWithLifecycle()
     val aeronavesUiState by aeronaveViewModel.uiState.collectAsStateWithLifecycle()
+    val reservaUiState by reservaViewModel.uiState.collectAsStateWithLifecycle()
 
     var selectedTipoVuelo by remember { mutableStateOf<TipoVueloDTO?>(null) }
     var selectedRuta by remember { mutableStateOf<RutaDTO?>(null) }
@@ -90,7 +92,7 @@ fun Rutas_Viajes_Screen(
                     rutaId = selectedRuta?.rutaId!!,
                     tipoVueloId = selectedTipoVuelo?.tipoVueloId!!,
                     aeronaveId = selectedAeronave?.aeronaveId!!,
-                    fecha = fecha,
+                    //fecha = fecha,
                     tarifaBase = 1000.0,
                     impuesto = 0.0,
                     precioTotal = 0.0,
@@ -101,7 +103,9 @@ fun Rutas_Viajes_Screen(
         goBackDetails = goBackDetails,
         goTopreReserva = goTopreReserva,
         goToRuta = goToRuta,
-        reservaViewModel = reservaViewModel
+        reservaViewModel = reservaViewModel,
+        reservaUiState = reservaUiState
+
     )
 }
 
@@ -121,10 +125,12 @@ fun Vuelos_RutasBodyListScreen(
     goBackDetails: (Int) -> Unit,
     goToRuta: (Int) -> Unit,
     goTopreReserva: (Int)-> Unit,
+    reservaUiState:UiState
 
 
     ) {
     var fechaSeleccionada by remember { mutableStateOf<Date?>(null) }
+    fechaSeleccionada = reservaUiState.fecha
     var selectedAeronave by remember { mutableStateOf<AeronaveDTO?>(null) }
 
 
@@ -140,6 +146,8 @@ fun Vuelos_RutasBodyListScreen(
 
 
     var soyPiloto by remember { mutableStateOf<Boolean?>(null) }
+    soyPiloto = reservaUiState.tipoCliente
+
     var licenciaSeleccionada by remember { mutableStateOf<String?>(null) }
     var mostrarLicencias by remember { mutableStateOf(false) }
     var expandedLicencia by remember { mutableStateOf(false) }
@@ -350,6 +358,7 @@ fun Vuelos_RutasBodyListScreen(
                         onClick = {
                             soyPiloto = true
                             mostrarLicencias = true
+                            reservaViewModel.seleccionarTipoCliente(true)
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = if (soyPiloto == true) Color(0xFF64B5F6) else Color.LightGray
@@ -360,9 +369,12 @@ fun Vuelos_RutasBodyListScreen(
 
                     Button(
                         onClick = {
+                            //reservaUiState.tipoCliente = false
                             soyPiloto = false
                             mostrarLicencias = false
                             licenciaSeleccionada = null
+                            reservaViewModel.seleccionarTipoCliente(false)
+
                         },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = if (soyPiloto == false) Color(0xFF64B5F6) else Color.LightGray

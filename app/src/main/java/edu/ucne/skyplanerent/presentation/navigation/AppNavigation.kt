@@ -8,7 +8,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -48,14 +47,12 @@ import edu.ucne.skyplanerent.presentation.reserva.ReservaEditScreen
 import edu.ucne.skyplanerent.presentation.reserva.ReservaViewModel
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.PreReservaListScreen
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.formulario.FormularioScreen
-import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.ReservaRutaScreenDetails
 //import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaDetailsScreen
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaEvent
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaScreenDetails
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaViewModel
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloDetailsScreen
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloEvent
-import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloUiState
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloViewModel
 
 @SuppressLint("RememberReturnType")
@@ -389,7 +386,7 @@ fun AppNavigation() {
 
         //Lista de aeronaves por la categoria seleccionada
         composable(
-            route = "aeronaveList?categoriaId={categoriaId}",
+            route = "tipoAeronaveList?categoriaId={categoriaId}",
             arguments = listOf(
                 navArgument("categoriaId") {
                     type = NavType.IntType
@@ -402,9 +399,9 @@ fun AppNavigation() {
             LaunchedEffect(categoriaId) {
                 if (categoriaId != -1) viewModel.filterAeronavesByCategoria(categoriaId)
             }
-            TipoAeronaveListScreen (
-                goToAeronave = { id ->
-                    navController.navigate(Screen.TipoAeronaveScreenList(id))
+            TipoAeronaveListScreen(
+                goToAeronave = {
+                    navController.navigate(Screen.TipoAeronaveDetails(0))
                 },
                 createAeronave = {
                     navController.navigate(Screen.Aeronave(null))
@@ -413,13 +410,14 @@ fun AppNavigation() {
             )
         }
 
+
         //Detalles de la aeronave
         composable<Screen.TipoAeronaveDetails> { backStack ->
             val args = backStack.toRoute<Screen.TipoAeronaveDetails>()
             val viewModel: AeronaveViewModel = hiltViewModel()
             TipoAeronaveDetailsScreen(
-                aeronaveId = args.aeronaveId,
-                viewModel = viewModel,
+                aeronaveId = args.aeronaveIde,
+                ViewModel = viewModel,
                 goBack = { navController.popBackStack() },
             )
         }

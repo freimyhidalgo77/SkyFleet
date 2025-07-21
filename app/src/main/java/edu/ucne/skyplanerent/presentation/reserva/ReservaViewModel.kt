@@ -32,6 +32,7 @@ class ReservaViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(UiState())
     val uiState get() = _uiState.asStateFlow()
 
+    //Seleccionar ruta de vuelo
     private val _rutaSeleccionadaId = MutableStateFlow<Int?>(null)
     val rutaSeleccionadaId: StateFlow<Int?> = _rutaSeleccionadaId
 
@@ -39,13 +40,14 @@ class ReservaViewModel @Inject constructor(
         _rutaSeleccionadaId.value = rutaId
     }
 
+    //Seleccionar tipo de vuelo
     private val _tipoVueloSeleccionadoId = MutableStateFlow<Int?>(null)
     val tipoVueloSeleccionadoId: StateFlow<Int?> = _tipoVueloSeleccionadoId
 
     fun seleccionarTipoVuelo(tipoVueloId: Int) {
         _tipoVueloSeleccionadoId.value = tipoVueloId
     }
-
+    //Seleciconar tipo aeronave
     private val _tipoAeronaveSeleccionadaId = MutableStateFlow<Int?>(null)
     val tipoAeronaveSeleccionadaId: StateFlow<Int?> = _tipoAeronaveSeleccionadaId
 
@@ -53,12 +55,22 @@ class ReservaViewModel @Inject constructor(
         _tipoAeronaveSeleccionadaId.value = tipoAeronaveId
     }
 
+    //Seleccionar fecha
     private val _fechaSeleccionada = MutableStateFlow<Date?>(null)
     val fechaSeleccionada: StateFlow<Date?> = _fechaSeleccionada
 
     fun seleccionarFecha(fecha: Date) {
         _fechaSeleccionada.value = fecha
     }
+
+    //Seleccionar tipo cliente
+    private val _tipoCliente = MutableStateFlow<Boolean?>(null)
+    val tipoCliente: StateFlow<Boolean?> = _tipoCliente
+
+    fun seleccionarTipoCliente(valor: Boolean) {
+        _tipoCliente.value = valor
+    }
+
 
     init{
         getReserva()
@@ -108,27 +120,39 @@ class ReservaViewModel @Inject constructor(
         rutaId: Int,
         tipoVueloId: Int,
         aeronaveId: Int,
-        fecha: Date?,
         tarifaBase: Double,
         impuesto: Double,
         precioTotal: Double,
-        tipoCliente:Boolean?
+        tipoCliente: Boolean?
     ) {
         viewModelScope.launch {
+            val fecha = _fechaSeleccionada.value
+            if (fecha == null) {
+                _uiState.update {
+                    it.copy(errorMessage = "Debe seleccionar una fecha válida.")
+                }
+                return@launch
+            }
+
             val reserva = ReservaEntity(
                 rutaId = rutaId,
                 tipoVueloId = tipoVueloId,
                 categoriaId = aeronaveId,
-                fecha = fecha,
+                fecha = fecha, // ✅ Se usa la fecha seleccionada correctamente
                 tarifa = tarifaBase,
                 impuesto = impuesto,
                 tipoCliente = tipoCliente,
                 precioTotal = precioTotal
             )
+
             reservaRepository.saveReserva(reserva)
-            // puedes emitir estado o recargar lista si lo necesitas
+
+            _uiState.update {
+                it.copy(successMessage = "Reserva guardada con éxito.", errorMessage = null)
+            }
         }
     }
+
 
 
     fun deleteReserva(){

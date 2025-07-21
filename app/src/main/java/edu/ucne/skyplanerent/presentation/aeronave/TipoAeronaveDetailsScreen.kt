@@ -1,9 +1,6 @@
 package edu.ucne.skyplanerent.presentation.aeronave
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,23 +28,23 @@ import kotlinx.coroutines.launch
 @Composable
 fun TipoAeronaveDetailsScreen (
     aeronaveId: Int?,
-    viewModel: AeronaveViewModel = hiltViewModel(),
+    ViewModel: AeronaveViewModel = hiltViewModel(),
     goBack: () -> Unit,
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by ViewModel.uiState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(aeronaveId) {
         aeronaveId?.let {
             if (it > 0) {
-                viewModel.onEvent(AeronaveEvent.GetAeronave(it))
+                ViewModel.onEvent(AeronaveEvent.GetAeronave(it))
             }
         }
     }
 
     LaunchedEffect(Unit) {
-        viewModel.uiEvent.collect { event ->
+        ViewModel.uiEvent.collect { event ->
             when (event) {
                 is UiEvent.NavigateUp -> goBack()
                 is UiEvent.ShowSnackbar -> {

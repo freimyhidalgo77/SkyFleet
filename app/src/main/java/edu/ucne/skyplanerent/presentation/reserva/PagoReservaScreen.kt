@@ -146,6 +146,8 @@ fun PagoReservaBodyListScreen(
 
     val costoXHora: Int =  150 //esta variable es mientrastanto para probar
 
+    val tipoCliente by reservaViewModel.tipoCliente.collectAsState()
+
 // Calcular
     val tarifaBase = duracionVuelo * costoXHora
     val impuesto = tarifaBase * 0.10
@@ -266,15 +268,20 @@ fun PagoReservaBodyListScreen(
                     )
                 }
 
-
                 item {
+                    Text(text = "¿Es Piloto?", fontWeight = FontWeight.Bold, fontSize = 18.sp)
                     Text(
-                        text = "¿Es Piloto?",
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        fontWeight = FontWeight.Bold,
+                        text = when (tipoCliente) {
+                            true -> "Sí"
+                            false -> "No"
+                            else -> "No especificado"
+                        },
+                        fontSize = 16.sp,
+                        color = Color.Gray
 
                     )
                 }
+
 
                 item {
                     Text(
@@ -317,7 +324,7 @@ fun PagoReservaBodyListScreen(
                                 rutaId = rutaId,
                                 tipoVueloId = tipoVueloId,
                                 aeronaveId = aeronaveId,
-                                fecha = uiState.fecha,
+                                //fecha = uiState.fecha,
                                 tarifaBase = tarifaBase,
                                 impuesto = impuesto,
                                 precioTotal = precioTotal,

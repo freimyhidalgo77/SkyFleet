@@ -31,6 +31,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,11 +47,16 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edu.ucne.skyplanerent.R
 import edu.ucne.skyplanerent.data.local.entity.ReservaEntity
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaUiState
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaViewModel
 import kotlinx.coroutines.CoroutineScope
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @Composable
 fun ReservaListScreen(
     viewModel: ReservaViewModel = hiltViewModel(),
+    rutaViewModel: RutaViewModel = hiltViewModel(),
     scope: CoroutineScope,
     onCreate:()-> Unit,
     onDetails: (ReservaEntity) -> Unit,
@@ -59,6 +65,7 @@ fun ReservaListScreen(
 
 ){
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val rutaUiState by rutaViewModel.uiState.collectAsStateWithLifecycle()
 
     ReservaBodyListScreen(
         uiState = uiState,
@@ -66,7 +73,8 @@ fun ReservaListScreen(
         onCreate = onCreate,
         onEdit = onEdit,
         onDelete = onDelete,
-        onDetails = onDetails
+        onDetails = onDetails,
+        rutaUiState = rutaUiState
     )
 }
 
@@ -78,7 +86,8 @@ fun ReservaBodyListScreen(
     onCreate:()-> Unit,
     onDetails: (ReservaEntity) -> Unit,
     onEdit:(ReservaEntity)-> Unit,
-    onDelete:(ReservaEntity)-> Unit
+    onDelete:(ReservaEntity)-> Unit,
+    rutaUiState: RutaUiState
 
 ){
     Scaffold(
@@ -123,7 +132,7 @@ fun ReservaBodyListScreen(
 
             ){
                 items(uiState.reservas){reserva->
-                    ReservaRow(reserva,onDetails)
+                    ReservaRow(reserva,onDetails,rutaUiState)
                 }
             }
         }
@@ -134,9 +143,17 @@ fun ReservaBodyListScreen(
 fun ReservaRow(
     reserva: ReservaEntity,
     onDetails: (ReservaEntity) -> Unit,
+    rutaUiState:RutaUiState,
+    reservaViewModel: ReservaViewModel = hiltViewModel(),
 
-    ) {
+
+) {
     var expanded by remember { mutableStateOf(false) }
+    val formato = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+    val fechaFormateada = reserva.fecha?.let { formato.format(it) } ?: "Sin fecha"
+
+    val ruta = rutaUiState.rutas.find { it.rutaId == reserva.rutaId }
+
 
     Card(
         shape = MaterialTheme.shapes.medium,
@@ -144,69 +161,50 @@ fun ReservaRow(
             .padding(horizontal = 16.dp)
             .fillMaxWidth(),
         elevation = CardDefaults.cardElevation(6.dp)
-
     ) {
         Row(
-            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
-                .background(MaterialTheme.colorScheme.surfaceVariant),
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
-
         ) {
             Column(
                 modifier = Modifier.weight(5f),
-                verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-
                 Text(
                     text = "Reserva NO.#: ${reserva.reservaId}",
-                    style = androidx.compose.ui.text.TextStyle(
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.onSurface
-
-                    )
-
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Text(
-                    text = "Fecha: ${reserva.fecha}",
-                    style = androidx.compose.ui.text.TextStyle(
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.onSurface
-
-                    )
-
+                    text = "Fecha: $fechaFormateada",
+                    fontSize = 16.sp,
+                    color = Color(0xFF0A80ED)
                 )
 
                 Text(
-                    text = "Ruta: ${reserva.rutaId}",
-                    style = androidx.compose.ui.text.TextStyle(
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.onSurface
-
-                    )
+                    text = ruta?.let { "Ruta:  ${it.origen} -> ${it.destino}" } ?: "Ruta no disponible",
+                    fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
                 Text(
                     text = "Precio Total: ${reserva.precioTotal}",
-                    style = androidx.compose.ui.text.TextStyle(
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.onSurface
-
-                    )
-
+                    fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
-
             }
 
             IconButton(
                 onClick = { expanded = !expanded },
                 modifier = Modifier.weight(1f)
             ) {
-                Icon(Icons.Filled.MoreVert, contentDescription = "Mas opciones")
+                Icon(Icons.Filled.MoreVert, contentDescription = "Más opciones")
             }
 
             DropdownMenu(
@@ -214,7 +212,6 @@ fun ReservaRow(
                 onDismissRequest = { expanded = false },
                 modifier = Modifier.background(MaterialTheme.colorScheme.surface)
             ) {
-
                 DropdownMenuItem(
                     text = { Text("Detalles") },
                     leadingIcon = { Icon(Icons.Filled.List, contentDescription = "Detalles") },
@@ -223,11 +220,8 @@ fun ReservaRow(
                         onDetails(reserva)
                     }
                 )
-
             }
         }
     }
 }
-
-
 

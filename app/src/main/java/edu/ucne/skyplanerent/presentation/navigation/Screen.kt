@@ -74,7 +74,7 @@ sealed class Screen {
 
     //Detalles de tipo aeronave
     @Serializable
-    data class TipoAeronaveDetails(val aeronaveId: Int?): Screen()
+    data class TipoAeronaveDetails(val aeronaveIde: Int?): Screen()
 
 
     @Serializable

@@ -127,6 +127,8 @@ fun ReservaBodyListScreen(
 
     val fechaVuelo by reservaViewModel.fechaSeleccionada.collectAsState()
 
+    val tipoCliente by reservaViewModel.tipoCliente.collectAsState()
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -211,9 +213,16 @@ fun ReservaBodyListScreen(
                 }
 
                 item {
+                    Text(text = "Piloto?", fontWeight = FontWeight.Bold, fontSize = 18.sp)
                     Text(
-                        text = "¿Es Piloto?",
-                        modifier = Modifier.padding(horizontal = 16.dp)
+                        text = when (tipoCliente) {
+                            true -> "Sí"
+                            false -> "No"
+                            else -> "No especificado"
+                        },
+                        fontSize = 16.sp,
+                        color = Color.Gray
+
                     )
                 }
 
