@@ -2,6 +2,7 @@ package edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,6 +35,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -105,24 +107,31 @@ fun RutaDetailsBodyScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = "Detalles de la Ruta",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = Color.White
-                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Ruta ${uiState.rutaId ?: 0}",
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black
+                        )
+                    }
                 },
                 navigationIcon = {
                     IconButton(onClick = goBack) {
                         Icon(
                             Icons.Default.ArrowBack,
                             contentDescription = "Volver",
-                            tint = Color.White
+                            tint = Color.Black
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF272D4D)
-                )
+
+                colors = TopAppBarDefaults.topAppBarColors()
             )
         },
         snackbarHost = {
@@ -146,7 +155,6 @@ fun RutaDetailsBodyScreen(
             ) {
                 item {
                     if (uiState.isLoading) {
-                        // Mostrar indicador de carga mientras se obtienen los datos
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -156,67 +164,104 @@ fun RutaDetailsBodyScreen(
                             CircularProgressIndicator()
                         }
                     } else if (uiState.rutaId != null) {
-                        // Información General
-                        Text(
-                            text = "Información General",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = Color.Black
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "ID Ruta: ${uiState.rutaId}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Blue
-                        )
-                        Text(
-                            text = "Origen: ${uiState.origen}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Blue
-                        )
-                        Text(
-                            text = "Destino: ${uiState.destino}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Blue
-                        )
+
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // Detalles Operacionales
                         Text(
-                            text = "Detalles Operacionales",
+
+                            text = "Detalle de la ruta",
                             style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
                             color = Color.Black
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Distancia: ${uiState.distancia} km",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Blue
-                        )
-                        Text(
-                            text = "Duración: ${uiState.duracionEstimada} h",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Blue
-                        )
+                        // Título centrado con ID de la ruta (redundante aquí, ya está en TopAppBar)
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // Botones
+                        // Origen y Destino
                         Row(
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = "Origen",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.Blue
+                            )
+                            Spacer(modifier = Modifier.weight(0.5f))
+                            Text(
+                                text = "Destino",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.Blue
+                            )
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = uiState.origen,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.Black
+                            )
+                            Spacer(modifier = Modifier.weight(0.5f))
+                            Text(
+                                text = uiState.destino,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.Black,
+                                modifier = Modifier.padding(bottom = 16.dp)
+                            )
+                        }
+
+                        // Distancia y Duración
+                        Row(
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = "Distancia",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.Blue
+                            )
+                            Spacer(modifier = Modifier.weight(0.5f))
+                            Text(
+                                text = "Duración",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.Blue
+                            )
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = "${uiState.distancia} km",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.Black
+                            )
+                            Spacer(modifier = Modifier.weight(0.5f))
+                            Text(
+                                text = "${uiState.duracionEstimada} min",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.Black,
+                                modifier = Modifier.padding(bottom = 16.dp)
+                            )
+                        }
+
+                        // Botones centrados mucho más abajo
+                        Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(top = 16.dp),
-                            horizontalArrangement = Arrangement.SpaceEvenly
+                                .padding(top = 96.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Button(
-                                onClick = onDelete,
-                                colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
-                            ) {
-                                Text("Eliminar Ruta", color = Color.White)
-                            }
                             Button(
                                 onClick = onEdit,
                                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                             ) {
                                 Text("Modificar Ruta", color = Color.White)
+                            }
+                            Button(
+                                onClick = onDelete,
+                                colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                            ) {
+                                Text("Eliminar Ruta", color = Color.White)
                             }
                         }
                     } else {
