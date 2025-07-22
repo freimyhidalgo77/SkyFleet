@@ -340,7 +340,10 @@ fun AppNavigation() {
                 createTipoVuelo = {
                     navController.navigate(Screen.TipoVuelo(null))
                 },
-                goBack = { navController.popBackStack() }
+                goToAdminPanel = {
+                    navController.navigate(Screen.AdminPanel)
+                },
+                goBack = { navController.popBackStack() },
             )
         }
 
