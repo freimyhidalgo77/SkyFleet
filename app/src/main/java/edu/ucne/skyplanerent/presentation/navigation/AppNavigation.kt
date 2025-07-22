@@ -121,7 +121,7 @@ fun AppNavigation() {
             ReservaListScreen(
                 scope = scope,
                 onCreate = { /* navController.navigate(...) */ },
-                onDetails = { navController.navigate(Screen.ReservaDetails(0)) },
+                onDetails = {reserva-> navController.navigate(Screen.ReservaDetails(reserva)) },
                 onEdit = { navController.navigate(Screen.ReservaEdit(0)) },
                 onDelete = { navController.navigate(Screen.ReservaDelete(0)) }
             )

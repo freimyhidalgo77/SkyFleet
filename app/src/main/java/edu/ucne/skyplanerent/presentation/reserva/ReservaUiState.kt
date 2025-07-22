@@ -4,6 +4,7 @@ import edu.ucne.skyplanerent.data.local.entity.ReservaEntity
 import edu.ucne.skyplanerent.data.remote.dto.AeronaveDTO
 import edu.ucne.skyplanerent.data.remote.dto.RutaDTO
 import edu.ucne.skyplanerent.data.remote.dto.TipoVueloDTO
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoLicencia
 import java.util.Date
 
 data class UiState (
@@ -21,12 +22,15 @@ data class UiState (
     val pasajeros: Int? = 0,
     val precioTotal: Double = 0.0,
     val tipoCliente: Boolean? = false,
-    val licenciaPiloto: String? = "",
+    val licenciaPiloto: TipoLicencia? = null,
+
 
     // UI extras para mostrar descripciones
     val tipoVueloSeleccionado: TipoVueloDTO? = null,
     val rutaSeleccionada: RutaDTO? = null,
     val aeronaveSeleccionada: AeronaveDTO? = null,
+
+
 
     // UI control
     val successMessage: String? = "",

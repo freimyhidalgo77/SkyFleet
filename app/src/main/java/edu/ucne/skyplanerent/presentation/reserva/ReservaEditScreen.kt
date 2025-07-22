@@ -12,11 +12,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import edu.ucne.skyplanerent.presentation.aeronave.AeronaveUiState
+import edu.ucne.skyplanerent.presentation.aeronave.AeronaveViewModel
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaUiState
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaViewModel
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloUiState
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloViewModel
 
 @Composable
 fun ReservaEditScreen(
     reservaId: Int,
     viewModel: ReservaViewModel = hiltViewModel(),
+    tipoVueloViewModel: TipoVueloViewModel = hiltViewModel(),
+    rutaViewModel: RutaViewModel = hiltViewModel(),
+    aeronaveViewModel: AeronaveViewModel = hiltViewModel(),
     goBack: (Int) -> Unit
 ) {
     LaunchedEffect(reservaId) {
@@ -24,14 +33,21 @@ fun ReservaEditScreen(
     }
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val tipoVueloUiState by tipoVueloViewModel.uiState.collectAsStateWithLifecycle()
+    val rutaUiState by rutaViewModel.uiState.collectAsStateWithLifecycle()
+    val aeronaveUiState by aeronaveViewModel.uiState.collectAsStateWithLifecycle()
 
     ReservaEditBodyScreen(
         uiState = uiState,
         onChangePasajeros = viewModel::onChangePasajeros,
         save = viewModel::getReserva,
-        goBack = goBack
+        goBack = goBack,
+        tipoVueloUiState = tipoVueloUiState,
+        rutaUiState = rutaUiState,
+        aeronaveUiState = aeronaveUiState
     )
 }
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,23 +55,31 @@ fun ReservaEditBodyScreen(
     uiState: UiState,
     onChangePasajeros: (Int) -> Unit,
     save: () -> Unit,
-    goBack: (Int) -> Unit
+    goBack: (Int) -> Unit,
+    tipoVueloUiState: TipoVueloUiState,
+    rutaUiState: RutaUiState,
+    aeronaveUiState: AeronaveUiState
 ) {
+
+    val tipoVuelo = tipoVueloUiState.tipovuelo.find { it.tipoVueloId == uiState.tipoVueloId }
+    val ruta = rutaUiState.rutas.find { it.rutaId == uiState.rutaId }
+    val aeronave = aeronaveUiState.aeronaves.find { it.aeronaveId == uiState.categoriaId }
+
+    val fecha = uiState.fecha
+    val tipoCliente = uiState.tipoCliente
+    val licencia = uiState.licenciaPiloto
+
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
+            TopAppBar(
                 title = {
                     Text(
                         text = "Modificar reserva",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 20.sp,
-                        color = Color.Black
+                        style = MaterialTheme.typography.titleLarge,
+                        color = Color.White
                     )
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.White
                 )
-            )
         },
         bottomBar = {
             Button(
@@ -83,66 +107,37 @@ fun ReservaEditBodyScreen(
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text(
-                text = "Detalles de la reserva",
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp
-            )
+            Text("Detalles de la reserva", fontWeight = FontWeight.Bold, fontSize = 18.sp)
 
-            InfoRow(title = "Aeronave", value = "Cessna 172") {
-                // Acción al cambiar aeronave
-            }
-
-           // InfoRow(title = "Hora y Fecha", value = uiState.fecha ?: "No definida") {
-                // Acción al cambiar hora y fecha
-            }
-
-            InfoRow(title = "Pasajeros", value = uiState.pasajeros.toString()) {
-                // Acción al cambiar pasajeros
-            }
-
-            InfoRow(title = "Origen", value = "San Francisco, CA") {
-                // Acción al cambiar origen
-            }
-
-            InfoRow(title = "Destino", value = "Los Angeles, CA") {
-                // Acción al cambiar destino
-            }
+            InfoRow("Tipo de vuelo", tipoVuelo?.nombreVuelo ?: "No disponible")
+            InfoRow("Aeronave", aeronave?.modeloAvion ?: "No disponible")
+            InfoRow("Origen", ruta?.origen ?: "No disponible")
+            InfoRow("Destino", ruta?.destino ?: "No disponible")
+            //InfoRow("Duración", ruta?.duracion ?: "No disponible")
+            InfoRow("Pasajeros", uiState.pasajeros.toString())
+            InfoRow("Fecha", fecha?.toString() ?: "No seleccionada")
+            InfoRow("Piloto", when (tipoCliente) {
+                true -> "Sí"
+                false -> "No"
+                else -> "No especificado"
+            })
+            InfoRow("Licencia", licencia?.descripcion ?: "No aplica")
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Text(
-                text = "Modificación",
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp
-            )
+            Text("Modificación", fontWeight = FontWeight.Bold, fontSize = 18.sp)
 
-            ChangeRow("Aeronaves") {
-                // Acción cambiar aeronave
-            }
+            ChangeRow("Aeronaves") { /* Acción cambiar aeronave */ }
+            ChangeRow("Fecha y hora") { /* Acción cambiar fecha */ }
+            ChangeRow("Pasajeros") { /* Acción cambiar pasajeros */ }
+            ChangeRow("Ruta") { /* Acción cambiar ruta */ }
 
-            ChangeRow("Fecha y hora") {
-                // Acción cambiar fecha
-            }
-
-            ChangeRow("Pasajeros") {
-                // Acción cambiar pasajeros
-            }
-
-            ChangeRow("Ruta") {
-                // Acción cambiar ruta
-            }
-
-            uiState.successMessage?.let { message ->
-                SuccessCard(message)
-            }
-
-            uiState.errorMessage?.let { message ->
-                ErrorCard(message)
-            }
+            uiState.successMessage?.let { SuccessCard(it) }
+            uiState.errorMessage?.let { ErrorCard(it) }
         }
     }
-//}
+}
+
 
 @Composable
 fun InfoRow(title: String, value: String, onChange: () -> Unit = {}) {

@@ -60,7 +60,7 @@ fun ReservaListScreen(
     rutaViewModel: RutaViewModel = hiltViewModel(),
     scope: CoroutineScope,
     onCreate:()-> Unit,
-    onDetails: (ReservaEntity) -> Unit,
+    onDetails: (Int) -> Unit,
     onEdit:(ReservaEntity)-> Unit,
     onDelete:(ReservaEntity)-> Unit
 
@@ -85,7 +85,7 @@ fun ReservaBodyListScreen(
     uiState: UiState,
     scope: CoroutineScope,
     onCreate:()-> Unit,
-    onDetails: (ReservaEntity) -> Unit,
+    onDetails: (Int) -> Unit,
     onEdit:(ReservaEntity)-> Unit,
     onDelete:(ReservaEntity)-> Unit,
     rutaUiState: RutaUiState
@@ -127,13 +127,23 @@ fun ReservaBodyListScreen(
                     .fillMaxSize()
             )
 
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-
-            ){
-                items(uiState.reservas){reserva->
-                    ReservaRow(reserva,onDetails,rutaUiState)
+            if (uiState.reservas.isEmpty()) {
+                Text(
+                    text = "No se han encontrado reservas.",
+                    fontSize = 16.sp,
+                    color = Color.Gray,
+                    modifier = Modifier
+                        .padding(top = 32.dp)
+                        .align(Alignment.CenterHorizontally)
+                )
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    items(uiState.reservas) { reserva ->
+                        ReservaRow(reserva, onDetails, rutaUiState)
+                    }
                 }
             }
         }
@@ -143,7 +153,7 @@ fun ReservaBodyListScreen(
 @Composable
 fun ReservaRow(
     reserva: ReservaEntity,
-    onDetails: (ReservaEntity) -> Unit,
+    onDetails: (Int) -> Unit,
     rutaUiState: RutaUiState,
     reservaViewModel: ReservaViewModel = hiltViewModel()
 ) {
@@ -165,6 +175,7 @@ fun ReservaRow(
                 .background(Color.White)
                 .padding(16.dp)
         ) {
+
             Text(
                 text = "Reserva #${reserva.reservaId}",
                 fontSize = 14.sp,
@@ -187,7 +198,8 @@ fun ReservaRow(
 
             //Ver mas
             androidx.compose.material3.Button(
-                onClick = { onDetails(reserva) },
+
+                onClick = { onDetails(reserva.reservaId?: 0) },
                 modifier = Modifier
                     .padding(top = 12.dp)
                     .align(Alignment.Start),

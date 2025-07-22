@@ -11,6 +11,7 @@ import edu.ucne.skyplanerent.data.repository.TipoVueloRepository
 import edu.ucne.skyplanerent.presentation.UiEvent
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaEvent
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.toEntity
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoLicencia
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -70,6 +71,11 @@ class ReservaViewModel @Inject constructor(
     fun seleccionarTipoCliente(valor: Boolean) {
         _tipoCliente.value = valor
     }
+
+    fun seleccionarLicenciaPiloto(licencia: TipoLicencia) {
+        _uiState.update { it.copy(licenciaPiloto = licencia) }
+    }
+
 
 
     init{
@@ -281,7 +287,8 @@ class ReservaViewModel @Inject constructor(
         impuesto = impuesto?:0.0,
         tarifa = tarifa?:0.0,
         precioTotal = precioTotal,
-        tipoCliente = tipoCliente?:false
+        tipoCliente = tipoCliente?:false,
+        pasajeros = pasajeros,
 
     )
 

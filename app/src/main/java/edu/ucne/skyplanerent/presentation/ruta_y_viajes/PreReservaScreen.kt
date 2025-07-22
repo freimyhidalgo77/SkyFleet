@@ -129,6 +129,9 @@ fun ReservaBodyListScreen(
 
     val tipoCliente by reservaViewModel.tipoCliente.collectAsState()
 
+    val reservaUiState by reservaViewModel.uiState.collectAsStateWithLifecycle()
+    val licenciaSeleccionada = reservaUiState.licenciaPiloto
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -225,6 +228,14 @@ fun ReservaBodyListScreen(
 
                     )
                 }
+
+           item{
+               Text(
+                   text = "Licencia seleccionada: ${reservaUiState.licenciaPiloto?.descripcion ?: "No aplica"}",
+                   modifier = Modifier.padding(16.dp)
+               )
+
+           }
 
                 item {
                     Spacer(modifier = Modifier.height(12.dp))

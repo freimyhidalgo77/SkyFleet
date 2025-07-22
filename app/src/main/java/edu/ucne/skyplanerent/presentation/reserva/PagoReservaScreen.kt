@@ -148,6 +148,9 @@ fun PagoReservaBodyListScreen(
 
     val tipoCliente by reservaViewModel.tipoCliente.collectAsState()
 
+    val reservaUiState by reservaViewModel.uiState.collectAsStateWithLifecycle()
+    val licenciaSeleccionada = reservaUiState.licenciaPiloto
+
 // Calcular
     val tarifaBase = duracionVuelo * costoXHora
     val impuesto = tarifaBase * 0.10
@@ -279,6 +282,14 @@ fun PagoReservaBodyListScreen(
                         fontSize = 16.sp,
                         color = Color.Gray
 
+                    )
+                }
+
+                item{
+                    Text(
+                        text = "Licencia seleccionada: ${licenciaSeleccionada ?: "No aplica"}",
+                        fontSize = 16.sp,
+                        modifier = Modifier.padding(16.dp)
                     )
                 }
 
