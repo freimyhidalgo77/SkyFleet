@@ -38,7 +38,11 @@ import edu.ucne.skyplanerent.presentation.aeronave.AeronaveViewModel
 import androidx.compose.material.icons.filled.CalendarToday
 import edu.ucne.skyplanerent.presentation.reserva.ReservaEvent
 import edu.ucne.skyplanerent.presentation.reserva.UiState
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoLicencia
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloUiState
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.tipoLicenciaFromDescripcion
+//import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.tipoLicenciaFromString
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -133,8 +137,10 @@ fun Vuelos_RutasBodyListScreen(
     fechaSeleccionada = reservaUiState.fecha
     var selectedAeronave by remember { mutableStateOf<AeronaveDTO?>(null) }
 
+    val snackbarHostState = remember { SnackbarHostState() }
 
-    val licencias = listOf(
+
+   /* val licencias = listOf(
         "PPL - Piloto Privado",
         "CPL - Piloto Comercial",
         "ATPL - Piloto de Transporte de Línea Aérea",
@@ -142,18 +148,23 @@ fun Vuelos_RutasBodyListScreen(
         "ME - Habilitación Multimotor",
         "Turboprop - Habilitación Turboprop",
         "Jet Type Rating - Habilitación Jet"
-    )
+    )*/
+
+    val licencias = TipoLicencia.values().toList()
 
 
     var soyPiloto by remember { mutableStateOf<Boolean?>(null) }
     soyPiloto = reservaUiState.tipoCliente
 
-    var licenciaSeleccionada by remember { mutableStateOf<String?>(null) }
+    var licenciaSeleccionada by remember { mutableStateOf<TipoLicencia?>(null) }
+
+    //Manejo de licencia
     var mostrarLicencias by remember { mutableStateOf(false) }
     var expandedLicencia by remember { mutableStateOf(false) }
 
     var selectedTipoVuelo by remember { mutableStateOf<TipoVueloDTO?>(null) }
     var selectedRuta by remember { mutableStateOf<RutaDTO?>(null) }
+
 
 
     val idSeleccionado by reservaViewModel.rutaSeleccionadaId.collectAsState()
@@ -177,6 +188,7 @@ fun Vuelos_RutasBodyListScreen(
 
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
@@ -396,7 +408,7 @@ fun Vuelos_RutasBodyListScreen(
                             .padding(horizontal = 16.dp)
                     ) {
                         OutlinedTextField(
-                            value = licenciaSeleccionada ?: "Seleccionar licencia",
+                            value = licenciaSeleccionada?.toString() ?: "Seleccionar licencia",
                             onValueChange = {},
                             readOnly = true,
                             label = { Text("Licencia de piloto") },
@@ -412,7 +424,7 @@ fun Vuelos_RutasBodyListScreen(
                         ) {
                             licencias.forEach { licencia ->
                                 DropdownMenuItem(
-                                    text = { Text(licencia) },
+                                    text = { Text(licencia.toString()) },
                                     onClick = {
                                         licenciaSeleccionada = licencia
                                         expandedLicencia = false
@@ -425,12 +437,35 @@ fun Vuelos_RutasBodyListScreen(
             }
 
             item {
+
                 AeronaveDropdown(
                     aeronaves = uiStateA.aeronaves,
                     selectedAeronave = selectedAeronave,
-                    onAeronaveSelected = { selectedAeronave = it
-                        reservaViewModel.seleccionarTipoAeronave(it.aeronaveId ?: 0)
-
+                    onAeronaveSelected = { aeronave ->
+                        val licenciaEnum = tipoLicenciaFromDescripcion(aeronave.licencia)
+                        if (soyPiloto == true && licenciaSeleccionada != null) {
+                            if (licenciaSeleccionada == licenciaEnum) {
+                                selectedAeronave = aeronave
+                                reservaViewModel.seleccionarTipoAeronave(aeronave.aeronaveId ?: 0)
+                            } else {
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(
+                                        message = "La aeronave seleccionada requiere una licencia diferente: ${aeronave.licencia}",
+                                        withDismissAction = true
+                                    )
+                                }
+                            }
+                        } else if (soyPiloto != true) {
+                            selectedAeronave = aeronave
+                            reservaViewModel.seleccionarTipoAeronave(aeronave.aeronaveId ?: 0)
+                        } else {
+                            scope.launch {
+                                snackbarHostState.showSnackbar(
+                                    message = "Debes seleccionar una licencia antes de elegir una aeronave.",
+                                    withDismissAction = true
+                                )
+                            }
+                        }
                     }
                 )
             }
