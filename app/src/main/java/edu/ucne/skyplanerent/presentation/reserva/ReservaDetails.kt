@@ -63,6 +63,7 @@ fun ReservaDetailsScreen(
         goBack = goBack,
         goToEdit = goToEdit,
         goToDelete = goToDelete,
+        reservaId = reservaId
     )
 }
 
@@ -73,7 +74,8 @@ fun ReservaDetailsBodyScreen(
     scope: CoroutineScope,
     goBack:()->Unit,
     goToEdit: (Int)->Unit,
-    goToDelete:(Int)->Unit
+    goToDelete:(Int)->Unit,
+    reservaId:Int
 
 ){
     Scaffold(
@@ -110,7 +112,7 @@ fun ReservaDetailsBodyScreen(
 
             ) {
                 items(uiState.reservas) { reserva ->
-                    ReservaDetailsRow(reserva, goToEdit, goToDelete)
+                    ReservaDetailsRow(reservaId, reserva, goToEdit, goToDelete)
                 }
             }
         }
@@ -120,9 +122,11 @@ fun ReservaDetailsBodyScreen(
 
 @Composable
 fun ReservaDetailsRow(
+    reservaId: Int,
     reserva: ReservaEntity,
     goToEdit: (Int) -> Unit,
-    goToDelete: (Int) -> Unit
+    goToDelete: (Int) -> Unit,
+
 ) {
     Column(
         modifier = Modifier
@@ -140,6 +144,7 @@ fun ReservaDetailsRow(
         Spacer(modifier = Modifier.height(20.dp))
 
         Text(text = "Detalles del vuelo", fontWeight = FontWeight.Bold)
+
         Text("Hora y fecha: ${reserva.fecha}", fontSize = 16.sp)
         Text("Origen: ${reserva.rutaId}", fontSize = 16.sp)
         Text("Destino: ${reserva.rutaId}", fontSize = 16.sp)
@@ -169,7 +174,7 @@ fun ReservaDetailsRow(
             }
 
             Button(
-                onClick = { goToDelete(0) },
+                onClick = { goToDelete(reserva.reservaId?: 0) },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFFED0A0A),

@@ -154,27 +154,34 @@ class ReservaViewModel @Inject constructor(
     }
 
 
-
-    fun deleteReserva(){
+    fun deleteReserva() {
         viewModelScope.launch {
-            try{
-                reservaRepository.deleteReserva(_uiState.value.toEntity())
-                _uiState.update {
-                    it.copy(
-                        successMessage = "Reserva  eliminada!", errorMessage = null
-                    )
+            try {
+                val reserva = _uiState.value.reservas.firstOrNull { it.reservaId == _uiState.value.reservaId }
+                if (reserva != null) {
+                    reservaRepository.deleteReserva(reserva)
+                    _uiState.update {
+                        it.copy(successMessage = "Reserva eliminada!", errorMessage = null)
+                    }
+                } else {
+                    _uiState.update {
+                        it.copy(errorMessage = "No se encontró la reserva para eliminar.")
+                    }
                 }
-
-            }catch(e:Exception){
+            } catch (e: Exception) {
                 _uiState.update {
-                    it.copy(
-                        errorMessage = "Ha ocurrido un error al eliminar la reserva"
-                    )
+                    it.copy(errorMessage = "Ha ocurrido un error al eliminar la reserva.")
                 }
             }
         }
-
     }
+
+    fun getReservaPorId(id: Int): ReservaEntity? {
+        return uiState.value.reservas.find { it.reservaId == id }
+    }
+
+
+
 
     /*fun nuevaReserva(){
         _uiState.update {
@@ -186,29 +193,39 @@ class ReservaViewModel @Inject constructor(
 
     }*/
 
-    fun selectReserva(reservaId:Int){
+    fun selectReserva(reservaId: Int) {
         viewModelScope.launch {
-            val reserva = reservaRepository.findReserva(reservaId)
-            if(reservaId > 0){
-                _uiState.update {
-                    it.copy(
-                        reservaId = reserva?.reservaId,
-                        rutaId = reserva?.rutaId,
-                        estadoId = reserva?.estadoId,
-                        formularioId = reserva?.formularioId,
-                        metodoPagoId = reserva?.metodoPagoId,
-                        tipoVueloId = reserva?.tipoVueloId,
-                        categoriaId = reserva?.categoriaId,
-                        pasajeros = reserva?.pasajeros,
-                        fecha = reserva?.fecha,
-                        impuesto = reserva?.impuesto?:0.0,
-                        tarifa = reserva.tarifa?:0.0
+            try {
+                val reserva = reservaRepository.findReserva(reservaId)
+                if (reserva != null) {
+                    println("Reserva encontrada: $reserva")
 
-                    )
+                    _uiState.update {
+                        it.copy(
+                            reservaId = reserva.reservaId,
+                            rutaId = reserva.rutaId,
+                            estadoId = reserva.estadoId,
+                            formularioId = reserva.formularioId,
+                            metodoPagoId = reserva.metodoPagoId,
+                            tipoVueloId = reserva.tipoVueloId,
+                            categoriaId = reserva.categoriaId,
+                            pasajeros = reserva.pasajeros,
+                            fecha = reserva.fecha,
+                            impuesto = reserva.impuesto ?: 0.0,
+                            tarifa = reserva.tarifa ?: 0.0,
+                            reservaSeleccionada = reserva
+                        )
+                    }
+                } else {
+                    println("No se encontró la reserva con ID: $reservaId")
                 }
+            } catch (e: Exception) {
+                println("Error al buscar reserva: ${e.message}")
             }
         }
     }
+
+
 
     fun nuevaReserva(){
         _uiState.update {

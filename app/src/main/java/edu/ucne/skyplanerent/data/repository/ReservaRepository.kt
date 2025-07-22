@@ -11,9 +11,11 @@ class ReservaRepository @Inject constructor(
 ){
     suspend fun saveReserva(reserva: ReservaEntity) = reservaDao.save(reserva)
 
-    suspend fun findReserva(Id:Int):ReservaEntity = reservaDao.find(Id)
+    suspend fun findReserva(Id:Int):ReservaEntity? = reservaDao.find(Id)
 
     suspend fun deleteReserva(reserva: ReservaEntity) = reservaDao.delete(reserva)
+
+    suspend fun deleteReservaById(id:Int) = reservaDao.deleteReservaById(id)
 
     fun getAll(): Flow<List<ReservaEntity>> = reservaDao.getAll()
 

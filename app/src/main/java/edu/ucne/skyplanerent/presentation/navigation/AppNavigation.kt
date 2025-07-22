@@ -263,8 +263,8 @@ fun AppNavigation() {
                     navController.navigate(Screen.ReservaEdit(0))
                 },
 
-                goToDelete = {
-                    navController.navigate(Screen.ReservaDelete(0))
+                goToDelete = {reservaId->
+                    navController.navigate(Screen.ReservaDelete(reservaId))
                 }
 
             )
@@ -290,7 +290,7 @@ fun AppNavigation() {
                 reservaId = args.reservaId,
                 goBack = {
                     navController.navigate(Screen.Reserva)
-                }
+                },
 
             )
 

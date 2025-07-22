@@ -31,5 +31,6 @@ data class UiState (
     // UI control
     val successMessage: String? = "",
     val errorMessage: String? = "",
+    val reservaSeleccionada: ReservaEntity? = null,
     val reservas: List<ReservaEntity> = emptyList()
 )
