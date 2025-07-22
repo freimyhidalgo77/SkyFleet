@@ -1,5 +1,7 @@
 package edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.ExperimentalMaterialApi
@@ -15,6 +19,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -33,18 +39,23 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
+import edu.ucne.skyplanerent.R
 import edu.ucne.skyplanerent.data.remote.dto.TipoVueloDTO
+import edu.ucne.skyplanerent.presentation.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TipoVueloListScreen(
     viewModel: TipoVueloViewModel = hiltViewModel(),
     createTipoVuelo: () -> Unit,
+    goToAdminPanel: () -> Unit,
     goToTipoVuelo: (Int) -> Unit,
-    goBack: () -> Unit
+    goBack: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -53,6 +64,7 @@ fun TipoVueloListScreen(
         goToTipoVuelo = { id -> goToTipoVuelo(id) },
         onEvent = viewModel::onEvent,
         createTipoVuelo = createTipoVuelo,
+        goToAdminPanel = goToAdminPanel,
         goBack = goBack
     )
 }
@@ -64,7 +76,8 @@ fun TipoVueloListBodyScreen(
     goToTipoVuelo: (Int) -> Unit,
     onEvent: (TipoVueloEvent) -> Unit,
     createTipoVuelo: () -> Unit,
-    goBack: () -> Unit
+    goToAdminPanel: () -> Unit,
+    goBack: () -> Unit,
 ) {
     val refreshing = uiState.isLoading
     val pullRefreshState = rememberPullRefreshState(
@@ -80,7 +93,8 @@ fun TipoVueloListBodyScreen(
                     Text(
                         text = "Tipos de Vuelo",
                         style = MaterialTheme.typography.titleLarge,
-                        color = Color.White
+                        color = Color.Black,
+                        modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.CenterHorizontally)
                     )
                 },
                 navigationIcon = {
@@ -88,18 +102,53 @@ fun TipoVueloListBodyScreen(
                         Icon(
                             Icons.Default.ArrowBack,
                             contentDescription = "Volver",
-                            tint = Color.White
+                            tint = Color.Black
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF272D4D)
+                    containerColor = Color.White
                 )
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = createTipoVuelo) {
+            FloatingActionButton(
+                onClick = createTipoVuelo,
+                containerColor = Color(0xFF1976D2)
+            ) {
                 Icon(Icons.Filled.Add, "Agregar nuevo")
+            }
+        },
+        bottomBar = {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White)
+                    .padding(8.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconButton(onClick = goToAdminPanel) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.admin),
+                        contentDescription = "Admin Panel",
+                        tint = Color.Black,
+                        modifier = Modifier.size(24.dp) // Tamaño ajustable
+                    )
+                }
+                Icon(
+                    painter = painterResource(id = R.drawable.tipovuelo),
+                    contentDescription = "Tipos de vuelo (Activo)",
+                    modifier = Modifier.size(32.dp),
+                    tint = Color(0xFF1976D2) // Color destacado para indicar que estamos aquí
+                )
+                IconButton(onClick = { /* Navegar a Perfil */ }) {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Perfil",
+                        tint = Color.Black
+                    )
+                }
             }
         }
     ) { padding ->
@@ -112,6 +161,14 @@ fun TipoVueloListBodyScreen(
             Column(
                 modifier = Modifier.fillMaxWidth()
             ) {
+                Text(
+                    text = "Gestión de los tipos de vuelo",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = Color.Black,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                )
                 if (uiState.tipovuelo.isEmpty()) {
                     Box(
                         modifier = Modifier
@@ -175,22 +232,26 @@ private fun TipoVueloRow(
             .fillMaxWidth()
             .padding(vertical = 8.dp)
     ) {
-        Text(
-            modifier = Modifier.weight(1f),
-            text = "Tipo Vuelo ${it.tipoVueloId ?: "N/A"}",
-            color = Color.Black
+        Icon(
+            painter = painterResource(id = R.drawable.tipovuelo),
+            contentDescription = "Tipo de vuelo",
+            modifier = Modifier
+                .size(32.dp)
+                .padding(end = 8.dp),
+            tint = Color.Unspecified
         )
-        Text(
-            modifier = Modifier.weight(2f),
-            text = "Nombre: ${it.nombreVuelo}",
-            style = MaterialTheme.typography.titleMedium,
-            color = Color.Blue
-        )
-        Text(
-            modifier = Modifier.weight(2f),
-            text = "Descripción: ${it.descripcionTipoVuelo}",
-            color = Color.Blue
-        )
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = it.nombreVuelo ?: "Sin nombre",
+                style = MaterialTheme.typography.titleMedium,
+                color = Color.Black
+            )
+            Text(
+                text = it.descripcionTipoVuelo ?: "Sin descripción",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.Gray
+            )
+        }
         IconButton(onClick = goToTipoVuelo) {
             Icon(
                 Icons.Default.ArrowForward,
