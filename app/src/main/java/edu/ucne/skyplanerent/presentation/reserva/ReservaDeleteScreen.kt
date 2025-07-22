@@ -142,9 +142,9 @@ fun ReservaDeleteRow(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        Text("📅 Fecha: ${reserva.fecha}", fontSize = 16.sp)
-        Text("📍 Origen ID: ${reserva.rutaId}", fontSize = 16.sp)
-        Text("✈️ Aeronave ID: ${reserva.categoriaId}", fontSize = 16.sp)
+        Text("Fecha: ${reserva.fecha}", fontSize = 16.sp)
+        Text("Origen ID: ${reserva.rutaId}", fontSize = 16.sp)
+        Text("Aeronave ID: ${reserva.categoriaId}", fontSize = 16.sp)
 
         Spacer(modifier = Modifier.height(20.dp))
 

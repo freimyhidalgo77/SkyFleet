@@ -143,7 +143,7 @@ fun ReservaDetailsRow(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Text(text = "Detalles del vuelo", fontWeight = FontWeight.Bold)
+        Text(text = "Detalles de la reserva", fontWeight = FontWeight.Bold)
 
         Text("Hora y fecha: ${reserva.fecha}", fontSize = 16.sp)
         Text("Origen: ${reserva.rutaId}", fontSize = 16.sp)
@@ -163,7 +163,7 @@ fun ReservaDetailsRow(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Button(
-                onClick = { goToEdit(0) },
+                onClick = { goToEdit(reserva.reservaId ?:0) },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF0AEDA9),

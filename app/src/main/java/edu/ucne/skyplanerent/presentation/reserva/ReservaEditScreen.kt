@@ -1,31 +1,12 @@
 package edu.ucne.skyplanerent.presentation.reserva
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -34,41 +15,30 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 fun ReservaEditScreen(
-    reservaId:Int,
+    reservaId: Int,
     viewModel: ReservaViewModel = hiltViewModel(),
-    goBack:(Int)->Unit
-
-){
-
-    LaunchedEffect(reservaId)
-    {
+    goBack: (Int) -> Unit
+) {
+    LaunchedEffect(reservaId) {
         viewModel.selectReserva(reservaId)
-
     }
-    val uiState = viewModel.uiState.collectAsStateWithLifecycle()
+
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     ReservaEditBodyScreen(
-        uiState = uiState.value,
+        uiState = uiState,
         onChangePasajeros = viewModel::onChangePasajeros,
         save = viewModel::getReserva,
         goBack = goBack
-
     )
 }
 
-
-@OptIn(
-    ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class,
-    ExperimentalMaterial3Api::class
-)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReservaEditBodyScreen(
     uiState: UiState,
-    /*onChangeAeronave:(String)-> Unit,
-    onChangeRuta:(String)-> Unit,
-    onChangeFecha:(String)-> Unit,*/
-    onChangePasajeros:(Int)-> Unit,
-    save:()->Unit,
+    onChangePasajeros: (Int) -> Unit,
+    save: () -> Unit,
     goBack: (Int) -> Unit
 ) {
     Scaffold(
@@ -77,137 +47,163 @@ fun ReservaEditBodyScreen(
                 title = {
                     Text(
                         text = "Modificar reserva",
-                        style = TextStyle(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp,
-                            color = Color.White
-
-                        )
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp,
+                        color = Color.Black
                     )
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.secondary
+                    containerColor = Color.White
                 )
             )
-
+        },
+        bottomBar = {
+            Button(
+                onClick = {
+                    save()
+                    goBack(0)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                shape = RoundedCornerShape(50),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF00F5A0),
+                    contentColor = Color.Black
+                )
+            ) {
+                Text("Confirmar cambios", fontWeight = FontWeight.Bold)
+            }
         }
-
     ) { innerPadding ->
         Column(
             modifier = Modifier
-                .fillMaxWidth()
                 .padding(innerPadding)
                 .padding(16.dp)
-
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            /*OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text(text = "Aeronave") },
-                value = uiState.pasajeros.toString(),
-                onValueChange = {
-                    val pasajero = it.toIntOrNull() ?: 0
-                    onChangePasajeros(pasajero)
-                }
-            )*/
-
-            /*OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text(text = "Fecha") },
-                value = uiState.pasajeros.toString(),
-                onValueChange = {
-                    val pasajero = it.toIntOrNull() ?: 0
-                    onChangePasajeros(pasajero)
-                }
-            )*/
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-
-            OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text(text = "Pasajeros") },
-                value = uiState.pasajeros.toString(),
-                onValueChange = {
-                    val pasajero = it.toIntOrNull() ?: 0
-                    onChangePasajeros(pasajero)
-                }
+            Text(
+                text = "Detalles de la reserva",
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            OutlinedTextField(
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text(text = "Ruta") },
-                value = uiState.rutaId.toString(),
-                onValueChange = {
-                    val ruta = it.toIntOrNull() ?: 0
-                    // onChangeRuta(ruta)
-                }
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-
-                OutlinedButton(
-                    onClick = {
-                        save()
-                        goBack(0)
-
-                    },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(16.dp)
-
-                ) {
-                    Icon(Icons.Default.Edit, contentDescription = "Guardar")
-                    Text("Guardar")
-
-                }
-
-
-
-                Spacer(modifier = Modifier.height(16.dp))
-                uiState.successMessage?.let { menssage ->
-                    ElevatedCard(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp),
-                        content = {
-                            Text(
-                                text = menssage,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp,
-                                color = Color.Green
-                            )
-                        }
-                    )
-                }
-
-                uiState.errorMessage?.let { menssage ->
-                    ElevatedCard(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp),
-                        content = {
-                            Text(
-                                text = menssage,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 16.sp,
-                                color = Color.Red
-                            )
-                        }
-                    )
-                }
+            InfoRow(title = "Aeronave", value = "Cessna 172") {
+                // Acción al cambiar aeronave
             }
+
+           // InfoRow(title = "Hora y Fecha", value = uiState.fecha ?: "No definida") {
+                // Acción al cambiar hora y fecha
+            }
+
+            InfoRow(title = "Pasajeros", value = uiState.pasajeros.toString()) {
+                // Acción al cambiar pasajeros
+            }
+
+            InfoRow(title = "Origen", value = "San Francisco, CA") {
+                // Acción al cambiar origen
+            }
+
+            InfoRow(title = "Destino", value = "Los Angeles, CA") {
+                // Acción al cambiar destino
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = "Modificación",
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp
+            )
+
+            ChangeRow("Aeronaves") {
+                // Acción cambiar aeronave
+            }
+
+            ChangeRow("Fecha y hora") {
+                // Acción cambiar fecha
+            }
+
+            ChangeRow("Pasajeros") {
+                // Acción cambiar pasajeros
+            }
+
+            ChangeRow("Ruta") {
+                // Acción cambiar ruta
+            }
+
+            uiState.successMessage?.let { message ->
+                SuccessCard(message)
+            }
+
+            uiState.errorMessage?.let { message ->
+                ErrorCard(message)
+            }
+        }
+    }
+//}
+
+@Composable
+fun InfoRow(title: String, value: String, onChange: () -> Unit = {}) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(text = title, fontWeight = FontWeight.Bold)
+        Text(text = value, fontSize = 16.sp, color = Color.Gray)
+        Spacer(modifier = Modifier.height(8.dp))
+    }
+}
+
+@Composable
+fun ChangeRow(label: String, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(label, fontSize = 16.sp)
+        OutlinedButton(
+            onClick = onClick,
+            shape = RoundedCornerShape(50)
+        ) {
+            Text("Cambiar")
         }
     }
 }
 
+@Composable
+fun SuccessCard(message: String) {
+    ElevatedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = Color(0xFFDFFFE0)
+        )
+    ) {
+        Text(
+            text = message,
+            color = Color(0xFF007E33),
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
 
-
-
+@Composable
+fun ErrorCard(message: String) {
+    ElevatedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = Color(0xFFFFE0E0)
+        )
+    ) {
+        Text(
+            text = message,
+            color = Color(0xFFB00020),
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}

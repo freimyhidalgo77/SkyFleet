@@ -259,8 +259,8 @@ fun AppNavigation() {
                     navController.navigate(Screen.ReservaDetails(0))
                 },
                 scope = scope,
-                goToEdit = {
-                    navController.navigate(Screen.ReservaEdit(0))
+                goToEdit = {reservaId->
+                    navController.navigate(Screen.ReservaEdit(reservaId))
                 },
 
                 goToDelete = {reservaId->
