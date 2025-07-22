@@ -346,10 +346,10 @@ fun AdminPanelScreen(
                     .wrapContentWidth(Alignment.CenterHorizontally)
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    IconButton(onClick = { /* Navegar a Home */ }) {
-                        Icon(imageVector = Icons.Default.Home, contentDescription = "Home")
+                    IconButton(onClick = { /* Navegar a Admin Panel */ }) {
+                        Icon(painter = painterResource(id = R.drawable.admin), contentDescription = "Admin Panel (Activo)", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
                     }
-                    Text(text = "Home", fontSize = 16.sp)
+                    Text(text = "Admin Panel", fontSize = 12.sp)
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     IconButton(onClick = { /* Navegar a Perfil */ }) {
