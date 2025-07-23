@@ -376,8 +376,16 @@ fun AppNavigation() {
                 goToCategoria = { categoriaId ->
                     navController.navigate("aeronaveList?categoriaId=$categoriaId")
                 },
-                createCategoria = {
-                    navController.navigate(Screen.CategoriaAeronave(null))
+                createCategoria = { categoriaId ->
+                    if (categoriaId != null) {
+                        navController.navigate(Screen.CategoriaAeronave(categoriaId))
+                    } else {
+                        // Opcional: Manejar el caso de categoriaId nulo, por ejemplo, mostrar un error
+                        // o no hacer nada
+                    }
+                },
+                goToAdminPanel = {
+                    navController.navigate(Screen.AdminPanel)
                 },
                 goBack = { navController.popBackStack() }
             )
