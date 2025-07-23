@@ -12,12 +12,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -32,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -92,7 +97,7 @@ fun ReservaDetailsScreen(
 fun ReservaDetailsBodyScreen(
     uiState: UiState,
     scope: CoroutineScope,
-    goBack:(Int)->Unit,
+    goBack:(Int)-> Unit,
     goToEdit: (Int)->Unit,
     goToDelete:(Int)->Unit,
     tipoVueloUiState: TipoVueloUiState,
@@ -119,19 +124,24 @@ fun ReservaDetailsBodyScreen(
                 title = {
                     Text(
                         text = "Detalles de la reserva",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 26.sp,
-                        color = Color.Black
+                        style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 18.sp)
                     )
                 },
+                navigationIcon = {
+                    IconButton(onClick = { goBack(reservaId) }) {
+                        Icon(Icons.Filled.ArrowBack, contentDescription = "Volver atrás")
+                    }
+                },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.White
+                    containerColor = Color.White,
+                    titleContentColor = Color.Black,
+                    navigationIconContentColor = Color.Black
                 )
             )
         },
 
 
-        ) { innerPadding ->
+    ) { innerPadding ->
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier

@@ -4,12 +4,15 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -89,19 +92,29 @@ fun ReservaEditBodyScreen(
     val selectedRuta = rutaUiState.rutas.find { it.rutaId == uiState.rutaId }
 
 
-
     Scaffold(
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = {
                     Text(
                         text = "Modificar reserva",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = Color.White
+                        style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 18.sp)
                     )
                 },
+                navigationIcon = {
+                    IconButton(onClick = { goBack(reservaId) }) {
+                        Icon(Icons.Filled.ArrowBack, contentDescription = "Volver atrás")
+                    }
+                },
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = Color.White,
+                    titleContentColor = Color.Black,
+                    navigationIconContentColor = Color.Black
+                )
             )
         },
+
+
         bottomBar = {
             Button(
                 onClick = {

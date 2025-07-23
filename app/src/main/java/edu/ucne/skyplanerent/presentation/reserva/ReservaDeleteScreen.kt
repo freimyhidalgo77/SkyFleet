@@ -77,7 +77,7 @@ fun ReservaDeleteScreen(
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
-        topBar = { /* ... */ }
+        topBar = { }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -155,7 +155,7 @@ fun ReservaDeleteRow(
             text = "¿Estás seguro de que quieres cancelar esta reserva?",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.Red
+            color = Color.Black
         )
 
         Text(
@@ -170,7 +170,7 @@ fun ReservaDeleteRow(
         Text("Tipo de vuelo: ${ tipoVuelo?.nombreVuelo ?: "No disponible"}", fontSize = 16.sp)
         Text("Origen: ${ ruta?.origen ?: "No disponible"}", fontSize = 16.sp)
         Text("Destino: ${ ruta?.destino ?: "No disponible"}", fontSize = 16.sp)
-        Text("Aeronave ID: ${aeronave?.modeloAvion }", fontSize = 16.sp)
+        Text("Aeronave: ${aeronave?.modeloAvion }", fontSize = 16.sp)
 
         Spacer(modifier = Modifier.height(20.dp))
 

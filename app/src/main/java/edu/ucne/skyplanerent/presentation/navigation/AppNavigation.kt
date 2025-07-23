@@ -256,8 +256,8 @@ fun AppNavigation() {
             val args = it.toRoute<Screen.ReservaDetails>()
             ReservaDetailsScreen(
                 reservaId = args.reservaId,
-                goBack = {reservaId->
-                    navController.navigate(Screen.ReservaDetails(reservaId))
+                goBack = {
+                    navController.navigate(Screen.Reserva)
                 },
                 scope = scope,
                 goToEdit = {reservaId->
