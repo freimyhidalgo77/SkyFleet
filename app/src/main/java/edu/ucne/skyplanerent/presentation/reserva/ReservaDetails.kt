@@ -196,7 +196,7 @@ fun ReservaDetailsRow(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Text("Detalles de la reserva", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+        Text("Detalles del vuelo", fontWeight = FontWeight.Bold, fontSize = 18.sp)
 
         InfoRow("Tipo de vuelo", tipoVuelo?.nombreVuelo ?: "No disponible")
         InfoRow("Aeronave", aeronave?.modeloAvion ?: "No disponible")
