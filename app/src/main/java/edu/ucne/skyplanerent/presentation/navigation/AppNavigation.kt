@@ -55,7 +55,7 @@ import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloDetai
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloEvent
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloViewModel
 
-@SuppressLint("RememberReturnType")
+@SuppressLint("RememberReturnType", "WrongNavigateRouteType")
 @Composable
 fun AppNavigation() {
     val auth = FirebaseAuth.getInstance()
@@ -376,18 +376,16 @@ fun AppNavigation() {
                 goToCategoria = { categoriaId ->
                     navController.navigate("aeronaveList?categoriaId=$categoriaId")
                 },
-                createCategoria = { categoriaId ->
-                    if (categoriaId != null) {
-                        navController.navigate(Screen.CategoriaAeronave(categoriaId))
-                    } else {
-                        // Opcional: Manejar el caso de categoriaId nulo, por ejemplo, mostrar un error
-                        // o no hacer nada
-                    }
+                createCategoria = {
+                    navController.navigate(Screen.CategoriaAeronave(null))
                 },
                 goToAdminPanel = {
                     navController.navigate(Screen.AdminPanel)
                 },
-                goBack = { navController.popBackStack() }
+                goBack = { navController.popBackStack() },
+                onEdit = { categoriaId ->
+                    navController.navigate(Screen.CategoriaAeronave(categoriaId))
+                }
             )
         }
 

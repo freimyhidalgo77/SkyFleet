@@ -41,11 +41,16 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import edu.ucne.skyplanerent.R
 import edu.ucne.skyplanerent.data.local.entity.CategoriaAeronaveEntity
 
@@ -53,7 +58,8 @@ import edu.ucne.skyplanerent.data.local.entity.CategoriaAeronaveEntity
 fun CategoriaAeronaveListScreen(
     viewModel: CategoriaAeronaveViewModel = hiltViewModel(),
     goToCategoria: (Int) -> Unit, // Para navegar a detalles
-    createCategoria: (Int?) -> Unit, // Cambiado a (Int?) -> Unit para crear o editar
+    createCategoria: () -> Unit, // Para crear nueva categoría (sin ID)
+    onEdit: (Int) -> Unit, // Para editar categoría (con ID)
     deleteCategoria: ((CategoriaAeronaveEntity) -> Unit)? = null,
     goBack: () -> Unit,
     goToAdminPanel: () -> Unit
@@ -63,6 +69,7 @@ fun CategoriaAeronaveListScreen(
         uiState = uiState,
         goToCategoria = goToCategoria,
         createCategoria = createCategoria,
+        onEdit = onEdit,
         deleteCategoria = { categoria ->
             viewModel.onEvent(CategoriaAeronaveEvent.CategoriaIdChange(categoria.categoriaId ?: 0))
             viewModel.onEvent(CategoriaAeronaveEvent.Delete)
@@ -76,9 +83,12 @@ fun CategoriaAeronaveListScreen(
 private fun CategoriaAeronaveRow(
     it: CategoriaAeronaveEntity,
     goToCategoria: (Int) -> Unit, // Para detalles
-    createCategoria: (Int?) -> Unit, // Para crear o editar
+    createCategoria: () -> Unit, // Para crear nueva categoría
+    onEdit: (Int) -> Unit, // Para editar categoría
     deleteCategoria: (CategoriaAeronaveEntity) -> Unit
 ) {
+    val showDeleteDialog = remember { mutableStateOf(false) } // Estado para controlar el diálogo
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -118,14 +128,14 @@ private fun CategoriaAeronaveRow(
                 horizontalArrangement = Arrangement.End,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                IconButton(onClick = { createCategoria(it.categoriaId) }) { // Botón de edición usa createCategoria con categoriaId
+                IconButton(onClick = { onEdit(it.categoriaId ?: 0) }) { // Botón de edición usa onEdit con categoriaId
                     Icon(
                         Icons.Default.Edit,
                         contentDescription = "Editar",
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
-                IconButton(onClick = { deleteCategoria(it) }) {
+                IconButton(onClick = { showDeleteDialog.value = true }) { // Mostrar diálogo al pulsar eliminar
                     Icon(
                         Icons.Default.Delete,
                         contentDescription = "Eliminar",
@@ -135,6 +145,32 @@ private fun CategoriaAeronaveRow(
             }
         }
     }
+
+    // Diálogo de confirmación para eliminar
+    if (showDeleteDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog.value = false }, // Cerrar diálogo al intentar salir
+            title = { Text("Confirmar eliminación") },
+            text = { Text("¿Estás seguro de que quieres eliminar la categoría ${it.descripcionCategoria}?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        deleteCategoria(it) // Ejecutar eliminación si se confirma
+                        showDeleteDialog.value = false // Cerrar diálogo
+                    }
+                ) {
+                    Text("Confirmar")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showDeleteDialog.value = false } // Cerrar diálogo sin eliminar
+                ) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -142,7 +178,8 @@ private fun CategoriaAeronaveRow(
 fun CategoriaAeronaveListBodyScreen(
     uiState: CategoriaAeronaveUiState,
     goToCategoria: (Int) -> Unit,
-    createCategoria: (Int?) -> Unit, // Cambiado a (Int?) -> Unit
+    createCategoria: () -> Unit, // Para crear nueva categoría
+    onEdit: (Int) -> Unit, // Para editar categoría
     deleteCategoria: (CategoriaAeronaveEntity) -> Unit,
     goBack: () -> Unit,
     goToAdminPanel: () -> Unit
@@ -152,19 +189,19 @@ fun CategoriaAeronaveListBodyScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text("Lista de Categorías de Aeronaves")
-                        Spacer(modifier = Modifier.weight(1f))
-                        IconButton(onClick = { createCategoria(null) }) { // Crear nueva categoría
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = "Nuevo",
-                                tint = Color.Black
-                            )
-                        }
+                    Text(
+                        text = "Categorías de Aeronaves",
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                },
+                actions = {
+                    IconButton(onClick = { createCategoria() }) { // Crear nueva categoría
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Nuevo",
+                            tint = Color.Black
+                        )
                     }
                 },
                 navigationIcon = {
@@ -233,7 +270,8 @@ fun CategoriaAeronaveListBodyScreen(
                     CategoriaAeronaveRow(
                         it = categoria,
                         goToCategoria = { categoriaId -> goToCategoria(categoriaId) },
-                        createCategoria = { categoriaId -> createCategoria(categoriaId) },
+                        createCategoria = { createCategoria() },
+                        onEdit = { categoriaId -> onEdit(categoriaId) },
                         deleteCategoria = deleteCategoria
                     )
                 }
