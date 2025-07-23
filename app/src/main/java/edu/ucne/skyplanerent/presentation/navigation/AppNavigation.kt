@@ -123,7 +123,8 @@ fun AppNavigation() {
                 onCreate = { /* navController.navigate(...) */ },
                 onDetails = {reserva-> navController.navigate(Screen.ReservaDetails(reserva)) },
                 onEdit = { navController.navigate(Screen.ReservaEdit(0)) },
-                onDelete = { navController.navigate(Screen.ReservaDelete(0)) }
+                onDelete = { navController.navigate(Screen.ReservaDelete(0)) },
+                navController = navController
             )
         }
         composable<Screen.Rutas_y_viajes> { backStackEntry ->
