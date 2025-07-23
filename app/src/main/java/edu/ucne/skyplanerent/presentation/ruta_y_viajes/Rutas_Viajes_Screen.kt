@@ -100,7 +100,9 @@ fun Rutas_Viajes_Screen(
                     tarifaBase = 1000.0,
                     impuesto = 0.0,
                     precioTotal = 0.0,
-                    tipoCliente = soyPiloto ?: false
+                    tipoCliente = soyPiloto ?: false,
+                    pasajero = 0
+
                 )//aqui se pasa a reserva en el metodo saveReserva(reserva:ReservaEntity)
             }
         },

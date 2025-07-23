@@ -214,7 +214,7 @@ fun ReservaDetailsRow(
         InfoRow("Origen", ruta?.origen ?: "No disponible")
         InfoRow("Destino", ruta?.destino ?: "No disponible")
         //InfoRow("Duración", ruta?.duracion ?: "No disponible")
-        InfoRow("Pasajeros", formularioUiState.cantidadPasajeros.toString())
+        InfoRow("Pasajeros", reserva.pasajeros.toString())
         InfoRow("Fecha", fecha?.toString() ?: "No seleccionada")
         InfoRow("Piloto", when (tipoCliente) {
             true -> "Sí"

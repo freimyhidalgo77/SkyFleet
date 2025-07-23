@@ -14,9 +14,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edu.ucne.skyplanerent.data.local.entity.ReservaEntity
+import edu.ucne.skyplanerent.data.remote.dto.AeronaveDTO
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveUiState
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveViewModel
-import edu.ucne.skyplanerent.presentation.ruta_y_viajes.AeronaveDropdown
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaUiState
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaViewModel
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloUiState
@@ -193,6 +193,61 @@ fun ReservaEditBodyScreen(
         }
     }
 }
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AeronaveDropdown(
+    aeronaves: List<AeronaveDTO>,
+    selectedAeronave: AeronaveDTO?,
+    onAeronaveSelected: (AeronaveDTO) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        OutlinedTextField(
+            value = selectedAeronave?.modeloAvion ?: "Seleccionar aeronave",
+            onValueChange = {}, // read-only
+            readOnly = true,
+            label = { Text("Modelo de Aeronave") },
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+            },
+            modifier = Modifier
+                .menuAnchor()
+                .fillMaxWidth()
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            if (aeronaves.isEmpty()) {
+                DropdownMenuItem(
+                    text = { Text("No hay aeronaves disponibles") },
+                    onClick = { expanded = false }
+                )
+            } else {
+                aeronaves.forEach { aeronave ->
+                    DropdownMenuItem(
+                        text = { Text(aeronave.modeloAvion) },
+                        onClick = {
+                            onAeronaveSelected(aeronave) // <- aquí se actualiza el estado en VM
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
 
 
 @Composable

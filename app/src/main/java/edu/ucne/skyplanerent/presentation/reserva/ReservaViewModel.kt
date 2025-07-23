@@ -153,7 +153,8 @@ class ReservaViewModel @Inject constructor(
         tarifaBase: Double,
         impuesto: Double,
         precioTotal: Double,
-        tipoCliente: Boolean?
+        tipoCliente: Boolean?,
+        pasajero: Int
     ) {
         viewModelScope.launch {
             val fecha = _fechaSeleccionada.value
@@ -172,7 +173,8 @@ class ReservaViewModel @Inject constructor(
                 tarifa = tarifaBase,
                 impuesto = impuesto,
                 tipoCliente = tipoCliente,
-                precioTotal = precioTotal
+                precioTotal = precioTotal,
+                pasajeros = pasajero
             )
 
             reservaRepository.saveReserva(reserva)

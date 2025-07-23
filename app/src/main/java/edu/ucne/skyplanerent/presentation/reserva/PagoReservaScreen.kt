@@ -129,8 +129,7 @@ fun PagoReservaBodyListScreen(
     val navController = rememberNavController()
 
     val idTipoVueloSeleccionado by reservaViewModel.tipoVueloSeleccionadoId.collectAsState()
-    val tipoVueloSeleccionado =
-        tipoVueloUiState.tipovuelo.find { it.tipoVueloId == idTipoVueloSeleccionado }
+    val tipoVueloSeleccionado = tipoVueloUiState.tipovuelo.find { it.tipoVueloId == idTipoVueloSeleccionado }
 
     val idRutaSeleccionada by reservaViewModel.rutaSeleccionadaId.collectAsState()
     val rutaSeleccionada = rutaUiState.rutas.find { it.rutaId == idRutaSeleccionada }
@@ -330,6 +329,7 @@ fun PagoReservaBodyListScreen(
                             val aeronaveId = aeronaveSeleccionada?.aeronaveId ?: return@Button
                             //val fechaFormateada = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(fechaVuelo ?: Date())
                             val tipoCliente = uiState?.tipoCliente ?: return@Button
+                            val pasajero = formularioUiState.cantidadPasajeros
 
                             reservaViewModel.guardarReserva(
                                 rutaId = rutaId,
@@ -339,7 +339,9 @@ fun PagoReservaBodyListScreen(
                                 tarifaBase = tarifaBase,
                                 impuesto = impuesto,
                                 precioTotal = precioTotal,
-                                tipoCliente = tipoCliente
+                                tipoCliente = tipoCliente,
+                                pasajero = pasajero
+
                             )
 
                             goBack()
