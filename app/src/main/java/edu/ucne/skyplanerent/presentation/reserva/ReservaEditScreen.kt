@@ -1,7 +1,9 @@
 package edu.ucne.skyplanerent.presentation.reserva
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -11,10 +13,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import edu.ucne.skyplanerent.data.local.entity.ReservaEntity
 import edu.ucne.skyplanerent.data.remote.dto.AeronaveDTO
+import edu.ucne.skyplanerent.data.remote.dto.RutaDTO
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveUiState
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveViewModel
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaUiState
@@ -80,6 +85,8 @@ fun ReservaEditBodyScreen(
     val licencia = uiState.licenciaPiloto
 
     var showRutaDialog by rememberSaveable { mutableStateOf(false) }
+    val selectedAeronave = aeronaveUiState.aeronaves.find { it.aeronaveId == uiState.categoriaId }
+
 
 
     Scaffold(
@@ -117,8 +124,10 @@ fun ReservaEditBodyScreen(
             modifier = Modifier
                 .padding(innerPadding)
                 .padding(16.dp)
-                .fillMaxSize(),
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(12.dp)
+
         ) {
 
 
@@ -154,31 +163,68 @@ fun ReservaEditBodyScreen(
 
             Text("Detalles de la reserva", fontWeight = FontWeight.Bold, fontSize = 18.sp)
 
-            InfoRow("Tipo de vuelo", tipoVuelo?.nombreVuelo ?: "No disponible")
-            InfoRow("Aeronave", aeronave?.modeloAvion ?: "No disponible")
-            InfoRow("Origen", ruta?.origen ?: "No disponible")
-            InfoRow("Destino", ruta?.destino ?: "No disponible")
-            //InfoRow("Duración", ruta?.duracion ?: "No disponible")
-            InfoRow("Pasajeros", uiState.pasajeros.toString())
-            InfoRow("Fecha", fecha?.toString() ?: "No seleccionada")
-            InfoRow("Piloto", when (tipoCliente) {
-                true -> "Sí"
-                false -> "No"
-                else -> "No especificado"
-            })
-            InfoRow("Licencia", licencia?.descripcion ?: "No aplica")
+            Text("Tipo de vuelo", fontWeight = FontWeight.Bold)
+            Text(tipoVuelo?.nombreVuelo ?: "No disponible", fontSize = 16.sp, color = Color.Gray)
+            Spacer(modifier = Modifier.height(8.dp))
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Text("Aeronave", fontWeight = FontWeight.Bold)
+            Text(aeronave?.modeloAvion ?: "No disponible", fontSize = 16.sp, color = Color.Gray)
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text("Origen", fontWeight = FontWeight.Bold)
+            Text(ruta?.origen ?: "No disponible", fontSize = 16.sp, color = Color.Gray)
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text("Destino", fontWeight = FontWeight.Bold)
+            Text(ruta?.destino ?: "No disponible", fontSize = 16.sp, color = Color.Gray)
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text("Pasajeros", fontWeight = FontWeight.Bold)
+            Text(uiState.pasajeros.toString(), fontSize = 16.sp, color = Color.Gray)
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text("Fecha", fontWeight = FontWeight.Bold)
+            Text(fecha?.toString() ?: "No seleccionada", fontSize = 16.sp, color = Color.Gray)
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text("Piloto", fontWeight = FontWeight.Bold)
+            Text(
+                when (tipoCliente) {
+                    true -> "Sí"
+                    false -> "No"
+                    else -> "No especificado"
+                },
+                fontSize = 16.sp,
+                color = Color.Gray
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text("Licencia", fontWeight = FontWeight.Bold)
+            Text(licencia?.descripcion ?: "No aplica", fontSize = 16.sp, color = Color.Gray)
+
+            Spacer(modifier = Modifier.height(8.dp))
 
             Text("Modificación", fontWeight = FontWeight.Bold, fontSize = 18.sp)
 
-            Text("Modificar aeronave", fontWeight = FontWeight.Bold, fontSize = 16.sp)
 
-            AeronaveDropdown(
+            Text("Modificar aeronave", fontWeight = FontWeight.Bold)
+            AeronavesDropdown(
                 aeronaves = aeronaveUiState.aeronaves,
-                selectedAeronave = aeronaveUiState.aeronaves.find { it.aeronaveId == uiState.categoriaId },
+                selectedAeronave = selectedAeronave,
                 onAeronaveSelected = { selected ->
-                    onChangeAeronave(selected.aeronaveId?:0)
+                    onChangeAeronave(selected.aeronaveId ?: 0)
+                }
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Ruta - sin zIndex
+            Text("Modificar ruta", fontWeight = FontWeight.Bold)
+            RutaDropdown(
+                rutas = rutaUiState.rutas,
+                selectedRuta = rutaUiState.rutas.find { it.rutaId == uiState.rutaId },
+                onRutaSelected = { selected ->
+                    onChangeRuta(selected.rutaId ?: 0)
                 }
             )
 
@@ -186,10 +232,6 @@ fun ReservaEditBodyScreen(
 
             ChangeRow("Pasajeros") { /* Acción cambiar pasajeros */ }
 
-
-
-            uiState.successMessage?.let { SuccessCard(it) }
-            uiState.errorMessage?.let { ErrorCard(it) }
         }
     }
 }
@@ -197,7 +239,7 @@ fun ReservaEditBodyScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AeronaveDropdown(
+fun AeronavesDropdown(
     aeronaves: List<AeronaveDTO>,
     selectedAeronave: AeronaveDTO?,
     onAeronaveSelected: (AeronaveDTO) -> Unit,
@@ -248,16 +290,76 @@ fun AeronaveDropdown(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RutaDropdown(
+    rutas: List<RutaDTO>,
+    selectedRuta: RutaDTO?,
+    onRutaSelected: (RutaDTO) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        OutlinedTextField(
+            value = selectedRuta?.let { "${it.origen} → ${it.destino}" } ?: "Seleccionar ruta",
+            onValueChange = {},
+            readOnly = true,
+            label = { Text("Ruta") },
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+            },
+            modifier = Modifier
+                .menuAnchor()
+                .fillMaxWidth()
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            if (rutas.isEmpty()) {
+                DropdownMenuItem(
+                    text = { Text("No hay rutas disponibles") },
+                    onClick = { expanded = false }
+                )
+            } else {
+                rutas.forEach { ruta ->
+                    DropdownMenuItem(
+                        text = { Text("${ruta.origen} → ${ruta.destino}") },
+                        onClick = {
+                            onRutaSelected(ruta)
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+
 
 
 @Composable
-fun InfoRow(title: String, value: String, onChange: () -> Unit = {}) {
+fun InfoRow(
+    title: String,
+    value: String,
+    onChange: @Composable (() -> Unit)? = null
+) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(text = title, fontWeight = FontWeight.Bold)
         Text(text = value, fontSize = 16.sp, color = Color.Gray)
+        onChange?.invoke() // <- aquí se renderiza el contenido adicional
         Spacer(modifier = Modifier.height(8.dp))
     }
 }
+
 
 @Composable
 fun ChangeRow(label: String, onClick: () -> Unit) {
@@ -275,43 +377,3 @@ fun ChangeRow(label: String, onClick: () -> Unit) {
         }
     }
 }
-
-@Composable
-fun SuccessCard(message: String) {
-    ElevatedCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = Color(0xFFDFFFE0)
-        )
-    ) {
-        Text(
-            text = message,
-            color = Color(0xFF007E33),
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(16.dp)
-        )
-    }
-}
-
-@Composable
-fun ErrorCard(message: String) {
-    ElevatedCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = Color(0xFFFFE0E0)
-        )
-    ) {
-        Text(
-            text = message,
-            color = Color(0xFFB00020),
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(16.dp)
-        )
-    }
-}
-
- 
