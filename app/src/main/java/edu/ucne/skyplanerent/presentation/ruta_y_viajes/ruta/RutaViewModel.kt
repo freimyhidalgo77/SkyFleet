@@ -130,12 +130,6 @@ class RutaViewModel @Inject constructor(
         }
     }
 
-    fun onChangeRuta(rutaId: Int) {
-        _uiState.update { it.copy(rutaId = rutaId) }
-    }
-
-
-
     private fun destinoChange(destino: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(destino = destino) }

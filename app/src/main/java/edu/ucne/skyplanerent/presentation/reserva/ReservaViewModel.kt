@@ -83,6 +83,11 @@ class ReservaViewModel @Inject constructor(
 
     }
 
+    fun onChangeRuta(rutaId: Int) {
+        _uiState.update { it.copy(rutaId = rutaId) }
+    }
+
+
 
     init{
         getReserva()

@@ -53,7 +53,7 @@ fun ReservaEditScreen(
         tipoVueloUiState = tipoVueloUiState,
         rutaUiState = rutaUiState,
         aeronaveUiState = aeronaveUiState,
-        onChangeRuta = rutaViewModel::onChangeRuta,
+        onChangeRuta = viewModel::onChangeRuta,
         onChangeAeronave = viewModel::categoriaIdChange,
         reservaId = reservaId
 
@@ -72,8 +72,8 @@ fun ReservaEditBodyScreen(
     tipoVueloUiState: TipoVueloUiState,
     rutaUiState: RutaUiState,
     aeronaveUiState: AeronaveUiState,
-    onChangeRuta: (Int) -> Unit,
-    onChangeAeronave:(Int)->Unit
+    onChangeRuta: (Int)-> Unit,
+    onChangeAeronave:(Int)-> Unit
 ) {
 
     val tipoVuelo = tipoVueloUiState.tipovuelo.find { it.tipoVueloId == uiState.tipoVueloId }
@@ -86,6 +86,7 @@ fun ReservaEditBodyScreen(
 
     var showRutaDialog by rememberSaveable { mutableStateOf(false) }
     val selectedAeronave = aeronaveUiState.aeronaves.find { it.aeronaveId == uiState.categoriaId }
+    val selectedRuta = rutaUiState.rutas.find { it.rutaId == uiState.rutaId }
 
 
 
@@ -218,11 +219,10 @@ fun ReservaEditBodyScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Ruta - sin zIndex
             Text("Modificar ruta", fontWeight = FontWeight.Bold)
             RutaDropdown(
                 rutas = rutaUiState.rutas,
-                selectedRuta = rutaUiState.rutas.find { it.rutaId == uiState.rutaId },
+                selectedRuta = selectedRuta,
                 onRutaSelected = { selected ->
                     onChangeRuta(selected.rutaId ?: 0)
                 }
