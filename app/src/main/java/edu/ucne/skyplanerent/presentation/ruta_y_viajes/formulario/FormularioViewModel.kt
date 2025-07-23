@@ -2,6 +2,7 @@ package edu.ucne.skyplanerent.presentation.ruta_y_viajes.formulario
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.test.core.app.canTakeScreenshot
 import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.ucne.skyplanerent.data.local.entity.FormularioEntity
 import edu.ucne.skyplanerent.data.local.entity.RutaEntity
@@ -50,7 +51,9 @@ class FormularioViewModel @Inject constructor(
 
             if (state.nombre.isBlank() || state.apellido.isBlank() ||
                 state.telefono.isBlank() || state.correo.isBlank() ||
-                state.pasaporte.isBlank() || state.ciudadResidencia.isBlank()
+                state.pasaporte.isBlank() || state.ciudadResidencia.isBlank() ||
+                state.cantidadPasajeros == 0
+
             ) {
                 _uiState.update {
                     it.copy(errorMessage = "Todos los campos deben ser rellenados")
@@ -79,6 +82,7 @@ class FormularioViewModel @Inject constructor(
                 correo = "",
                 pasaporte = "",
                 ciudadResidencia = "",
+                cantidadPasajeros = 0,
                 errorMessage = null
             )
         }
@@ -175,6 +179,7 @@ class FormularioViewModel @Inject constructor(
         correo = correo ?: "",
         telefono = telefono ?: "",
         pasaporte = pasaporte ?: "",
-        ciudadResidencia = ciudadResidencia ?: ""
+        ciudadResidencia = ciudadResidencia ?: "",
+        cantidadPasajeros = cantidadPasajeros?:0
     )
 }

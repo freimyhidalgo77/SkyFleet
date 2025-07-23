@@ -76,6 +76,12 @@ class ReservaViewModel @Inject constructor(
         _uiState.update { it.copy(licenciaPiloto = licencia) }
     }
 
+    fun categoriaIdChange(id: Int) {
+        _uiState.update {
+            it.copy(categoriaId = id)
+        }
+
+    }
 
 
     init{
@@ -121,6 +127,24 @@ class ReservaViewModel @Inject constructor(
             }
         }
     }
+
+    fun updateReserva() {
+        viewModelScope.launch {
+            try {
+                val reserva = uiState.value.toEntity()
+                reservaRepository.saveReserva(reserva)
+                _uiState.update {
+                    it.copy(successMessage = "Reserva actualizada correctamente")
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(errorMessage = "Error al actualizar la reserva")
+                }
+            }
+        }
+    }
+
+
 
     fun guardarReserva(
         rutaId: Int,

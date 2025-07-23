@@ -224,7 +224,7 @@ class AeronaveViewModel @Inject constructor(
         }
     }
 
-    private fun aeronaveIdChange(id: Int) {
+     fun aeronaveIdChange(id: Int) {
         viewModelScope.launch {
             _uiState.update {
                 it.copy(AeronaveId = id)
@@ -240,13 +240,23 @@ class AeronaveViewModel @Inject constructor(
         }
     }
 
-    private fun modeloAvionChange(modelo: String) {
+     fun modeloAvionChange(modelo: String) {
         viewModelScope.launch {
             _uiState.update {
                 it.copy(ModeloAvion = modelo)
             }
         }
     }
+
+
+
+    /*fun modeloAvionChange(descripcion: String) {
+        val aeronave = aeronaves.find { it.descripcionAeronave == descripcion }
+        _uiState.update {
+            it.copy(categoriaId = aeronave?.aeronaveId ?: 0, aeronaveSeleccionada = aeronave)
+        }
+    }*/
+
 
     private fun descripcionCategoriaChange(descripcion: String) {
         viewModelScope.launch {
@@ -351,6 +361,8 @@ class AeronaveViewModel @Inject constructor(
             }
         }
     }
+
+
 
     private fun nuevo() {
         viewModelScope.launch {

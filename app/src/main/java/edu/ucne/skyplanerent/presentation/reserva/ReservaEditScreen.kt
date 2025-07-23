@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -12,8 +13,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import edu.ucne.skyplanerent.data.local.entity.ReservaEntity
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveUiState
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveViewModel
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.AeronaveDropdown
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaUiState
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaViewModel
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloUiState
@@ -40,11 +43,15 @@ fun ReservaEditScreen(
     ReservaEditBodyScreen(
         uiState = uiState,
         onChangePasajeros = viewModel::onChangePasajeros,
-        save = viewModel::getReserva,
+        save = viewModel::updateReserva,
         goBack = goBack,
         tipoVueloUiState = tipoVueloUiState,
         rutaUiState = rutaUiState,
-        aeronaveUiState = aeronaveUiState
+        aeronaveUiState = aeronaveUiState,
+        onChangeRuta = rutaViewModel::onChangeRuta,
+        onChangeAeronave = viewModel::categoriaIdChange,
+        reservaId = reservaId
+
     )
 }
 
@@ -53,12 +60,15 @@ fun ReservaEditScreen(
 @Composable
 fun ReservaEditBodyScreen(
     uiState: UiState,
+    reservaId: Int,
     onChangePasajeros: (Int) -> Unit,
     save: () -> Unit,
     goBack: (Int) -> Unit,
     tipoVueloUiState: TipoVueloUiState,
     rutaUiState: RutaUiState,
-    aeronaveUiState: AeronaveUiState
+    aeronaveUiState: AeronaveUiState,
+    onChangeRuta: (Int) -> Unit,
+    onChangeAeronave:(Int)->Unit
 ) {
 
     val tipoVuelo = tipoVueloUiState.tipovuelo.find { it.tipoVueloId == uiState.tipoVueloId }
@@ -68,6 +78,9 @@ fun ReservaEditBodyScreen(
     val fecha = uiState.fecha
     val tipoCliente = uiState.tipoCliente
     val licencia = uiState.licenciaPiloto
+
+    var showRutaDialog by rememberSaveable { mutableStateOf(false) }
+
 
     Scaffold(
         topBar = {
@@ -79,13 +92,13 @@ fun ReservaEditBodyScreen(
                         color = Color.White
                     )
                 },
-                )
+            )
         },
         bottomBar = {
             Button(
                 onClick = {
                     save()
-                    goBack(0)
+                    goBack(reservaId)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -107,6 +120,38 @@ fun ReservaEditBodyScreen(
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+
+
+            if (showRutaDialog) {
+                AlertDialog(
+                    onDismissRequest = { showRutaDialog = false },
+                    confirmButton = {},
+                    title = { Text("Seleccionar Ruta") },
+                    text = {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp)
+                        ) {
+                            rutaUiState.rutas.forEach { rutaItem ->
+                                TextButton(
+                                    onClick = {
+                                        onChangeRuta(rutaItem.rutaId ?: 0)
+                                        showRutaDialog = false
+                                    },
+                                    modifier = Modifier.fillMaxWidth()
+                                ) {
+                                    Text("${rutaItem.origen} → ${rutaItem.destino}")
+                                }
+                            }
+                        }
+                    },
+                    containerColor = Color.White // asegúrate de que no esté transparente
+                )
+
+            }
+
+
             Text("Detalles de la reserva", fontWeight = FontWeight.Bold, fontSize = 18.sp)
 
             InfoRow("Tipo de vuelo", tipoVuelo?.nombreVuelo ?: "No disponible")
@@ -127,10 +172,21 @@ fun ReservaEditBodyScreen(
 
             Text("Modificación", fontWeight = FontWeight.Bold, fontSize = 18.sp)
 
-            ChangeRow("Aeronaves") { /* Acción cambiar aeronave */ }
+            Text("Modificar aeronave", fontWeight = FontWeight.Bold, fontSize = 16.sp)
+
+            AeronaveDropdown(
+                aeronaves = aeronaveUiState.aeronaves,
+                selectedAeronave = aeronaveUiState.aeronaves.find { it.aeronaveId == uiState.categoriaId },
+                onAeronaveSelected = { selected ->
+                    onChangeAeronave(selected.aeronaveId?:0)
+                }
+            )
+
             ChangeRow("Fecha y hora") { /* Acción cambiar fecha */ }
+
             ChangeRow("Pasajeros") { /* Acción cambiar pasajeros */ }
-            ChangeRow("Ruta") { /* Acción cambiar ruta */ }
+
+
 
             uiState.successMessage?.let { SuccessCard(it) }
             uiState.errorMessage?.let { ErrorCard(it) }
@@ -202,3 +258,5 @@ fun ErrorCard(message: String) {
         )
     }
 }
+
+ 

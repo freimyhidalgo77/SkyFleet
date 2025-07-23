@@ -45,6 +45,7 @@ import edu.ucne.skyplanerent.data.remote.dto.TipoVueloDTO
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveUiState
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveViewModel
 import edu.ucne.skyplanerent.presentation.navigation.Screen
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.formulario.FormularioViewModel
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaUiState
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaViewModel
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloUiState
@@ -59,7 +60,7 @@ fun ReservaDetailsScreen(
     tipoVueloViewModel: TipoVueloViewModel = hiltViewModel(),
     aeronaveViewModel: AeronaveViewModel =  hiltViewModel(),
     scope: CoroutineScope,
-    goBack:()->Unit,
+    goBack:(Int)->Unit,
     goToEdit: (Int)->Unit,
     goToDelete:(Int)->Unit,
 
@@ -91,7 +92,7 @@ fun ReservaDetailsScreen(
 fun ReservaDetailsBodyScreen(
     uiState: UiState,
     scope: CoroutineScope,
-    goBack:()->Unit,
+    goBack:(Int)->Unit,
     goToEdit: (Int)->Unit,
     goToDelete:(Int)->Unit,
     tipoVueloUiState: TipoVueloUiState,
@@ -169,18 +170,23 @@ fun ReservaDetailsRow(
     goToDelete: (Int) -> Unit,
     uiState: UiState,
     rutaViewModel: RutaViewModel = hiltViewModel(),
+    formularioViewModel: FormularioViewModel = hiltViewModel(),
     tipoVueloViewModel: TipoVueloViewModel = hiltViewModel(),
     aeronaveViewModel: AeronaveViewModel =  hiltViewModel(),
-    
+
     ) {
 
     val rutaUiState by rutaViewModel.uiState.collectAsStateWithLifecycle()
     val tipoVueloUiState by tipoVueloViewModel.uiState.collectAsStateWithLifecycle()
     val aeronaveUiState by aeronaveViewModel.uiState.collectAsStateWithLifecycle()
 
+    val formularioUiState by formularioViewModel.uiState.collectAsStateWithLifecycle()
+
     val tipoVuelo = tipoVueloUiState.tipovuelo.find { it.tipoVueloId == uiState.tipoVueloId }
     val ruta = rutaUiState.rutas.find { it.rutaId == uiState.rutaId }
     val aeronave = aeronaveUiState.aeronaves.find { it.aeronaveId == uiState.categoriaId }
+
+    val fromulario = formularioUiState.formularios.find { it.formularioId == uiState.formularioId }
 
     val fecha = uiState.fecha
     val tipoCliente = uiState.tipoCliente
@@ -201,8 +207,6 @@ fun ReservaDetailsRow(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Text(text = "Detalles de la reserva", fontWeight = FontWeight.Bold)
-
         Text("Detalles de la reserva", fontWeight = FontWeight.Bold, fontSize = 18.sp)
 
         InfoRow("Tipo de vuelo", tipoVuelo?.nombreVuelo ?: "No disponible")
@@ -210,7 +214,7 @@ fun ReservaDetailsRow(
         InfoRow("Origen", ruta?.origen ?: "No disponible")
         InfoRow("Destino", ruta?.destino ?: "No disponible")
         //InfoRow("Duración", ruta?.duracion ?: "No disponible")
-        InfoRow("Pasajeros", uiState.pasajeros.toString())
+        InfoRow("Pasajeros", formularioUiState.cantidadPasajeros.toString())
         InfoRow("Fecha", fecha?.toString() ?: "No seleccionada")
         InfoRow("Piloto", when (tipoCliente) {
             true -> "Sí"
