@@ -102,9 +102,15 @@ fun ReservaDetailsBodyScreen(
 
 ){
 
-    val ruta = uiState.rutaSeleccionada
+   /* val ruta = uiState.rutaSeleccionada
     val tipoVuelo = uiState.tipoVueloSeleccionado
-    val aeronave = uiState.aeronaveSeleccionada
+    val aeronave = uiState.aeronaveSeleccionada*/
+
+    val reserva = uiState.reservas.find { it.reservaId == reservaId }
+
+    val ruta = rutaUiState.rutas.find { it.rutaId == reserva?.rutaId }
+    val tipoVuelo = tipoVueloUiState.tipovuelo.find { it.tipoVueloId == reserva?.tipoVueloId }
+    val aeronave = aeronaveUiState.aeronaves.find { it.aeronaveId == reserva?.categoriaId }
 
 
     Scaffold(
@@ -140,19 +146,22 @@ fun ReservaDetailsBodyScreen(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
 
             ) {
-                items(uiState.reservas) { reserva ->
-                    ReservaDetailsRow(
-                        reservaId = reservaId,
-                        reserva = reserva,
-                        ruta = ruta,
-                        tipoVuelo = tipoVuelo,
-                        aeronave = aeronave,
-                        goToEdit = goToEdit,
-                        goToDelete = goToDelete,
-                        uiState
-                    )
-                }
+                item {
+                    reserva?.let {
+                        ReservaDetailsRow(
+                            reserva = it,
+                            ruta = ruta,
+                            tipoVuelo = tipoVuelo,
+                            aeronave = aeronave,
+                            goToEdit = goToEdit,
+                            goToDelete = goToDelete,
+                            fecha = uiState.fecha?.toString(),
+                            tipoCliente = uiState.tipoCliente,
+                            licenciaDescripcion = uiState.licenciaPiloto?.descripcion
+                        )
+                    }
 
+                }
             }
         }
     }
@@ -161,36 +170,16 @@ fun ReservaDetailsBodyScreen(
 
 @Composable
 fun ReservaDetailsRow(
-    reservaId: Int,
     reserva: ReservaEntity,
     ruta: RutaDTO?,
     tipoVuelo: TipoVueloDTO?,
     aeronave: AeronaveDTO?,
     goToEdit: (Int) -> Unit,
     goToDelete: (Int) -> Unit,
-    uiState: UiState,
-    rutaViewModel: RutaViewModel = hiltViewModel(),
-    formularioViewModel: FormularioViewModel = hiltViewModel(),
-    tipoVueloViewModel: TipoVueloViewModel = hiltViewModel(),
-    aeronaveViewModel: AeronaveViewModel =  hiltViewModel(),
-
-    ) {
-
-    val rutaUiState by rutaViewModel.uiState.collectAsStateWithLifecycle()
-    val tipoVueloUiState by tipoVueloViewModel.uiState.collectAsStateWithLifecycle()
-    val aeronaveUiState by aeronaveViewModel.uiState.collectAsStateWithLifecycle()
-
-    val formularioUiState by formularioViewModel.uiState.collectAsStateWithLifecycle()
-
-    val tipoVuelo = tipoVueloUiState.tipovuelo.find { it.tipoVueloId == uiState.tipoVueloId }
-    val ruta = rutaUiState.rutas.find { it.rutaId == uiState.rutaId }
-    val aeronave = aeronaveUiState.aeronaves.find { it.aeronaveId == uiState.categoriaId }
-
-    val fromulario = formularioUiState.formularios.find { it.formularioId == uiState.formularioId }
-
-    val fecha = uiState.fecha
-    val tipoCliente = uiState.tipoCliente
-    val licencia = uiState.licenciaPiloto
+    fecha: String?,
+    tipoCliente: Boolean?,
+    licenciaDescripcion: String?
+) {
 
     Column(
         modifier = Modifier
@@ -213,22 +202,16 @@ fun ReservaDetailsRow(
         InfoRow("Aeronave", aeronave?.modeloAvion ?: "No disponible")
         InfoRow("Origen", ruta?.origen ?: "No disponible")
         InfoRow("Destino", ruta?.destino ?: "No disponible")
-        //InfoRow("Duración", ruta?.duracion ?: "No disponible")
         InfoRow("Pasajeros", reserva.pasajeros.toString())
-        InfoRow("Fecha", fecha?.toString() ?: "No seleccionada")
+        InfoRow("Fecha", fecha ?: "No seleccionada")
         InfoRow("Piloto", when (tipoCliente) {
             true -> "Sí"
             false -> "No"
             else -> "No especificado"
         })
-        InfoRow("Licencia", licencia?.descripcion ?: "No aplica")
-
+        InfoRow("Licencia", licenciaDescripcion ?: "No aplica")
 
         Spacer(modifier = Modifier.height(20.dp))
-
-        Text("Detalles del cliente: ${reserva.pasajeros}", fontSize = 16.sp, fontWeight = FontWeight.Bold)
-
-        Spacer(modifier = Modifier.height(120.dp))
 
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -236,7 +219,7 @@ fun ReservaDetailsRow(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Button(
-                onClick = { goToEdit(reserva.reservaId ?:0) },
+                onClick = { goToEdit(reserva.reservaId ?: 0) },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF0AEDA9),
@@ -247,7 +230,7 @@ fun ReservaDetailsRow(
             }
 
             Button(
-                onClick = { goToDelete(reserva.reservaId?: 0) },
+                onClick = { goToDelete(reserva.reservaId ?: 0) },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFFED0A0A),
