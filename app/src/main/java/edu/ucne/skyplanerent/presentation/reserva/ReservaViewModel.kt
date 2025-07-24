@@ -87,6 +87,10 @@ class ReservaViewModel @Inject constructor(
         _uiState.update { it.copy(rutaId = rutaId) }
     }
 
+    fun onChangeTipoVuelo(tipoVueloId: Int) {
+        _uiState.update { it.copy(tipoVueloId =  tipoVueloId) }
+    }
+
 
 
     init{
@@ -174,7 +178,7 @@ class ReservaViewModel @Inject constructor(
                 rutaId = rutaId,
                 tipoVueloId = tipoVueloId,
                 categoriaId = aeronaveId,
-                fecha = fecha, // ✅ Se usa la fecha seleccionada correctamente
+                fecha = fecha,
                 tarifa = tarifaBase,
                 impuesto = impuesto,
                 tipoCliente = tipoCliente,
@@ -246,7 +250,7 @@ class ReservaViewModel @Inject constructor(
                             metodoPagoId = reserva.metodoPagoId,
                             tipoVueloId = reserva.tipoVueloId,
                             categoriaId = reserva.categoriaId,
-                            pasajeros = reserva.pasajeros,
+                            pasajeros = reserva.pasajeros?:0,
                             fecha = reserva.fecha,
                             impuesto = reserva.impuesto ?: 0.0,
                             tarifa = reserva.tarifa ?: 0.0,

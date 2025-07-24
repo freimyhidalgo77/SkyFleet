@@ -23,6 +23,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import edu.ucne.skyplanerent.data.local.entity.ReservaEntity
 import edu.ucne.skyplanerent.data.remote.dto.AeronaveDTO
 import edu.ucne.skyplanerent.data.remote.dto.RutaDTO
+import edu.ucne.skyplanerent.data.remote.dto.TipoVueloDTO
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveUiState
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveViewModel
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaUiState
@@ -58,7 +59,9 @@ fun ReservaEditScreen(
         aeronaveUiState = aeronaveUiState,
         onChangeRuta = viewModel::onChangeRuta,
         onChangeAeronave = viewModel::categoriaIdChange,
-        reservaId = reservaId
+        onChangeTipoVuelo = viewModel::onChangeTipoVuelo,
+        reservaId = reservaId,
+
 
     )
 }
@@ -69,14 +72,15 @@ fun ReservaEditScreen(
 fun ReservaEditBodyScreen(
     uiState: UiState,
     reservaId: Int,
-    onChangePasajeros: (Int) -> Unit,
     save: () -> Unit,
     goBack: (Int) -> Unit,
     tipoVueloUiState: TipoVueloUiState,
     rutaUiState: RutaUiState,
     aeronaveUiState: AeronaveUiState,
     onChangeRuta: (Int)-> Unit,
-    onChangeAeronave:(Int)-> Unit
+    onChangeAeronave:(Int)-> Unit,
+    onChangeTipoVuelo: (Int) -> Unit,
+    onChangePasajeros: (Int) -> Unit,
 ) {
 
     val tipoVuelo = tipoVueloUiState.tipovuelo.find { it.tipoVueloId == uiState.tipoVueloId }
@@ -90,6 +94,7 @@ fun ReservaEditBodyScreen(
     var showRutaDialog by rememberSaveable { mutableStateOf(false) }
     val selectedAeronave = aeronaveUiState.aeronaves.find { it.aeronaveId == uiState.categoriaId }
     val selectedRuta = rutaUiState.rutas.find { it.rutaId == uiState.rutaId }
+    val selectedTipoVuelo = tipoVueloUiState.tipovuelo.find { it.tipoVueloId == uiState.tipoVueloId }
 
 
     Scaffold(
@@ -220,6 +225,17 @@ fun ReservaEditBodyScreen(
 
             Text("Modificación", fontWeight = FontWeight.Bold, fontSize = 18.sp)
 
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text("Modificar Tipo vuelo", fontWeight = FontWeight.Bold)
+
+            TipoVueloDropdown (
+                tipoVuelo = tipoVueloUiState.tipovuelo,
+                selectedTipoVuelo = selectedTipoVuelo,
+                onTipoVueloSelected = { selected ->
+                    onChangeTipoVuelo(selected.tipoVueloId ?: 0)
+                }
+            )
 
             Text("Modificar aeronave", fontWeight = FontWeight.Bold)
             AeronavesDropdown(
@@ -230,7 +246,7 @@ fun ReservaEditBodyScreen(
                 }
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             Text("Modificar ruta", fontWeight = FontWeight.Bold)
             RutaDropdown(
@@ -347,6 +363,60 @@ fun RutaDropdown(
                         text = { Text("${ruta.origen} → ${ruta.destino}") },
                         onClick = {
                             onRutaSelected(ruta)
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TipoVueloDropdown(
+    tipoVuelo: List<TipoVueloDTO>,
+    selectedTipoVuelo: TipoVueloDTO?,
+    onTipoVueloSelected: (TipoVueloDTO) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        OutlinedTextField(
+            value = selectedTipoVuelo?.let { "${it.nombreVuelo}" } ?: "Seleccionar tipo vuelo",
+            onValueChange = {},
+            readOnly = true,
+            label = { Text("Tipo Vuelo") },
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+            },
+            modifier = Modifier
+                .menuAnchor()
+                .fillMaxWidth()
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            if (tipoVuelo.isEmpty()) {
+                DropdownMenuItem(
+                    text = { Text("No hay tipos de vuelo disponibles") },
+                    onClick = { expanded = false }
+                )
+            } else {
+                tipoVuelo.forEach { tipoVuelo ->
+                    DropdownMenuItem(
+                        text = { Text("${tipoVuelo.nombreVuelo}") },
+                        onClick = {
+                            onTipoVueloSelected(tipoVuelo)
                             expanded = false
                         }
                     )

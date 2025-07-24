@@ -175,6 +175,7 @@ class FormularioViewModel @Inject constructor(
         correo = correo ?: "",
         telefono = telefono ?: "",
         pasaporte = pasaporte ?: "",
-        ciudadResidencia = ciudadResidencia ?: ""
+        ciudadResidencia = ciudadResidencia ?: "",
+        cantidadPasajeros = cantidadPasajeros?:0
     )
 }

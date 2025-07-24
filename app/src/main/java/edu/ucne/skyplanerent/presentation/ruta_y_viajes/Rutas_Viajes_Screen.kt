@@ -189,6 +189,9 @@ fun Vuelos_RutasBodyListScreen(
     } ?:   vueloUiState.tipovuelo
 
 
+    val isLoading = uiState.rutas.isEmpty() || vueloUiState.tipovuelo.isEmpty()
+
+
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
@@ -215,6 +218,19 @@ fun Vuelos_RutasBodyListScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
+
+            if (isLoading) {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                }
+            } else {
 
             item {
                 Text(
@@ -261,10 +277,11 @@ fun Vuelos_RutasBodyListScreen(
                 }
             }
 
-            val idTipoVueloSeleccionado = idSeleccionado
+            val idTipoVueloSeleccionado = ideSeleccionado
             if (idTipoVueloSeleccionado != null && idTipoVueloSeleccionado > 0) {
                 item {
-                    val tipoVueloSeleccionado = vueloUiState.tipovuelo.find { it.tipoVueloId == idTipoVueloSeleccionado }
+                    val tipoVueloSeleccionado =
+                        vueloUiState.tipovuelo.find { it.tipoVueloId == idTipoVueloSeleccionado }
 
                     if (tipoVueloSeleccionado != null) {
                         Text(
@@ -342,6 +359,7 @@ fun Vuelos_RutasBodyListScreen(
                     }
                 }
             }
+        }
 
             item {
                 FechaSelector(
