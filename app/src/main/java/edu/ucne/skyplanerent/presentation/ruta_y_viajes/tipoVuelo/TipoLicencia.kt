@@ -13,8 +13,10 @@ enum class TipoLicencia(val descripcion: String) {
     override fun toString(): String = descripcion
 }
 
+
 fun tipoLicenciaFromDescripcion(descripcion: String): TipoLicencia? {
     return TipoLicencia.values().firstOrNull {
-        descripcion.contains(it.descripcion, ignoreCase = true)
+        it.descripcion.equals(descripcion.trim(), ignoreCase = true)
     }
 }
+

@@ -33,11 +33,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.times
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.times
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
@@ -58,6 +60,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import kotlin.time.times
 
 @Composable
 fun PagoReservaListScreen(
@@ -129,8 +132,7 @@ fun PagoReservaBodyListScreen(
     val navController = rememberNavController()
 
     val idTipoVueloSeleccionado by reservaViewModel.tipoVueloSeleccionadoId.collectAsState()
-    val tipoVueloSeleccionado =
-        tipoVueloUiState.tipovuelo.find { it.tipoVueloId == idTipoVueloSeleccionado }
+    val tipoVueloSeleccionado = tipoVueloUiState.tipovuelo.find { it.tipoVueloId == idTipoVueloSeleccionado }
 
     val idRutaSeleccionada by reservaViewModel.rutaSeleccionadaId.collectAsState()
     val rutaSeleccionada = rutaUiState.rutas.find { it.rutaId == idRutaSeleccionada }
@@ -141,17 +143,23 @@ fun PagoReservaBodyListScreen(
     val fechaVuelo by reservaViewModel.fechaSeleccionada.collectAsState()
 
     // Valores base
-    val duracionVuelo = rutaUiState.duracionEstimada?.toDouble() ?: 0.0
-   // val costoXHora = aeronaveUiState.CostoXHora ?: 0.0
-
-    val costoXHora: Int =  150 //esta variable es mientrastanto para probar
-
-    val tipoCliente by reservaViewModel.tipoCliente.collectAsState()
-
-// Calcular
+    val duracionVuelo = rutaSeleccionada?.duracion?:0
+    val costoXHora = aeronaveSeleccionada?.costoXHora ?: 0.0
     val tarifaBase = duracionVuelo * costoXHora
     val impuesto = tarifaBase * 0.10
     val precioTotal = tarifaBase + impuesto
+
+
+
+    val tipoCliente by reservaViewModel.tipoCliente.collectAsState()
+
+    val reservaUiState by reservaViewModel.uiState.collectAsStateWithLifecycle()
+    val licenciaSeleccionada = reservaUiState.licenciaPiloto
+
+    /*Calcular
+     val tarifaBase = duracionVuelo * costoXHora
+     val impuesto = tarifaBase * 0.10
+     val precioTotal = tarifaBase + impuesto*/
 
 
     Scaffold(
@@ -159,7 +167,7 @@ fun PagoReservaBodyListScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "Pre-Reserva",
+                        text = "Pago Reserva",
                         fontWeight = FontWeight.Bold,
                         fontSize = 26.sp,
                         color = Color.Black
@@ -282,6 +290,14 @@ fun PagoReservaBodyListScreen(
                     )
                 }
 
+                item{
+                    Text(
+                        text = "Licencia seleccionada: ${licenciaSeleccionada ?: "No aplica"}",
+                        fontSize = 16.sp,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+
 
                 item {
                     Text(
@@ -319,6 +335,7 @@ fun PagoReservaBodyListScreen(
                             val aeronaveId = aeronaveSeleccionada?.aeronaveId ?: return@Button
                             //val fechaFormateada = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(fechaVuelo ?: Date())
                             val tipoCliente = uiState?.tipoCliente ?: return@Button
+                            val pasajero = formularioUiState.cantidadPasajeros
 
                             reservaViewModel.guardarReserva(
                                 rutaId = rutaId,
@@ -328,7 +345,9 @@ fun PagoReservaBodyListScreen(
                                 tarifaBase = tarifaBase,
                                 impuesto = impuesto,
                                 precioTotal = precioTotal,
-                                tipoCliente = tipoCliente
+                                tipoCliente = tipoCliente,
+                                pasajero = pasajero
+
                             )
 
                             goBack()

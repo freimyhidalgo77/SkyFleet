@@ -15,8 +15,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -28,6 +30,8 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -46,8 +50,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import edu.ucne.skyplanerent.R
 import edu.ucne.skyplanerent.data.local.entity.ReservaEntity
+import edu.ucne.skyplanerent.presentation.navigation.BottomNavItem
+import edu.ucne.skyplanerent.presentation.navigation.Screen
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaUiState
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -60,9 +68,10 @@ fun ReservaListScreen(
     rutaViewModel: RutaViewModel = hiltViewModel(),
     scope: CoroutineScope,
     onCreate:()-> Unit,
-    onDetails: (ReservaEntity) -> Unit,
+    onDetails: (Int) -> Unit,
     onEdit:(ReservaEntity)-> Unit,
-    onDelete:(ReservaEntity)-> Unit
+    onDelete:(ReservaEntity)-> Unit,
+    navController: NavController
 
 ){
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -75,7 +84,8 @@ fun ReservaListScreen(
         onEdit = onEdit,
         onDelete = onDelete,
         onDetails = onDetails,
-        rutaUiState = rutaUiState
+        rutaUiState = rutaUiState,
+        navController = navController
     )
 }
 
@@ -84,13 +94,20 @@ fun ReservaListScreen(
 fun ReservaBodyListScreen(
     uiState: UiState,
     scope: CoroutineScope,
-    onCreate:()-> Unit,
-    onDetails: (ReservaEntity) -> Unit,
-    onEdit:(ReservaEntity)-> Unit,
-    onDelete:(ReservaEntity)-> Unit,
-    rutaUiState: RutaUiState
+    onCreate: () -> Unit,
+    onDetails: (Int) -> Unit,
+    onEdit: (ReservaEntity) -> Unit,
+    onDelete: (ReservaEntity) -> Unit,
+    rutaUiState: RutaUiState,
+    navController: NavController // <-- Agregado
+) {
+    val items = listOf(
+        BottomNavItem("Inicio", Icons.Default.Home, Screen.Home),
+        BottomNavItem("Perfil", Icons.Default.Person, Screen.Perfil),
+    )
 
-){
+    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -107,18 +124,32 @@ fun ReservaBodyListScreen(
                 )
             )
         },
-
-
-        ){innerPadding->
-        Column (
+        bottomBar = {
+            NavigationBar {
+                items.forEach { item ->
+                    NavigationBarItem(
+                        icon = { Icon(item.icon, contentDescription = item.title) },
+                        label = { Text(item.title) },
+                        selected = currentRoute == item.route.toString(),
+                        onClick = {
+                            if (currentRoute != item.route.toString()) {
+                                navController.navigate(item.route) {
+                                    popUpTo(Screen.Home) { inclusive = false }
+                                }
+                            }
+                        }
+                    )
+                }
+            }
+        }
+    ) { innerPadding ->
+        Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .padding(innerPadding)
                 .padding(8.dp)
                 .fillMaxSize()
-
-        ){
-
+        ) {
             Image(
                 painter = painterResource(id = R.drawable.reservas),
                 contentDescription = "Imagen mis reservas",
@@ -127,23 +158,34 @@ fun ReservaBodyListScreen(
                     .fillMaxSize()
             )
 
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-
-            ){
-                items(uiState.reservas){reserva->
-                    ReservaRow(reserva,onDetails,rutaUiState)
+            if (uiState.reservas.isEmpty()) {
+                Text(
+                    text = "No se han encontrado reservas.",
+                    fontSize = 16.sp,
+                    color = Color.Gray,
+                    modifier = Modifier
+                        .padding(top = 32.dp)
+                        .align(Alignment.CenterHorizontally)
+                )
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    items(uiState.reservas) { reserva ->
+                        ReservaRow(reserva, onDetails, rutaUiState)
+                    }
                 }
             }
         }
     }
 }
 
+
 @Composable
 fun ReservaRow(
     reserva: ReservaEntity,
-    onDetails: (ReservaEntity) -> Unit,
+    onDetails: (Int) -> Unit,
     rutaUiState: RutaUiState,
     reservaViewModel: ReservaViewModel = hiltViewModel()
 ) {
@@ -165,6 +207,7 @@ fun ReservaRow(
                 .background(Color.White)
                 .padding(16.dp)
         ) {
+
             Text(
                 text = "Reserva #${reserva.reservaId}",
                 fontSize = 14.sp,
@@ -187,7 +230,8 @@ fun ReservaRow(
 
             //Ver mas
             androidx.compose.material3.Button(
-                onClick = { onDetails(reserva) },
+
+                onClick = { onDetails(reserva.reservaId?: 0) },
                 modifier = Modifier
                     .padding(top = 12.dp)
                     .align(Alignment.Start),

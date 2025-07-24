@@ -121,11 +121,13 @@ fun AppNavigation() {
             ReservaListScreen(
                 scope = scope,
                 onCreate = { /* navController.navigate(...) */ },
-                onDetails = { navController.navigate(Screen.ReservaDetails(0)) },
+                onDetails = {reserva-> navController.navigate(Screen.ReservaDetails(reserva)) },
                 onEdit = { navController.navigate(Screen.ReservaEdit(0)) },
-                onDelete = { navController.navigate(Screen.ReservaDelete(0)) }
+                onDelete = { navController.navigate(Screen.ReservaDelete(0)) },
+                navController = navController
             )
         }
+
         composable<Screen.Rutas_y_viajes> { backStackEntry ->
             val reservaViewModel: ReservaViewModel = hiltViewModel(backStackEntry)
 
@@ -256,7 +258,7 @@ fun AppNavigation() {
             ReservaDetailsScreen(
                 reservaId = args.reservaId,
                 goBack = {
-                    navController.navigate(Screen.ReservaDetails(0))
+                    navController.navigate(Screen.Reserva)
                 },
                 scope = scope,
                 goToEdit = {reservaId->
@@ -276,12 +278,13 @@ fun AppNavigation() {
             val args = it.toRoute<Screen.ReservaEdit>()
             ReservaEditScreen(
                 reservaId = args.reservaId,
-                goBack = { id ->
-                    navController.navigate(Screen.ReservaEdit(id))
+                goBack = {reservaId->
+                    navController.navigate(Screen.ReservaDetails(reservaId))
                 }
 
             )
         }
+
 
 
         composable<Screen.ReservaDelete> {

@@ -100,7 +100,9 @@ fun Rutas_Viajes_Screen(
                     tarifaBase = 1000.0,
                     impuesto = 0.0,
                     precioTotal = 0.0,
-                    tipoCliente = soyPiloto ?: false
+                    tipoCliente = soyPiloto ?: false,
+                    pasajero = 0
+
                 )//aqui se pasa a reserva en el metodo saveReserva(reserva:ReservaEntity)
             }
         },
@@ -132,7 +134,7 @@ fun Vuelos_RutasBodyListScreen(
     reservaUiState:UiState
 
 
-    ) {
+) {
     var fechaSeleccionada by remember { mutableStateOf<Date?>(null) }
     fechaSeleccionada = reservaUiState.fecha
     var selectedAeronave by remember { mutableStateOf<AeronaveDTO?>(null) }
@@ -140,15 +142,15 @@ fun Vuelos_RutasBodyListScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
 
-   /* val licencias = listOf(
-        "PPL - Piloto Privado",
-        "CPL - Piloto Comercial",
-        "ATPL - Piloto de Transporte de Línea Aérea",
-        "IR - Habilitación de Vuelo por Instrumentos",
-        "ME - Habilitación Multimotor",
-        "Turboprop - Habilitación Turboprop",
-        "Jet Type Rating - Habilitación Jet"
-    )*/
+    /* val licencias = listOf(
+         "PPL - Piloto Privado",
+         "CPL - Piloto Comercial",
+         "ATPL - Piloto de Transporte de Línea Aérea",
+         "IR - Habilitación de Vuelo por Instrumentos",
+         "ME - Habilitación Multimotor",
+         "Turboprop - Habilitación Turboprop",
+         "Jet Type Rating - Habilitación Jet"
+     )*/
 
     val licencias = TipoLicencia.values().toList()
 
@@ -428,6 +430,9 @@ fun Vuelos_RutasBodyListScreen(
                                     onClick = {
                                         licenciaSeleccionada = licencia
                                         expandedLicencia = false
+
+                                        // reservaViewModel.seleccionarLicenciaPiloto(licencia)
+
                                     }
                                 )
                             }
@@ -444,7 +449,7 @@ fun Vuelos_RutasBodyListScreen(
                     onAeronaveSelected = { aeronave ->
                         val licenciaEnum = tipoLicenciaFromDescripcion(aeronave.licencia)
                         if (soyPiloto == true && licenciaSeleccionada != null) {
-                            if (licenciaSeleccionada == licenciaEnum) {
+                            if (licenciaEnum == licenciaSeleccionada) {
                                 selectedAeronave = aeronave
                                 reservaViewModel.seleccionarTipoAeronave(aeronave.aeronaveId ?: 0)
                             } else {

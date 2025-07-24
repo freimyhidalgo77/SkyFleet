@@ -11,6 +11,7 @@ import edu.ucne.skyplanerent.data.repository.TipoVueloRepository
 import edu.ucne.skyplanerent.presentation.UiEvent
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaEvent
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.toEntity
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoLicencia
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -71,6 +72,22 @@ class ReservaViewModel @Inject constructor(
         _tipoCliente.value = valor
     }
 
+    fun seleccionarLicenciaPiloto(licencia: TipoLicencia) {
+        _uiState.update { it.copy(licenciaPiloto = licencia) }
+    }
+
+    fun categoriaIdChange(id: Int) {
+        _uiState.update {
+            it.copy(categoriaId = id)
+        }
+
+    }
+
+    fun onChangeRuta(rutaId: Int) {
+        _uiState.update { it.copy(rutaId = rutaId) }
+    }
+
+
 
     init{
         getReserva()
@@ -84,25 +101,25 @@ class ReservaViewModel @Inject constructor(
 
 
 
-   /* fun onEvent(event: ReservaEvent) {
-        when (event) {
-            is ReservaEvent.AeronaveChange -> {
-            }
-            is ReservaEvent.FechaChange -> {
-                _uiState.update {
-                    it.copy(fecha = event.fecha)
-                }
-            }
-            is ReservaEvent.PasajeroChange -> {
-                onChangePasajeros(event.pasajero)
-            }
-            is ReservaEvent.RutaChange -> {
-                seleccionarRuta(event.rutaId)
-            }
-            ReservaEvent.Delte -> deleteReserva()
-            ReservaEvent.save -> guardarReserva()
-        }
-    }*/
+    /* fun onEvent(event: ReservaEvent) {
+         when (event) {
+             is ReservaEvent.AeronaveChange -> {
+             }
+             is ReservaEvent.FechaChange -> {
+                 _uiState.update {
+                     it.copy(fecha = event.fecha)
+                 }
+             }
+             is ReservaEvent.PasajeroChange -> {
+                 onChangePasajeros(event.pasajero)
+             }
+             is ReservaEvent.RutaChange -> {
+                 seleccionarRuta(event.rutaId)
+             }
+             ReservaEvent.Delte -> deleteReserva()
+             ReservaEvent.save -> guardarReserva()
+         }
+     }*/
 
 
 
@@ -116,6 +133,24 @@ class ReservaViewModel @Inject constructor(
         }
     }
 
+    fun updateReserva() {
+        viewModelScope.launch {
+            try {
+                val reserva = uiState.value.toEntity()
+                reservaRepository.saveReserva(reserva)
+                _uiState.update {
+                    it.copy(successMessage = "Reserva actualizada correctamente")
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(errorMessage = "Error al actualizar la reserva")
+                }
+            }
+        }
+    }
+
+
+
     fun guardarReserva(
         rutaId: Int,
         tipoVueloId: Int,
@@ -123,7 +158,8 @@ class ReservaViewModel @Inject constructor(
         tarifaBase: Double,
         impuesto: Double,
         precioTotal: Double,
-        tipoCliente: Boolean?
+        tipoCliente: Boolean?,
+        pasajero: Int
     ) {
         viewModelScope.launch {
             val fecha = _fechaSeleccionada.value
@@ -142,7 +178,8 @@ class ReservaViewModel @Inject constructor(
                 tarifa = tarifaBase,
                 impuesto = impuesto,
                 tipoCliente = tipoCliente,
-                precioTotal = precioTotal
+                precioTotal = precioTotal,
+                pasajeros = pasajero
             )
 
             reservaRepository.saveReserva(reserva)
@@ -281,8 +318,9 @@ class ReservaViewModel @Inject constructor(
         impuesto = impuesto?:0.0,
         tarifa = tarifa?:0.0,
         precioTotal = precioTotal,
-        tipoCliente = tipoCliente?:false
+        tipoCliente = tipoCliente?:false,
+        pasajeros = pasajeros,
 
-    )
+        )
 
 }
