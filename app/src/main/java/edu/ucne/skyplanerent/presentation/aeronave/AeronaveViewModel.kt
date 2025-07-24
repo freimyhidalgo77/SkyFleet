@@ -1,12 +1,16 @@
 package edu.ucne.skyplanerent.presentation.aeronave
 
+import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import edu.ucne.skyplanerent.data.remote.Resource
 import edu.ucne.skyplanerent.data.remote.dto.AeronaveDTO
 import edu.ucne.skyplanerent.data.repository.AeronaveRepository
 import edu.ucne.skyplanerent.presentation.UiEvent
+import edu.ucne.skyplanerent.presentation.categoriaaeronave.CategoriaAeronaveEvent
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,11 +19,14 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.File
+import java.io.FileOutputStream
 import javax.inject.Inject
 
 @HiltViewModel
 class AeronaveViewModel @Inject constructor(
-    private val aeronaveRepository: AeronaveRepository
+    private val aeronaveRepository: AeronaveRepository,
+    @ApplicationContext private val context: Context // Añadir contexto
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(AeronaveUiState())
     val uiState = _uiState.asStateFlow()
@@ -71,6 +78,7 @@ class AeronaveViewModel @Inject constructor(
             is AeronaveEvent.GetAeronave -> findAeronave(event.id)
             AeronaveEvent.Save -> saveAeronave()
             AeronaveEvent.Delete -> deleteAeronave()
+            is AeronaveEvent.ImageSelected -> onImageSelected(event.uri)
         }
     }
 
@@ -101,6 +109,26 @@ class AeronaveViewModel @Inject constructor(
                     }
                 }
             }
+        }
+    }
+
+    private fun onImageSelected(uri: Uri) {
+        _uiState.update { it.copy(imageUri = uri) }
+    }
+
+    private fun saveImage(context: Context, uri: Uri): String? {
+        return try {
+            val contentResolver = context.contentResolver
+            val file = File(context.filesDir, "aeronave_${System.currentTimeMillis()}.jpg")
+            contentResolver.openInputStream(uri)?.use { input ->
+                FileOutputStream(file).use { output ->
+                    input.copyTo(output)
+                }
+            }
+            file.absolutePath
+        } catch (e: Exception) {
+            _uiState.update { it.copy(errorMessage = "Error al guardar la imagen: ${e.message}") }
+            null
         }
     }
 
@@ -372,6 +400,7 @@ class AeronaveViewModel @Inject constructor(
                     CapacidadPasajeros = 0,
                     AltitudMaxima = 0,
                     Licencia = "",
+                    imageUri = null, // Reiniciar la imagen
                     errorEstadoId = null,
                     errorModeloAvion = null,
                     errorDescripcionCategoria = null,
@@ -490,13 +519,18 @@ class AeronaveViewModel @Inject constructor(
             if (error) return@launch
 
             try {
-                aeronaveRepository.saveAeronave(_uiState.value.toEntity())
-
+                // Procesar la imagen si existe
+                val imagePath = _uiState.value.imageUri?.let { uri ->
+                    saveImage(context, uri)
+                }
+                // Guardar en el repositorio
+                aeronaveRepository.saveAeronave(_uiState.value.toEntity(imagePath))
                 _uiState.update {
                     it.copy(
                         isSuccess = true,
                         successMessage = "Aeronave guardada correctamente",
-                        errorMessage = null
+                        errorMessage = null,
+                        imageUri = null // Limpiar imagen tras éxito
                     )
                 }
 
@@ -539,12 +573,18 @@ class AeronaveViewModel @Inject constructor(
     private fun saveAeronave() {
         viewModelScope.launch {
             try {
-                aeronaveRepository.saveAeronave(_uiState.value.toEntity())
+                // Procesar la imagen si existe
+                val imagePath = _uiState.value.imageUri?.let { uri ->
+                    saveImage(context, uri)
+                }
+                // Guardar en el repositorio
+                aeronaveRepository.saveAeronave(_uiState.value.toEntity(imagePath))
                 _uiState.update {
                     it.copy(
                         isSuccess = true,
                         successMessage = "Aeronave guardada correctamente",
-                        errorMessage = null
+                        errorMessage = null,
+                        imageUri = null // Limpiar imagen tras éxito
                     )
                 }
                 getAeronaves()
@@ -566,12 +606,20 @@ class AeronaveViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 _uiState.value.AeronaveId?.let { id ->
+                    // Eliminar la imagen asociada si existe
+                    _uiState.value.imageUri?.let { uri ->
+                        val file = File(uri.path ?: "")
+                        if (file.exists()) {
+                            file.delete()
+                        }
+                    }
                     aeronaveRepository.deleteAeronave(id)
                     _uiState.update {
                         it.copy(
                             isSuccess = true,
                             successMessage = "Aeronave eliminada correctamente",
-                            errorMessage = null
+                            errorMessage = null,
+                            imageUri = null // Limpiar imagen tras eliminar
                         )
                     }
                     getAeronaves()
@@ -622,7 +670,8 @@ class AeronaveViewModel @Inject constructor(
                                         Rango = aeronave.rango ?: 0,
                                         CapacidadPasajeros = aeronave.capacidadPasajeros ?: 0,
                                         AltitudMaxima = aeronave.altitudMaxima ?: 0,
-                                        Licencia = aeronave.licencia ?: ""
+                                        Licencia = aeronave.licencia ?: "",
+                                        imageUri = aeronave.imagePath?.let { path -> Uri.fromFile(File(path)) }
                                     )
                                 }
                             } ?: run {
@@ -674,7 +723,7 @@ class AeronaveViewModel @Inject constructor(
     }
 }
 
-fun AeronaveUiState.toEntity() = AeronaveDTO(
+fun AeronaveUiState.toEntity(imagePath: String? = null) = AeronaveDTO(
     aeronaveId = AeronaveId,
     estadoId = estadoId ?: 0,
     modeloAvion = ModeloAvion ?: "",
@@ -690,5 +739,6 @@ fun AeronaveUiState.toEntity() = AeronaveDTO(
     rango = Rango ?: 0,
     capacidadPasajeros = CapacidadPasajeros ?: 0,
     altitudMaxima = AltitudMaxima ?: 0,
-    licencia = Licencia ?: ""
+    licencia = Licencia ?: "",
+    imagePath = imagePath ?: imageUri?.path // Añadir imagePath
 )
