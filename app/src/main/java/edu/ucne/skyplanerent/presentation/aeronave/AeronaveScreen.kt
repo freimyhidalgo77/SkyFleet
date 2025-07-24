@@ -1,7 +1,16 @@
 package edu.ucne.skyplanerent.presentation.aeronave
 
+import android.Manifest
+import android.os.Build
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,12 +18,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AddPhotoAlternate
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -39,12 +53,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import edu.ucne.skyplanerent.presentation.UiEvent
+import edu.ucne.skyplanerent.presentation.categoriaaeronave.CategoriaAeronaveEvent
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,7 +74,22 @@ fun AeronaveScreen(
     viewModel: AeronaveViewModel = hiltViewModel(),
     goBack: () -> Unit
 ) {
+    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    // Lanzador para seleccionar imágenes
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        uri?.let { viewModel.onEvent(AeronaveEvent.ImageSelected(it)) }
+    }
+
+    // Lanzador para permisos
+    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+        if (isGranted) {
+            launcher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+        } else {
+            Toast.makeText(context, "Permiso denegado", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     LaunchedEffect(aeronaveId) {
         if (aeronaveId != null && aeronaveId > 0) {
@@ -68,7 +103,14 @@ fun AeronaveScreen(
         uiState = uiState,
         onEvent = viewModel::onEvent,
         goBack = goBack,
-        viewModel = viewModel
+        viewModel = viewModel,
+        pickImage = {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                permissionLauncher.launch(Manifest.permission.READ_MEDIA_IMAGES)
+            } else {
+                permissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+            }
+        }
     )
 }
 
@@ -78,7 +120,8 @@ fun AeronaveBodyScreen(
     uiState: AeronaveUiState,
     onEvent: (AeronaveEvent) -> Unit,
     goBack: () -> Unit,
-    viewModel: AeronaveViewModel
+    viewModel: AeronaveViewModel,
+    pickImage: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -190,6 +233,34 @@ fun AeronaveBodyScreen(
                 ) {
                     Spacer(modifier = Modifier.height(32.dp))
                     Text(if (uiState.AeronaveId == null) "Nueva Aeronave" else "Editar Aeronave")
+
+                    // Mostrar la imagen guardada o la seleccionada
+                    (uiState.imageUri)?.let { imageSource ->
+                        AsyncImage(
+                            model = imageSource,
+                            contentDescription = "Imagen de la aeronave",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp)
+                                .clip(RoundedCornerShape(8.dp)),
+                            contentScale = ContentScale.Crop
+                        )
+                    } ?: Spacer(modifier = Modifier.height(200.dp)) // Espacio reservado si no hay imagen
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Botón para seleccionar imagen
+                    OutlinedButton(
+                        onClick = pickImage,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Blue),
+                        border = BorderStroke(1.dp, Color.Blue)
+                    ) {
+                        Icon(Icons.Default.Image, contentDescription = "Seleccionar imagen")
+                        Text("Seleccionar Imagen")
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
 
                     OutlinedTextField(
                         value = uiState.AeronaveId?.toString() ?: "Nuevo",
@@ -604,6 +675,7 @@ fun AeronaveBodyScreen(
                                     } else {
                                         onEvent(AeronaveEvent.Save) // Editar aeronave existente
                                     }
+                                    goBack()
                                 }
                             },
                             enabled = isFormValid,
@@ -614,6 +686,10 @@ fun AeronaveBodyScreen(
                             border = BorderStroke(1.dp, if (isFormValid) Color.Blue else Color.Gray),
                             modifier = Modifier.padding(horizontal = 8.dp)
                         ) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "save button"
+                            )
                             Text(text = if (uiState.AeronaveId == null) "Guardar" else "Actualizar")
                         }
                     }
