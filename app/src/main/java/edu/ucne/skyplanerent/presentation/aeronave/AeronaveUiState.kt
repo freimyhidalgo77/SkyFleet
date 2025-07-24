@@ -1,5 +1,6 @@
 package edu.ucne.skyplanerent.presentation.aeronave
 
+import android.net.Uri
 import edu.ucne.skyplanerent.data.remote.dto.AeronaveDTO
 
 data class AeronaveUiState (
@@ -38,6 +39,7 @@ data class AeronaveUiState (
     val errorMessage:String? = null,
     val isLoading:Boolean = false,
     val isSuccess: Boolean = false,
-    val aeronaves:List<AeronaveDTO> = emptyList()
+    val aeronaves:List<AeronaveDTO> = emptyList(),
+    val imageUri: Uri? = null // Nuevo campo para la imagen
 
 )

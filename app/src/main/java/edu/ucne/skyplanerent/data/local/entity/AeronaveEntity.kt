@@ -22,7 +22,6 @@ data class AeronaveEntity(
     val CapacidadPasajeros:Int = 0,
     val AltitudMaxima:Int  = 0,
     val Licencia:String,
-    val isPendingSync: Boolean = false // Nuevo campo
-
-
+    val isPendingSync: Boolean = false, // Nuevo campo
+    val imagePath: String? = null
 )
