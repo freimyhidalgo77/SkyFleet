@@ -19,6 +19,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Date
+import java.text.SimpleDateFormat
+import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
@@ -89,6 +91,17 @@ class ReservaViewModel @Inject constructor(
 
     fun onChangeTipoVuelo(tipoVueloId: Int) {
         _uiState.update { it.copy(tipoVueloId =  tipoVueloId) }
+    }
+
+    fun onFechaChange(nuevaFecha: String) {
+        val formato = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val fechaConvertida: Date? = try {
+            formato.parse(nuevaFecha)
+        } catch (e: Exception) {
+            null
+        }
+
+        _uiState.update { it.copy(fecha = fechaConvertida) }
     }
 
 

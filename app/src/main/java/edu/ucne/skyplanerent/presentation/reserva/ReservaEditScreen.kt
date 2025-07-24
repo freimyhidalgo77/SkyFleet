@@ -1,17 +1,20 @@
 package edu.ucne.skyplanerent.presentation.reserva
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -30,6 +33,10 @@ import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaUiState
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaViewModel
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloUiState
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloViewModel
+import java.util.Calendar
+import java.util.Date
+
+
 
 @Composable
 fun ReservaEditScreen(
@@ -60,6 +67,7 @@ fun ReservaEditScreen(
         onChangeRuta = viewModel::onChangeRuta,
         onChangeAeronave = viewModel::categoriaIdChange,
         onChangeTipoVuelo = viewModel::onChangeTipoVuelo,
+        onDateSelected = viewModel::onFechaChange,
         reservaId = reservaId,
 
 
@@ -80,7 +88,9 @@ fun ReservaEditBodyScreen(
     onChangeRuta: (Int)-> Unit,
     onChangeAeronave:(Int)-> Unit,
     onChangeTipoVuelo: (Int) -> Unit,
+    onDateSelected:(String)->Unit,
     onChangePasajeros: (Int) -> Unit,
+    viewModel: ReservaViewModel = hiltViewModel()
 ) {
 
     val tipoVuelo = tipoVueloUiState.tipovuelo.find { it.tipoVueloId == uiState.tipoVueloId }
@@ -237,6 +247,8 @@ fun ReservaEditBodyScreen(
                 }
             )
 
+            Spacer(modifier = Modifier.height(8.dp))
+
             Text("Modificar aeronave", fontWeight = FontWeight.Bold)
             AeronavesDropdown(
                 aeronaves = aeronaveUiState.aeronaves,
@@ -257,9 +269,15 @@ fun ReservaEditBodyScreen(
                 }
             )
 
-            ChangeRow("Fecha y hora") { /* Acción cambiar fecha */ }
+            FechaPickerField(
+                selectedDate = fecha?.toString(),
+                onDateSelected = { viewModel.onFechaChange(it) }
+            )
 
-            ChangeRow("Pasajeros") { /* Acción cambiar pasajeros */ }
+            PasajerosDropdown(
+                selectedPasajeros = uiState.pasajeros?:0,
+                onPasajerosSelected = { onChangePasajeros(it) }
+            )
 
         }
     }
@@ -426,6 +444,111 @@ fun TipoVueloDropdown(
     }
 }
 
+
+@Composable
+fun FechaPickerField(
+    selectedDate: String?,
+    onDateSelected: (String) -> Unit
+) {
+    var showDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
+    // Configurar la fecha inicial
+    val calendar = Calendar.getInstance()
+    selectedDate?.let {
+        val parts = it.split("-")
+        if (parts.size == 3) {
+            try {
+                calendar.set(parts[0].toInt(), parts[1].toInt() - 1, parts[2].toInt())
+            } catch (e: NumberFormatException) {
+                // Usar fecha actual si el formato no es válido
+                calendar.time = Date()
+            }
+        }
+    }
+
+    // Crear el DatePickerDialog
+    val datePickerDialog = android.app.DatePickerDialog(
+        context,
+        { _, year, month, dayOfMonth ->
+            val formattedDate = String.format("%04d-%02d-%02d", year, month + 1, dayOfMonth)
+            onDateSelected(formattedDate)
+        },
+        calendar.get(Calendar.YEAR),
+        calendar.get(Calendar.MONTH),
+        calendar.get(Calendar.DAY_OF_MONTH)
+    ).apply {
+        setCancelable(true)
+    }
+
+    // Manejar el click para mostrar el diálogo
+    val clickHandler = {
+        showDialog = true
+        datePickerDialog.show()
+    }
+
+    OutlinedTextField(
+        value = selectedDate ?: "Seleccionar fecha",
+        onValueChange = {},
+        readOnly = true,
+        label = { Text("Fecha del vuelo") },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .clickable(onClick = clickHandler),
+        trailingIcon = {
+            Icon(
+                imageVector = Icons.Default.CalendarToday,
+                contentDescription = "Seleccionar fecha",
+                modifier = Modifier.clickable(onClick = clickHandler)
+            )
+        }
+    )
+}
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PasajerosDropdown(
+    selectedPasajeros: Int,
+    onPasajerosSelected: (Int) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+    ) {
+        OutlinedTextField(
+            value = selectedPasajeros.toString(),
+            onValueChange = {},
+            readOnly = true,
+            label = { Text("Cantidad de pasajeros") },
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+            },
+            modifier = Modifier
+                .menuAnchor()
+                .fillMaxWidth()
+        )
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            (1..10).forEach { count ->
+                DropdownMenuItem(
+                    text = { Text("$count") },
+                    onClick = {
+                        onPasajerosSelected(count)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
 
 
 
