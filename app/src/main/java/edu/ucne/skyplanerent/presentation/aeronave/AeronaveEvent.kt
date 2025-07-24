@@ -1,5 +1,8 @@
 package edu.ucne.skyplanerent.presentation.aeronave
 
+import android.net.Uri
+import edu.ucne.skyplanerent.presentation.categoriaaeronave.CategoriaAeronaveEvent
+
 
 sealed interface AeronaveEvent {
 
@@ -19,6 +22,7 @@ sealed interface AeronaveEvent {
     data class CapacidadPasajerosChange(val capacidadPasajeros: Int): AeronaveEvent
     data class AltitudMaximaChange(val altitudMaxima: Int): AeronaveEvent
     data class LicenciaChange(val licencia: String): AeronaveEvent
+    data class ImageSelected(val uri: Uri) : AeronaveEvent // Nuevo evento
 
     data object LimpiarErrorMessageEstadoIdChange: AeronaveEvent
     data object LimpiarErrorMessageModeloAvionChange: AeronaveEvent
@@ -42,4 +46,5 @@ sealed interface AeronaveEvent {
     data object New: AeronaveEvent
     data object postAeronave: AeronaveEvent
     data object ResetSuccessMessage: AeronaveEvent
+
 }
