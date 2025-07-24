@@ -15,12 +15,41 @@ class AeronaveRepository @Inject constructor(
     private val dataSource: AeronavesDataSource,
     private val dao: AeronaveDao
 ) {
+    // Separador único para embeber imagePath en descripcionAeronave
+    private val IMAGE_PATH_SEPARATOR = "|IMG_PATH:"
+
+    // Extrae imagePath y descripción limpia de descripcionAeronave
+    private fun extractImagePathAndDescription(descripcion: String?): Pair<String?, String?> {
+        if (descripcion.isNullOrBlank()) return Pair(null, null)
+        return if (descripcion.contains(IMAGE_PATH_SEPARATOR)) {
+            val parts = descripcion.split(IMAGE_PATH_SEPARATOR)
+            Pair(parts.last().takeIf { it.isNotBlank() }, parts.first().takeIf { it.isNotBlank() })
+        } else {
+            Pair(null, descripcion)
+        }
+    }
+
+    // Combina descripción y imagePath en un solo string
+    private fun combineDescriptionAndImagePath(descripcion: String?, imagePath: String?): String? {
+        return when {
+            descripcion.isNullOrBlank() && imagePath.isNullOrBlank() -> null
+            descripcion.isNullOrBlank() -> "$IMAGE_PATH_SEPARATOR$imagePath"
+            imagePath.isNullOrBlank() -> descripcion
+            else -> "$descripcion$IMAGE_PATH_SEPARATOR$imagePath"
+        }
+    }
+
     fun getAeronave(aeronaveId: Int): Flow<Resource<List<AeronaveDTO>>> = flow {
         emit(Resource.Loading())
         try {
             val aeronave = dataSource.getAeronave(aeronaveId)
-            dao.save(listOf(aeronave.toEntity().copy(isPendingSync = false)))
-            emit(Resource.Success(listOf(aeronave)))
+            val (imagePath, cleanDescription) = extractImagePathAndDescription(aeronave.descripcionAeronave)
+            val aeronaveWithImage = aeronave.copy(
+                descripcionAeronave = cleanDescription.toString(),
+                imagePath = imagePath ?: dao.find(aeronaveId)?.imagePath
+            )
+            dao.save(listOf(aeronaveWithImage.toEntity().copy(isPendingSync = false)))
+            emit(Resource.Success(listOf(aeronaveWithImage)))
         } catch (e: HttpException) {
             val errorMessage = e.response()?.errorBody()?.string() ?: e.message()
             Log.e("Aeronave", "HttpException: $errorMessage")
@@ -51,9 +80,30 @@ class AeronaveRepository @Inject constructor(
             val pendingAeronaves = dao.getPendingSync()
             for (pending in pendingAeronaves) {
                 try {
-                    val savedAeronave = dataSource.PostAeronave(pending.toDto())
-                    dao.deletePending(pending.AeronaveId)
-                    dao.save(listOf(savedAeronave.toEntity().copy(isPendingSync = false)))
+                    val dto = pending.toDto()
+                    val combinedDescription = combineDescriptionAndImagePath(dto.descripcionAeronave, dto.imagePath)
+                    val dtoWithoutImage = dto.copy(descripcionAeronave = combinedDescription.toString(), imagePath = null)
+                    if (pending.AeronaveId != null && pending.AeronaveId > 0) {
+                        // Actualizar aeronave existente
+                        val updatedAeronave = dataSource.putAeronave(pending.AeronaveId, dtoWithoutImage)
+                        dao.deletePending(pending.AeronaveId)
+                        val (imagePath, cleanDescription) = extractImagePathAndDescription(updatedAeronave.descripcionAeronave)
+                        dao.save(listOf(updatedAeronave.toEntity().copy(
+                            isPendingSync = false,
+                            imagePath = imagePath ?: pending.imagePath,
+                            DescripcionAeronave = cleanDescription ?: updatedAeronave.descripcionAeronave
+                        )))
+                    } else {
+                        // Crear nueva aeronave
+                        val savedAeronave = dataSource.PostAeronave(dtoWithoutImage)
+                        dao.deletePending(pending.AeronaveId)
+                        val (imagePath, cleanDescription) = extractImagePathAndDescription(savedAeronave.descripcionAeronave)
+                        dao.save(listOf(savedAeronave.toEntity().copy(
+                            isPendingSync = false,
+                            imagePath = imagePath ?: pending.imagePath,
+                            DescripcionAeronave = cleanDescription ?: savedAeronave.descripcionAeronave
+                        )))
+                    }
                 } catch (e: Exception) {
                     Log.e("Aeronave", "Error al sincronizar aeronave ${pending.AeronaveId}: ${e.message}")
                 }
@@ -61,7 +111,16 @@ class AeronaveRepository @Inject constructor(
 
             // Obtener aeronaves del servidor
             val aeronavesFetched = dataSource.getAeronaves()
-            val listaEntity = aeronavesFetched.map { it.toEntity().copy(isPendingSync = false) }
+            // Actualizar solo las aeronaves no pendientes localmente
+            val listaEntity = aeronavesFetched.map { aeronave ->
+                val localAeronave = dao.find(aeronave.aeronaveId ?: 0)
+                val (imagePath, cleanDescription) = extractImagePathAndDescription(aeronave.descripcionAeronave)
+                aeronave.toEntity().copy(
+                    isPendingSync = false,
+                    imagePath = imagePath ?: localAeronave?.imagePath,
+                    DescripcionAeronave = cleanDescription ?: aeronave.descripcionAeronave
+                )
+            }
             dao.save(listaEntity)
 
             // Emitir aeronaves locales actualizadas
@@ -78,11 +137,23 @@ class AeronaveRepository @Inject constructor(
 
     suspend fun update(id: Int, aeronaveDTO: AeronaveDTO) {
         try {
-            dataSource.putAeronave(id, aeronaveDTO)
-            dao.save(listOf(aeronaveDTO.toEntity().copy(isPendingSync = false)))
+            // Combinar descripción e imagePath para enviar al servidor
+            val combinedDescription = combineDescriptionAndImagePath(aeronaveDTO.descripcionAeronave, aeronaveDTO.imagePath)
+            val dtoWithoutImage = aeronaveDTO.copy(descripcionAeronave = combinedDescription.toString(), imagePath = null)
+            val updatedAeronave = dataSource.putAeronave(id, dtoWithoutImage)
+            val (imagePath, cleanDescription) = extractImagePathAndDescription(updatedAeronave.descripcionAeronave)
+            dao.save(listOf(updatedAeronave.toEntity().copy(
+                isPendingSync = false,
+                imagePath = imagePath ?: aeronaveDTO.imagePath,
+                DescripcionAeronave = cleanDescription ?: updatedAeronave.descripcionAeronave
+            )))
         } catch (e: Exception) {
             Log.e("Aeronave", "Error al actualizar remoto: ${e.message}")
-            dao.save(listOf(aeronaveDTO.toEntity().copy(isPendingSync = true)))
+            val combinedDescription = combineDescriptionAndImagePath(aeronaveDTO.descripcionAeronave, aeronaveDTO.imagePath)
+            dao.save(listOf(aeronaveDTO.toEntity().copy(
+                isPendingSync = true,
+                DescripcionAeronave = combinedDescription.toString()
+            )))
         }
     }
 
@@ -90,8 +161,14 @@ class AeronaveRepository @Inject constructor(
         emit(Resource.Loading())
         try {
             val aeronave = dataSource.getAeronave(id)
-            dao.save(listOf(aeronave.toEntity().copy(isPendingSync = false)))
-            emit(Resource.Success(aeronave))
+            val localAeronave = dao.find(id)
+            val (imagePath, cleanDescription) = extractImagePathAndDescription(aeronave.descripcionAeronave)
+            val aeronaveWithImage = aeronave.copy(
+                descripcionAeronave = cleanDescription ?: aeronave.descripcionAeronave,
+                imagePath = imagePath ?: localAeronave?.imagePath
+            )
+            dao.save(listOf(aeronaveWithImage.toEntity().copy(isPendingSync = false)))
+            emit(Resource.Success(aeronaveWithImage))
         } catch (e: HttpException) {
             val errorMessage = e.response()?.errorBody()?.string() ?: e.message()
             Log.e("Aeronave", "HttpException: $errorMessage")
@@ -114,20 +191,38 @@ class AeronaveRepository @Inject constructor(
 
     suspend fun saveAeronave(aeronaveDTO: AeronaveDTO): Resource<AeronaveDTO> {
         return try {
-            val savedAeronave = dataSource.PostAeronave(aeronaveDTO)
-            dao.save(listOf(savedAeronave.toEntity().copy(isPendingSync = false)))
-            Resource.Success(savedAeronave)
+            // Combinar descripción e imagePath para enviar al servidor
+            val combinedDescription = combineDescriptionAndImagePath(aeronaveDTO.descripcionAeronave, aeronaveDTO.imagePath)
+            val dtoWithoutImage = aeronaveDTO.copy(descripcionAeronave = combinedDescription.toString(), imagePath = null)
+            val savedAeronave = dataSource.PostAeronave(dtoWithoutImage)
+            val (imagePath, cleanDescription) = extractImagePathAndDescription(savedAeronave.descripcionAeronave)
+            val savedEntity = savedAeronave.toEntity().copy(
+                isPendingSync = false,
+                imagePath = imagePath ?: aeronaveDTO.imagePath,
+                DescripcionAeronave = cleanDescription ?: savedAeronave.descripcionAeronave
+            )
+            dao.save(listOf(savedEntity))
+            Resource.Success(savedAeronave.copy(
+                imagePath = imagePath ?: aeronaveDTO.imagePath,
+                descripcionAeronave = cleanDescription ?: savedAeronave.descripcionAeronave
+            ))
         } catch (e: HttpException) {
             val errorMessage = e.response()?.errorBody()?.string() ?: e.message()
             Log.e("Aeronave", "HttpException al guardar remoto: $errorMessage")
-            val localAeronave = aeronaveDTO.copy(aeronaveId = null)
-            dao.save(listOf(localAeronave.toEntity().copy(isPendingSync = true, AeronaveId = null)))
-            Resource.Success(localAeronave)
+            val combinedDescription = combineDescriptionAndImagePath(aeronaveDTO.descripcionAeronave, aeronaveDTO.imagePath)
+            dao.save(listOf(aeronaveDTO.toEntity().copy(
+                isPendingSync = true,
+                DescripcionAeronave = combinedDescription.toString()
+            )))
+            Resource.Success(aeronaveDTO)
         } catch (e: Exception) {
             Log.e("Aeronave", "Exception al guardar remoto: ${e.message}")
-            val localAeronave = aeronaveDTO.copy(aeronaveId = null)
-            dao.save(listOf(localAeronave.toEntity().copy(isPendingSync = true, AeronaveId = null)))
-            Resource.Success(localAeronave)
+            val combinedDescription = combineDescriptionAndImagePath(aeronaveDTO.descripcionAeronave, aeronaveDTO.imagePath)
+            dao.save(listOf(aeronaveDTO.toEntity().copy(
+                isPendingSync = true,
+                DescripcionAeronave = combinedDescription.toString()
+            )))
+            Resource.Success(aeronaveDTO)
         }
     }
 
@@ -169,6 +264,7 @@ class AeronaveRepository @Inject constructor(
         CapacidadPasajeros = this.capacidadPasajeros,
         AltitudMaxima = this.altitudMaxima,
         Licencia = this.licencia,
+        imagePath = this.imagePath,
         isPendingSync = false
     )
 
@@ -188,6 +284,7 @@ class AeronaveRepository @Inject constructor(
         rango = this.Rango,
         capacidadPasajeros = this.CapacidadPasajeros,
         altitudMaxima = this.AltitudMaxima,
-        licencia = this.Licencia
+        licencia = this.Licencia,
+        imagePath = this.imagePath
     )
 }
