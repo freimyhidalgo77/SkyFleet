@@ -54,7 +54,12 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
 
+    //Dependencia para mostrar calendario
     implementation("androidx.compose.material:material-icons-extended:1.6.1")
+
+    // O la última versión estable para imagen asyn
+    implementation("io.coil-kt:coil-compose:2.5.0")
+
 
     //room
     implementation("androidx.room:room-runtime:2.6.1")
