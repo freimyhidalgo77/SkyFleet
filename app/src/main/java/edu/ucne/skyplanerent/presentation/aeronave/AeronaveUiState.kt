@@ -40,6 +40,7 @@ data class AeronaveUiState (
     val isLoading:Boolean = false,
     val isSuccess: Boolean = false,
     val aeronaves:List<AeronaveDTO> = emptyList(),
-    val imageUri: Uri? = null // Nuevo campo para la imagen
+    val imageUri: Uri? = null, // Nuevo campo para la imagen
+    val categoriaId: Int? = null // Nueva propiedad para almacenar el ID de la categoría
 
 )
