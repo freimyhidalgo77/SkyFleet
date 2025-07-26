@@ -88,7 +88,7 @@ fun LoginScreen(
                         if (task.isSuccessful) {
                             onLoginSuccess()
                         } else {
-                            errorMessage = task.exception?.message
+                            errorMessage = task.exception?.message ?: "Error desconocido"
                         }
                     }
             },

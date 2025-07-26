@@ -25,7 +25,7 @@ class MainActivity : ComponentActivity() {
         FirebaseApp.initializeApp(this)
         setContent {
             MaterialTheme {
-                AppNavigation()
+                AppNavigation(context = this)
             }
         }
     }

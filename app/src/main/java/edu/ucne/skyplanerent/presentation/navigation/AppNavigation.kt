@@ -1,6 +1,7 @@
 package edu.ucne.skyplanerent.presentation.navigation
 
 import android.annotation.SuppressLint
+import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -40,6 +41,7 @@ import edu.ucne.skyplanerent.presentation.aeronave.TipoAeronaveListScreen
 //import edu.ucne.skyplanerent.presentation.aeronave.CategoriaReservaAeronaveScreen
 //import edu.ucne.skyplanerent.presentation.aeronave.TipoAeronaveScreen
 import edu.ucne.skyplanerent.presentation.categoriaaeronave.CategoriaReservaAeronaveScreen
+import edu.ucne.skyplanerent.presentation.login.SessionManager
 import edu.ucne.skyplanerent.presentation.reserva.PagoReservaListScreen
 import edu.ucne.skyplanerent.presentation.reserva.ReservaDeleteScreen
 import edu.ucne.skyplanerent.presentation.reserva.ReservaDetailsScreen
@@ -55,16 +57,20 @@ import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloDetai
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloEvent
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloViewModel
 
+
 @SuppressLint("RememberReturnType", "WrongNavigateRouteType")
 @Composable
-fun AppNavigation() {
-    val auth = FirebaseAuth.getInstance()
-    val navController = rememberNavController()
+fun AppNavigation(context: Context) {
     val scope = rememberCoroutineScope()
     val rutaList by remember { mutableStateOf(emptyList<RutaEntity>()) }
     val tipoList by remember { mutableStateOf(emptyList<TipoVueloEntity>()) }
 
-    val isLoggedIn = auth.currentUser != null
+    val auth = FirebaseAuth.getInstance()
+    val navController = rememberNavController()
+    val sessionManager = remember { SessionManager(context) }
+
+    // Verifica tanto FirebaseAuth como SharedPreferences
+    val isLoggedIn = auth.currentUser != null || sessionManager.isLoggedIn()
 
     NavHost(
         navController = navController,
@@ -79,6 +85,7 @@ fun AppNavigation() {
                 navController = navController,
                 onLogout = {
                     auth.signOut()
+                    sessionManager.clearSession() // Limpia la sesión
                     navController.navigate(Screen.FirstScreen) {
                         popUpTo(0) { inclusive = true }
                     }
@@ -95,6 +102,7 @@ fun AppNavigation() {
         composable<Screen.Login> {
             LoginScreen(
                 onLoginSuccess = {
+                    sessionManager.saveLoginState(true) // Guarda el estado de sesión
                     navController.navigate(Screen.Home) {
                         popUpTo(0) { inclusive = true }
                     }
@@ -104,7 +112,6 @@ fun AppNavigation() {
                 }
             )
         }
-
 
         composable<Screen.Register> {
             RegisterScreen(
