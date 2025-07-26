@@ -58,7 +58,7 @@ fun CategoriaReservaAeronaveScreen (
 @Composable
 private fun CategoriaAeronaveRow(
     it: CategoriaAeronaveEntity,
-    goToCategoria: (Int) -> Unit, // Para navegar a AeronaveListScreen
+    goToCategoria: (Int) -> Unit,
     deleteCategoria: (CategoriaAeronaveEntity) -> Unit
 ) {
     Card(

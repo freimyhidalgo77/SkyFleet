@@ -392,11 +392,11 @@ fun AppNavigation() {
             )
         }
 
-        //Pantalas de aeronave reserva
+        //Pantalla de aeronave reserva
         composable<Screen.CategoriaAeronaveReservaList> {
             CategoriaReservaAeronaveScreen (
                 goToCategoria = { categoriaId ->
-                    navController.navigate("aeronaveList?categoriaId=$categoriaId")
+                    navController.navigate("tipoAeronaveList?categoriaId=$categoriaId")
                 },
                 goBack = { navController.popBackStack() }
             )
@@ -418,11 +418,8 @@ fun AppNavigation() {
                 if (categoriaId != -1) viewModel.filterAeronavesByCategoria(categoriaId)
             }
             TipoAeronaveListScreen(
-                goToAeronave = {
-                    navController.navigate(Screen.TipoAeronaveDetails(0))
-                },
-                createAeronave = {
-                    navController.navigate(Screen.Aeronave(null))
+                goToAeronave = {aeronaveId->
+                    navController.navigate(Screen.TipoAeronaveDetails(aeronaveId))
                 },
                 goBack = { navController.popBackStack() }
             )

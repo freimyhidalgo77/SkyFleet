@@ -44,7 +44,7 @@ import edu.ucne.skyplanerent.data.remote.dto.AeronaveDTO
 fun TipoAeronaveListScreen (
     viewModel: AeronaveViewModel = hiltViewModel(),
     goToAeronave: (Int) -> Unit,
-    createAeronave: () -> Unit,
+    //createAeronave: () -> Unit,
     goBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -53,7 +53,7 @@ fun TipoAeronaveListScreen (
         uiState = uiState,
         goToAeronave = { id -> goToAeronave(id) },
         onEvent = viewModel::onEvent,
-        createAeronave = createAeronave,
+        //createAeronave = createAeronave,
         goBack = goBack
     )
 }
@@ -64,7 +64,7 @@ fun TipoAeronaveBodyListScreen(
     uiState: AeronaveUiState,
     goToAeronave: (Int) -> Unit,
     onEvent: (AeronaveEvent) -> Unit,
-    createAeronave: () -> Unit,
+    //createAeronave: () -> Unit,
     goBack: () -> Unit
 ) {
     val refreshing = uiState.isLoading
@@ -98,11 +98,6 @@ fun TipoAeronaveBodyListScreen(
                 )
             )
         },
-        floatingActionButton = {
-            FloatingActionButton(onClick = createAeronave) {
-                Icon(Icons.Filled.Add, "Agregar nueva")
-            }
-        }
     ) { padding ->
         Box(
             modifier = Modifier
