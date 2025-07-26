@@ -70,6 +70,8 @@ private fun CategoriaAeronaveRow(
     goToCategoria: (Int) -> Unit,
     deleteCategoria: (CategoriaAeronaveEntity) -> Unit
 ) {
+
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
