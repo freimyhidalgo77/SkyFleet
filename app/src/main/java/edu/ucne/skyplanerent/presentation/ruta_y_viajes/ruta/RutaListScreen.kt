@@ -1,6 +1,7 @@
 package edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta
 
 import android.widget.Toast
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -279,87 +280,79 @@ fun RutasRow(
     it: RutaDTO,
     goToRuta: () -> Unit
 ) {
-    Card(
-        elevation = CardDefaults.cardElevation(4.dp),
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp)
-            .clickable { goToRuta() },
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White
-        ),
-        shape = RoundedCornerShape(12.dp)
+            .background(Color.White)
+            .padding(horizontal = 16.dp, vertical = 12.dp)
+            .clickable { goToRuta() }
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "Ruta ${it.rutaId ?: "N/A"}",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.SemiBold
-                    ),
-                    modifier = Modifier.padding(bottom = 4.dp)
-                )
-                Text(
-                    text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color.Blue)) {
-                            append("Origen: ")
-                        }
-                        append(it.origen)
-                    },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color.Blue)) {
-                            append("Destino: ")
-                        }
-                        append(it.destino)
-                    },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color.Blue)) {
-                            append("Distancia: ")
-                        }
-                        append("${it.distancia} km")
-                    },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = buildAnnotatedString {
-                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color.Blue)) {
-                            append("Duración: ")
-                        }
-                        append("${it.duracion} min")
-                    },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-            IconButton(onClick = goToRuta) {
-                Icon(
-                    Icons.Default.ArrowForward,
-                    contentDescription = "Ver/Editar ruta",
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            }
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = "Ruta ${it.rutaId ?: "N/A"}",
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.SemiBold
+                ),
+                color = Color.Black,
+                modifier = Modifier.padding(bottom = 4.dp)
+            )
+            Text(
+                text = buildAnnotatedString {
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color.Blue)) {
+                        append("Origen: ")
+                    }
+                    append(it.origen)
+                },
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.Gray,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = buildAnnotatedString {
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color.Blue)) {
+                        append("Destino: ")
+                    }
+                    append(it.destino)
+                },
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.Gray,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = buildAnnotatedString {
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color.Blue)) {
+                        append("Distancia: ")
+                    }
+                    append("${it.distancia} km")
+                },
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.Gray,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = buildAnnotatedString {
+                    withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color.Blue)) {
+                        append("Duración: ")
+                    }
+                    append("${it.duracion} min")
+                },
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.Gray,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+        IconButton(onClick = goToRuta) {
+            Icon(
+                Icons.Default.ArrowForward,
+                contentDescription = "Ver/Editar ruta",
+                tint = MaterialTheme.colorScheme.primary
+            )
         }
     }
+    HorizontalDivider(color = Color.Gray.copy(alpha = 0.2f))
 }
