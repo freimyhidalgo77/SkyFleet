@@ -14,6 +14,7 @@ import edu.ucne.skyplanerent.presentation.categoriaaeronave.CategoriaAeronaveEve
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -22,11 +23,14 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
 import javax.inject.Inject
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.mapLatest
 
 @HiltViewModel
 class AeronaveViewModel @Inject constructor(
     private val aeronaveRepository: AeronaveRepository,
-    @ApplicationContext private val context: Context // Añadir contexto
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(AeronaveUiState())
     val uiState = _uiState.asStateFlow()
@@ -34,8 +38,26 @@ class AeronaveViewModel @Inject constructor(
     private val _uiEvent = Channel<UiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
 
+    // Variables para búsqueda
+    private val _searchQuery = MutableStateFlow("")
+    val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
+
+    private val _searchResults = MutableStateFlow<List<AeronaveDTO>>(emptyList())
+    val searchResults: StateFlow<List<AeronaveDTO>> = _searchResults.asStateFlow()
+
     init {
         getAeronaves()
+        viewModelScope.launch {
+            _searchQuery
+                .debounce(600)
+                .distinctUntilChanged()
+                .mapLatest { query ->
+                    filterAeronaves(query)
+                }
+                .collectLatest { filtered ->
+                    _searchResults.value = filtered
+                }
+        }
     }
 
     fun onEvent(event: AeronaveEvent) {
@@ -74,17 +96,42 @@ class AeronaveViewModel @Inject constructor(
             is AeronaveEvent.LicenciaChange -> licenciaChange(event.licencia)
             AeronaveEvent.New -> nuevo()
             AeronaveEvent.postAeronave -> addAeronave()
-            AeronaveEvent.ResetSuccessMessage -> _uiState.update { it.copy(isSuccess = false, successMessage = null) }
+            AeronaveEvent.ResetSuccessMessage -> _uiState.update {
+                it.copy(isSuccess = false, successMessage = null)
+            }
             is AeronaveEvent.GetAeronave -> findAeronave(event.id)
             AeronaveEvent.Save -> saveAeronave()
             AeronaveEvent.Delete -> deleteAeronave()
             is AeronaveEvent.ImageSelected -> onImageSelected(event.uri)
+            is AeronaveEvent.FilterByCategoria -> filterAeronavesByCategoria(event.categoriaId)
         }
     }
 
-    // Nueva función para filtrar aeronaves por categoriaId
+    fun onSearchQueryChanged(query: String) {
+        _searchQuery.value = query
+    }
+
+    private fun filterAeronaves(query: String): List<AeronaveDTO> {
+        val baseList = if (_uiState.value.categoriaId != null) {
+            _uiState.value.aeronaves.filter { it.estadoId == _uiState.value.categoriaId }
+        } else {
+            _uiState.value.aeronaves
+        }
+
+        return if (query.isBlank()) {
+            baseList
+        } else {
+            baseList.filter {
+                it.modeloAvion?.contains(query, ignoreCase = true) == true ||
+                        it.registracion?.contains(query, ignoreCase = true) == true ||
+                        it.descripcionAeronave?.contains(query, ignoreCase = true) == true
+            }
+        }
+    }
+
     fun filterAeronavesByCategoria(categoriaId: Int) {
         viewModelScope.launch {
+            _uiState.update { it.copy(categoriaId = categoriaId) }
             aeronaveRepository.getAeronaves().collectLatest { result ->
                 when (result) {
                     is Resource.Loading -> {
@@ -98,6 +145,7 @@ class AeronaveViewModel @Inject constructor(
                                 isLoading = false
                             )
                         }
+                        _searchResults.value = filterAeronaves(_searchQuery.value)
                     }
                     is Resource.Error -> {
                         _uiState.update {
@@ -134,249 +182,187 @@ class AeronaveViewModel @Inject constructor(
 
     private fun limpiarErrorMessageEstadoId() {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(errorEstadoId = null)
-            }
+            _uiState.update { it.copy(errorEstadoId = null) }
         }
     }
 
     private fun limpiarErrorMessageModeloAvion() {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(errorModeloAvion = null)
-            }
+            _uiState.update { it.copy(errorModeloAvion = null) }
         }
     }
 
     private fun limpiarErrorMessageDescripcionCategoria() {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(errorDescripcionCategoria = null)
-            }
+            _uiState.update { it.copy(errorDescripcionCategoria = null) }
         }
     }
 
     private fun limpiarErrorMessageRegistracion() {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(errorRegistracion = null)
-            }
+            _uiState.update { it.copy(errorRegistracion = null) }
         }
     }
 
     private fun limpiarErrorMessageCostoXHora() {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(errorCostoXHora = null)
-            }
+            _uiState.update { it.copy(errorCostoXHora = null) }
         }
     }
 
     private fun limpiarErrorMessageDescripcionAeronave() {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(errorDescripcionAeronave = null)
-            }
+            _uiState.update { it.copy(errorDescripcionAeronave = null) }
         }
     }
 
     private fun limpiarErrorMessageVelocidadMaxima() {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(errorVelocidadMaxima = null)
-            }
+            _uiState.update { it.copy(errorVelocidadMaxima = null) }
         }
     }
 
     private fun limpiarErrorMessageDescripcionMotor() {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(errorDescripcionMotor = null)
-            }
+            _uiState.update { it.copy(errorDescripcionMotor = null) }
         }
     }
 
     private fun limpiarErrorMessageCapacidadCombustible() {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(errorCapacidadCombustible = null)
-            }
+            _uiState.update { it.copy(errorCapacidadCombustible = null) }
         }
     }
 
     private fun limpiarErrorMessageConsumoXHora() {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(errorConsumoXHora = null)
-            }
+            _uiState.update { it.copy(errorConsumoXHora = null) }
         }
     }
 
     private fun limpiarErrorMessagePeso() {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(errorPeso = null)
-            }
+            _uiState.update { it.copy(errorPeso = null) }
         }
     }
 
     private fun limpiarErrorMessageRango() {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(errorRango = null)
-            }
+            _uiState.update { it.copy(errorRango = null) }
         }
     }
 
     private fun limpiarErrorMessageCapacidadPasajeros() {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(errorCapacidadPasajeros = null)
-            }
+            _uiState.update { it.copy(errorCapacidadPasajeros = null) }
         }
     }
 
     private fun limpiarErrorMessageAltitudMaxima() {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(errorAltitudMaxima = null)
-            }
+            _uiState.update { it.copy(errorAltitudMaxima = null) }
         }
     }
 
     private fun limpiarErrorMessageLicencia() {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(errorLicencia = null)
-            }
+            _uiState.update { it.copy(errorLicencia = null) }
         }
     }
 
     private fun aeronaveIdChange(id: Int) {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(AeronaveId = id)
-            }
+            _uiState.update { it.copy(AeronaveId = id) }
         }
     }
 
     private fun estadoIdChange(estadoId: Int?) {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(estadoId = estadoId)
-            }
+            _uiState.update { it.copy(estadoId = estadoId) }
         }
     }
 
     private fun modeloAvionChange(modelo: String) {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(ModeloAvion = modelo)
-            }
+            _uiState.update { it.copy(ModeloAvion = modelo) }
         }
     }
 
     private fun descripcionCategoriaChange(descripcion: String) {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(DescripcionCategoria = descripcion)
-            }
+            _uiState.update { it.copy(DescripcionCategoria = descripcion) }
         }
     }
 
     private fun registracionChange(registracion: String) {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(Registracion = registracion)
-            }
+            _uiState.update { it.copy(Registracion = registracion) }
         }
     }
 
     private fun costoXHoraChange(costo: Double?) {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(CostoXHora = costo)
-            }
+            _uiState.update { it.copy(CostoXHora = costo) }
         }
     }
 
     private fun descripcionAeronaveChange(descripcion: String) {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(DescripcionAeronave = descripcion)
-            }
+            _uiState.update { it.copy(DescripcionAeronave = descripcion) }
         }
     }
 
     private fun velocidadMaximaChange(velocidad: Double?) {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(VelocidadMaxima = velocidad)
-            }
+            _uiState.update { it.copy(VelocidadMaxima = velocidad) }
         }
     }
 
     private fun descripcionMotorChange(descripcion: String) {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(DescripcionMotor = descripcion)
-            }
+            _uiState.update { it.copy(DescripcionMotor = descripcion) }
         }
     }
 
     private fun capacidadCombustibleChange(capacidad: Int) {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(CapacidadCombustible = capacidad)
-            }
+            _uiState.update { it.copy(CapacidadCombustible = capacidad) }
         }
     }
 
     private fun consumoXHoraChange(consumo: Int) {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(ConsumoXHora = consumo)
-            }
+            _uiState.update { it.copy(ConsumoXHora = consumo) }
         }
     }
 
     private fun pesoChange(peso: Double?) {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(Peso = peso)
-            }
+            _uiState.update { it.copy(Peso = peso) }
         }
     }
 
     private fun rangoChange(rango: Int) {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(Rango = rango)
-            }
+            _uiState.update { it.copy(Rango = rango) }
         }
     }
 
     private fun capacidadPasajerosChange(capacidad: Int) {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(CapacidadPasajeros = capacidad)
-            }
+            _uiState.update { it.copy(CapacidadPasajeros = capacidad) }
         }
     }
 
     private fun altitudMaximaChange(altitud: Int) {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(AltitudMaxima = altitud)
-            }
+            _uiState.update { it.copy(AltitudMaxima = altitud) }
         }
     }
 
     private fun licenciaChange(licencia: String) {
         viewModelScope.launch {
-            _uiState.update {
-                it.copy(Licencia = licencia)
-            }
+            _uiState.update { it.copy(Licencia = licencia) }
         }
     }
 
@@ -400,7 +386,7 @@ class AeronaveViewModel @Inject constructor(
                     CapacidadPasajeros = 0,
                     AltitudMaxima = 0,
                     Licencia = "",
-                    imageUri = null, // Reiniciar la imagen
+                    imageUri = null,
                     errorEstadoId = null,
                     errorModeloAvion = null,
                     errorDescripcionCategoria = null,
@@ -427,116 +413,80 @@ class AeronaveViewModel @Inject constructor(
             var error = false
 
             if (_uiState.value.estadoId == null || _uiState.value.estadoId!! <= 0) {
-                _uiState.update {
-                    it.copy(errorEstadoId = "El ID de estado debe ser mayor que cero *")
-                }
+                _uiState.update { it.copy(errorEstadoId = "El ID de estado debe ser mayor que cero *") }
                 error = true
             }
             if (_uiState.value.ModeloAvion.isBlank()) {
-                _uiState.update {
-                    it.copy(errorModeloAvion = "El modelo de avión es obligatorio *")
-                }
+                _uiState.update { it.copy(errorModeloAvion = "El modelo de avión es obligatorio *") }
                 error = true
             }
             if (_uiState.value.DescripcionCategoria.isBlank()) {
-                _uiState.update {
-                    it.copy(errorDescripcionCategoria = "La descripción de categoría es obligatoria *")
-                }
+                _uiState.update { it.copy(errorDescripcionCategoria = "La descripción de categoría es obligatoria *") }
                 error = true
             }
             if (_uiState.value.Registracion.isBlank()) {
-                _uiState.update {
-                    it.copy(errorRegistracion = "La registración es obligatoria *")
-                }
+                _uiState.update { it.copy(errorRegistracion = "La registración es obligatoria *") }
                 error = true
             }
             if (_uiState.value.CostoXHora == null || _uiState.value.CostoXHora!! <= 0.0) {
-                _uiState.update {
-                    it.copy(errorCostoXHora = "El costo por hora debe ser mayor que cero *")
-                }
+                _uiState.update { it.copy(errorCostoXHora = "El costo por hora debe ser mayor que cero *") }
                 error = true
             }
             if (_uiState.value.DescripcionAeronave.isBlank()) {
-                _uiState.update {
-                    it.copy(errorDescripcionAeronave = "La descripción de la aeronave es obligatoria *")
-                }
+                _uiState.update { it.copy(errorDescripcionAeronave = "La descripción de la aeronave es obligatoria *") }
                 error = true
             }
             if (_uiState.value.VelocidadMaxima == null || _uiState.value.VelocidadMaxima!! <= 0.0) {
-                _uiState.update {
-                    it.copy(errorVelocidadMaxima = "La velocidad máxima debe ser mayor que cero *")
-                }
+                _uiState.update { it.copy(errorVelocidadMaxima = "La velocidad máxima debe ser mayor que cero *") }
                 error = true
             }
             if (_uiState.value.DescripcionMotor.isBlank()) {
-                _uiState.update {
-                    it.copy(errorDescripcionMotor = "La descripción del motor es obligatoria *")
-                }
+                _uiState.update { it.copy(errorDescripcionMotor = "La descripción del motor es obligatoria *") }
                 error = true
             }
             if (_uiState.value.CapacidadCombustible <= 0) {
-                _uiState.update {
-                    it.copy(errorCapacidadCombustible = "La capacidad de combustible debe ser mayor que cero *")
-                }
+                _uiState.update { it.copy(errorCapacidadCombustible = "La capacidad de combustible debe ser mayor que cero *") }
                 error = true
             }
             if (_uiState.value.ConsumoXHora <= 0) {
-                _uiState.update {
-                    it.copy(errorConsumoXHora = "El consumo por hora debe ser mayor que cero *")
-                }
+                _uiState.update { it.copy(errorConsumoXHora = "El consumo por hora debe ser mayor que cero *") }
                 error = true
             }
             if (_uiState.value.Peso == null || _uiState.value.Peso!! <= 0.0) {
-                _uiState.update {
-                    it.copy(errorPeso = "El peso debe ser mayor que cero *")
-                }
+                _uiState.update { it.copy(errorPeso = "El peso debe ser mayor que cero *") }
                 error = true
             }
             if (_uiState.value.Rango <= 0) {
-                _uiState.update {
-                    it.copy(errorRango = "El rango debe ser mayor que cero *")
-                }
+                _uiState.update { it.copy(errorRango = "El rango debe ser mayor que cero *") }
                 error = true
             }
             if (_uiState.value.CapacidadPasajeros <= 0) {
-                _uiState.update {
-                    it.copy(errorCapacidadPasajeros = "La capacidad de pasajeros debe ser mayor que cero *")
-                }
+                _uiState.update { it.copy(errorCapacidadPasajeros = "La capacidad de pasajeros debe ser mayor que cero *") }
                 error = true
             }
             if (_uiState.value.AltitudMaxima <= 0) {
-                _uiState.update {
-                    it.copy(errorAltitudMaxima = "La altitud máxima debe ser mayor que cero *")
-                }
+                _uiState.update { it.copy(errorAltitudMaxima = "La altitud máxima debe ser mayor que cero *") }
                 error = true
             }
             if (_uiState.value.Licencia.isBlank()) {
-                _uiState.update {
-                    it.copy(errorLicencia = "La licencia es obligatoria *")
-                }
+                _uiState.update { it.copy(errorLicencia = "La licencia es obligatoria *") }
                 error = true
             }
             if (error) return@launch
 
             try {
-                // Procesar la imagen si existe
-                val imagePath = _uiState.value.imageUri?.let { uri ->
-                    saveImage(context, uri)
-                }
-                // Guardar en el repositorio
+                val imagePath = _uiState.value.imageUri?.let { uri -> saveImage(context, uri) }
                 aeronaveRepository.saveAeronave(_uiState.value.toEntity(imagePath))
                 _uiState.update {
                     it.copy(
                         isSuccess = true,
                         successMessage = "Aeronave guardada correctamente",
                         errorMessage = null,
-                        imageUri = null // Limpiar imagen tras éxito
+                        imageUri = null
                     )
                 }
-
                 getAeronaves()
                 nuevo()
-
                 delay(2000)
                 _uiEvent.send(UiEvent.NavigateUp)
             } catch (e: retrofit2.HttpException) {
@@ -565,7 +515,6 @@ class AeronaveViewModel @Inject constructor(
                     )
                 }
             }
-
             _uiEvent.send(UiEvent.NavigateUp)
         }
     }
@@ -573,18 +522,14 @@ class AeronaveViewModel @Inject constructor(
     private fun saveAeronave() {
         viewModelScope.launch {
             try {
-                // Procesar la imagen si existe
-                val imagePath = _uiState.value.imageUri?.let { uri ->
-                    saveImage(context, uri)
-                }
-                // Guardar en el repositorio
+                val imagePath = _uiState.value.imageUri?.let { uri -> saveImage(context, uri) }
                 aeronaveRepository.saveAeronave(_uiState.value.toEntity(imagePath))
                 _uiState.update {
                     it.copy(
                         isSuccess = true,
                         successMessage = "Aeronave guardada correctamente",
                         errorMessage = null,
-                        imageUri = null // Limpiar imagen tras éxito
+                        imageUri = null
                     )
                 }
                 getAeronaves()
@@ -606,7 +551,6 @@ class AeronaveViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 _uiState.value.AeronaveId?.let { id ->
-                    // Eliminar la imagen asociada si existe
                     _uiState.value.imageUri?.let { uri ->
                         val file = File(uri.path ?: "")
                         if (file.exists()) {
@@ -619,7 +563,7 @@ class AeronaveViewModel @Inject constructor(
                             isSuccess = true,
                             successMessage = "Aeronave eliminada correctamente",
                             errorMessage = null,
-                            imageUri = null // Limpiar imagen tras eliminar
+                            imageUri = null
                         )
                     }
                     getAeronaves()
@@ -679,9 +623,7 @@ class AeronaveViewModel @Inject constructor(
                             }
                         }
                         is Resource.Error -> {
-                            _uiState.update {
-                                it.copy(errorMessage = resource.message)
-                            }
+                            _uiState.update { it.copy(errorMessage = resource.message) }
                         }
                         is Resource.Loading -> {
                             _uiState.update { it.copy(isLoading = true) }
@@ -697,17 +639,21 @@ class AeronaveViewModel @Inject constructor(
             aeronaveRepository.getAeronaves().collectLatest { result ->
                 when (result) {
                     is Resource.Loading -> {
-                        _uiState.update {
-                            it.copy(isLoading = true)
-                        }
+                        _uiState.update { it.copy(isLoading = true) }
                     }
                     is Resource.Success -> {
+                        val filteredAeronaves = if (_uiState.value.categoriaId != null) {
+                            result.data?.filter { it.estadoId == _uiState.value.categoriaId } ?: emptyList()
+                        } else {
+                            result.data ?: emptyList()
+                        }
                         _uiState.update {
                             it.copy(
-                                aeronaves = result.data ?: emptyList(),
+                                aeronaves = filteredAeronaves,
                                 isLoading = false
                             )
                         }
+                        _searchResults.value = filterAeronaves(_searchQuery.value)
                     }
                     is Resource.Error -> {
                         _uiState.update {
@@ -740,5 +686,5 @@ fun AeronaveUiState.toEntity(imagePath: String? = null) = AeronaveDTO(
     capacidadPasajeros = CapacidadPasajeros ?: 0,
     altitudMaxima = AltitudMaxima ?: 0,
     licencia = Licencia ?: "",
-    imagePath = imagePath ?: imageUri?.path // Añadir imagePath
+    imagePath = imagePath ?: imageUri?.path
 )
