@@ -3,6 +3,7 @@ package edu.ucne.skyplanerent.presentation.aeronave
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -127,47 +128,41 @@ fun TipoAeronaveDetailsBodyScreen (
                 .fillMaxSize()
                 .padding(padding)
         ) {
-
-            Column {
-                uiState.imageUri?.let { path ->
-                    AsyncImage(
-                        model = path,
-                        contentDescription = "Imagen de ${uiState.DescripcionCategoria}",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp)
-                            .clip(RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp)),
-                        contentScale = ContentScale.Crop
-                    )
-                } ?: Spacer(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                )
-
-            }
-
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-            ) {
-
-                item {
-
-                    if (uiState.isLoading) {
-                        // Mostrar indicador de carga mientras se obtienen los datos
-                        Box(
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    item {
+                        // Imagen principal
+                        uiState.imageUri?.let { path ->
+                            AsyncImage(
+                                model = path,
+                                contentDescription = "Imagen de ${uiState.DescripcionCategoria}",
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(200.dp)
+                                    .clip(RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp)),
+                                contentScale = ContentScale.Crop
+                            )
+                        } ?: Spacer(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(200.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            CircularProgressIndicator()
-                        }
-                    } else if (uiState.AeronaveId != null) {
+                                .height(200.dp)
+                        )
+                    }
 
-                        Spacer(modifier = Modifier.height(200.dp))
+                    item {
+                        if (uiState.isLoading) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(200.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator()
+                            }
+                    } else if (uiState.AeronaveId != null) {
 
                         Text(
                             text = "Especificaciones Clave",

@@ -123,7 +123,11 @@ fun ReservaDeleteScreen(
                     }
                 },
                 dismissButton = {
-                    Button(onClick = { showDialog = false }) {
+                    Button(
+                        onClick = {
+                        showDialog = false },
+
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)) {
                         Text("Cancelar")
                     }
                 }
