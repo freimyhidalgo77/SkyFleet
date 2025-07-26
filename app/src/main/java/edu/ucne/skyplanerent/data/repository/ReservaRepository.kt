@@ -9,7 +9,13 @@ class ReservaRepository @Inject constructor(
     val reservaDao: ReservaDao
 
 ){
-    suspend fun saveReserva(reserva: ReservaEntity) = reservaDao.save(reserva)
+    suspend fun saveReserva(reserva: ReservaEntity) {
+        if (reserva.reservaId != null) {
+            reservaDao.update(reserva) // <- Actualizar si tiene ID
+        } else {
+            reservaDao.save(reserva) // <- Insertar si es nuevo
+        }
+    }
 
     suspend fun findReserva(Id:Int):ReservaEntity? = reservaDao.find(Id)
 
@@ -18,5 +24,9 @@ class ReservaRepository @Inject constructor(
     suspend fun deleteReservaById(id:Int) = reservaDao.deleteReservaById(id)
 
     fun getAll(): Flow<List<ReservaEntity>> = reservaDao.getAll()
+
+    fun getReservasByUserId(userId: String): Flow<List<ReservaEntity>> {
+        return reservaDao.getReservasByUserId(userId)
+    }
 
 }

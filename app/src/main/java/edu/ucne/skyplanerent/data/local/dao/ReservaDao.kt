@@ -3,6 +3,7 @@ package edu.ucne.skyplanerent.data.local.dao
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Query
+import androidx.room.Update
 import androidx.room.Upsert
 import edu.ucne.skyplanerent.data.local.entity.ReservaEntity
 import kotlinx.coroutines.flow.Flow
@@ -12,6 +13,9 @@ interface ReservaDao {
 
     @Upsert
     suspend fun save(reserva: ReservaEntity)
+
+    @Update
+    suspend fun update(reserva: ReservaEntity)
 
     @Query("SELECT * FROM Reservas WHERE reservaId = :id LIMIT 1")
     suspend fun find(id: Int): ReservaEntity?
@@ -24,5 +28,8 @@ interface ReservaDao {
 
     @Query("SELECT * FROM Reservas")
     fun getAll(): Flow<List<ReservaEntity>>
+
+    @Query("SELECT * FROM Reservas WHERE userId = :userId")
+    fun getReservasByUserId(userId: String): Flow<List<ReservaEntity>>
 
 }

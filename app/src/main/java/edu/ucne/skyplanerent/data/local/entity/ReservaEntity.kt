@@ -21,6 +21,7 @@ data class ReservaEntity(
     val precioTotal:Double,
     val tipoCliente:Boolean?,
     val licenciaPiloto:String? = null,
+    val userId: String
     //val aeronaveId:Int = 0,
 
 ){

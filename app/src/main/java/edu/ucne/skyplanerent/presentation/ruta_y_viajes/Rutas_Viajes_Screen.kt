@@ -37,6 +37,7 @@ import edu.ucne.skyplanerent.data.remote.dto.AeronaveDTO
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveUiState
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveViewModel
 import androidx.compose.material.icons.filled.CalendarToday
+import com.google.firebase.auth.FirebaseAuth
 import edu.ucne.skyplanerent.presentation.reserva.ReservaEvent
 import edu.ucne.skyplanerent.presentation.reserva.UiState
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoLicencia
@@ -79,6 +80,14 @@ fun Rutas_Viajes_Screen(
         tiposDeVuelo = tipoVueloUiState.tipovuelo,
         scope = scope,
         onReserva = { fecha ->
+
+            val currentUser = FirebaseAuth.getInstance().currentUser
+
+            if (currentUser == null) {
+                // Mostrar error o redirigir a login
+                return@Vuelos_RutasBodyListScreen
+            }
+
             if (selectedTipoVuelo != null && selectedRuta != null && selectedAeronave != null) {
                 val reserva = ReservaEntity(
                     tipoVueloId = selectedTipoVuelo!!.tipoVueloId,
@@ -90,7 +99,8 @@ fun Rutas_Viajes_Screen(
                     precioTotal = 0.0,
                     categoriaId = selectedAeronave!!.aeronaveId,
                     tipoCliente = soyPiloto ?: false,
-                    licenciaPiloto = licenciaSeleccionada
+                    licenciaPiloto = licenciaSeleccionada,
+                    userId = currentUser.uid
 
                 )
                 reservaViewModel.guardarReserva(

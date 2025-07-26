@@ -2,6 +2,7 @@ package edu.ucne.skyplanerent.presentation.reserva
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.ucne.skyplanerent.data.local.entity.ReservaEntity
 import edu.ucne.skyplanerent.data.remote.dto.TipoVueloDTO
@@ -28,12 +29,14 @@ class ReservaViewModel @Inject constructor(
 
     private val reservaRepository: ReservaRepository,
     private val tipoRutaRepository: TipoVueloRepository,
-    private val rutaRepository: RutaRepository
+    private val rutaRepository: RutaRepository,
+    private val auth: FirebaseAuth
 
 ): ViewModel() {
 
     private val _uiState = MutableStateFlow(UiState())
-    val uiState get() = _uiState.asStateFlow()
+    val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+
 
     //Seleccionar ruta de vuelo
     private val _rutaSeleccionadaId = MutableStateFlow<Int?>(null)
@@ -107,7 +110,21 @@ class ReservaViewModel @Inject constructor(
 
 
     init{
-        getReserva()
+        //getReserva()
+        loadUserReservas()
+    }
+
+
+     fun loadUserReservas() {
+        val currentUser = auth.currentUser
+        if (currentUser != null) {
+            viewModelScope.launch {
+                reservaRepository.getReservasByUserId(currentUser.uid)
+                    .collect { reservas ->
+                        _uiState.update { it.copy(reservas = reservas) }
+                    }
+            }
+        }
     }
 
 
@@ -153,20 +170,45 @@ class ReservaViewModel @Inject constructor(
     fun updateReserva() {
         viewModelScope.launch {
             try {
-                val reserva = uiState.value.toEntity()
-                reservaRepository.saveReserva(reserva)
+                val currentUserId = auth.currentUser?.uid ?: throw Exception("Usuario no autenticado")
+                val reservaSeleccionada = uiState.value.reservaSeleccionada
+                    ?: throw Exception("No hay reserva seleccionada")
+
+                if (reservaSeleccionada.userId != currentUserId) {
+                    throw Exception("La reserva no pertenece al usuario")
+                }
+
+                val reservaActualizada = uiState.value.toEntity().copy(
+                    reservaId = reservaSeleccionada.reservaId,
+                    userId = currentUserId,
+                    // Asegurar que todos los campos se mantengan
+                    rutaId = uiState.value.rutaId ?: reservaSeleccionada.rutaId,
+                    tipoVueloId = uiState.value.tipoVueloId ?: reservaSeleccionada.tipoVueloId,
+                    categoriaId = uiState.value.categoriaId ?: reservaSeleccionada.categoriaId,
+                    fecha = uiState.value.fecha ?: reservaSeleccionada.fecha,
+                    pasajeros = uiState.value.pasajeros ?: reservaSeleccionada.pasajeros ?: 1,
+                    tipoCliente = uiState.value.tipoCliente ?: reservaSeleccionada.tipoCliente,
+                    impuesto = uiState.value.impuesto ?: 0.0,
+                    tarifa = uiState.value.tarifa ?: 0.0,
+
+                )
+
+                reservaRepository.saveReserva(reservaActualizada)
+                loadUserReservas() // Recargar lista actualizada
+
                 _uiState.update {
-                    it.copy(successMessage = "Reserva actualizada correctamente")
+                    it.copy(
+                        successMessage = "Reserva actualizada correctamente",
+                        errorMessage = null
+                    )
                 }
             } catch (e: Exception) {
                 _uiState.update {
-                    it.copy(errorMessage = "Error al actualizar la reserva")
+                    it.copy(errorMessage = "Error al actualizar: ${e.message}")
                 }
             }
         }
     }
-
-
 
     fun guardarReserva(
         rutaId: Int,
@@ -176,13 +218,22 @@ class ReservaViewModel @Inject constructor(
         impuesto: Double,
         precioTotal: Double,
         tipoCliente: Boolean?,
-        pasajero: Int
+        pasajero: Int,
     ) {
         viewModelScope.launch {
             val fecha = _fechaSeleccionada.value
+            val currentUser = auth.currentUser
+
             if (fecha == null) {
                 _uiState.update {
                     it.copy(errorMessage = "Debe seleccionar una fecha válida.")
+                }
+                return@launch
+            }
+
+            if (currentUser == null) {
+                _uiState.update {
+                    it.copy(errorMessage = "Usuario no autenticado. Por favor inicie sesión.")
                 }
                 return@launch
             }
@@ -196,7 +247,8 @@ class ReservaViewModel @Inject constructor(
                 impuesto = impuesto,
                 tipoCliente = tipoCliente,
                 precioTotal = precioTotal,
-                pasajeros = pasajero
+                pasajeros = pasajero,
+                userId = currentUser.uid
             )
 
             reservaRepository.saveReserva(reserva)
@@ -211,20 +263,33 @@ class ReservaViewModel @Inject constructor(
     fun deleteReserva() {
         viewModelScope.launch {
             try {
-                val reserva = _uiState.value.reservas.firstOrNull { it.reservaId == _uiState.value.reservaId }
+                val currentUserId = auth.currentUser?.uid
+                if (currentUserId == null) {
+                    _uiState.update { it.copy(errorMessage = "Usuario no autenticado") }
+                    return@launch
+                }
+
+                val reserva = _uiState.value.reservas.firstOrNull {
+                    it.reservaId == _uiState.value.reservaId && it.userId == currentUserId
+                }
+
                 if (reserva != null) {
                     reservaRepository.deleteReserva(reserva)
                     _uiState.update {
-                        it.copy(successMessage = "Reserva eliminada!", errorMessage = null)
+                        it.copy(
+                            successMessage = "Reserva eliminada!",
+                            errorMessage = null
+                        )
                     }
+                    loadUserReservas() // Recargar lista actualizada
                 } else {
                     _uiState.update {
-                        it.copy(errorMessage = "No se encontró la reserva para eliminar.")
+                        it.copy(errorMessage = "Reserva no encontrada o no pertenece al usuario")
                     }
                 }
             } catch (e: Exception) {
                 _uiState.update {
-                    it.copy(errorMessage = "Ha ocurrido un error al eliminar la reserva.")
+                    it.copy(errorMessage = "Error al eliminar: ${e.message}")
                 }
             }
         }
@@ -250,10 +315,18 @@ class ReservaViewModel @Inject constructor(
     fun selectReserva(reservaId: Int) {
         viewModelScope.launch {
             try {
-                val reserva = reservaRepository.findReserva(reservaId)
-                if (reserva != null) {
-                    println("Reserva encontrada: $reserva")
+                val currentUserId = auth.currentUser?.uid
+                if (currentUserId == null) {
+                    _uiState.update { it.copy(errorMessage = "Usuario no autenticado") }
+                    return@launch
+                }
 
+                val reserva = uiState.value.reservas.find { it.reservaId == reservaId && it.userId == currentUserId }
+                    ?: reservaRepository.findReserva(reservaId).takeIf { it?.userId == currentUserId }
+                    ?: throw Exception("Reserva no encontrada")
+
+                // Buscar primero en las reservas ya cargadas
+                uiState.value.reservas.find { it.reservaId == reservaId && it.userId == currentUserId }?.let { reserva ->
                     _uiState.update {
                         it.copy(
                             reservaId = reserva.reservaId,
@@ -270,15 +343,26 @@ class ReservaViewModel @Inject constructor(
                             reservaSeleccionada = reserva
                         )
                     }
+                    return@launch
+                }
+
+                // Si no está en las cargadas, buscar en el repositorio
+               // val reserva = reservaRepository.findReserva(reservaId)
+                if (reserva != null && reserva.userId == currentUserId) {
+                    _uiState.update {
+                        it.copy(
+                            reservaSeleccionada = reserva,
+                            // Actualizar campos como arriba
+                        )
+                    }
                 } else {
-                    println("No se encontró la reserva con ID: $reservaId")
+                    _uiState.update { it.copy(errorMessage = "Reserva no encontrada") }
                 }
             } catch (e: Exception) {
-                println("Error al buscar reserva: ${e.message}")
+                _uiState.update { it.copy(errorMessage = "Error al cargar reserva") }
             }
         }
     }
-
 
 
     fun nuevaReserva(){
@@ -337,6 +421,7 @@ class ReservaViewModel @Inject constructor(
         precioTotal = precioTotal,
         tipoCliente = tipoCliente?:false,
         pasajeros = pasajeros,
+        userId = userId
 
         )
 

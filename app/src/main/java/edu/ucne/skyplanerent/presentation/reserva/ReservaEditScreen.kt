@@ -51,10 +51,24 @@ fun ReservaEditScreen(
         viewModel.selectReserva(reservaId)
     }
 
+
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val tipoVueloUiState by tipoVueloViewModel.uiState.collectAsStateWithLifecycle()
     val rutaUiState by rutaViewModel.uiState.collectAsStateWithLifecycle()
     val aeronaveUiState by aeronaveViewModel.uiState.collectAsStateWithLifecycle()
+
+
+    if (uiState.reservaSeleccionada == null) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            CircularProgressIndicator()
+        }
+        return
+    }
+
 
     ReservaEditBodyScreen(
         uiState = uiState,
@@ -93,9 +107,11 @@ fun ReservaEditBodyScreen(
     viewModel: ReservaViewModel = hiltViewModel()
 ) {
 
-    val tipoVuelo = tipoVueloUiState.tipovuelo.find { it.tipoVueloId == uiState.tipoVueloId }
-    val ruta = rutaUiState.rutas.find { it.rutaId == uiState.rutaId }
-    val aeronave = aeronaveUiState.aeronaves.find { it.aeronaveId == uiState.categoriaId }
+    val reserva = uiState.reservaSeleccionada ?: return
+
+    val tipoVuelo = tipoVueloUiState.tipovuelo.find { it.tipoVueloId == reserva.tipoVueloId }
+    val ruta = rutaUiState.rutas.find { it.rutaId == reserva.rutaId }
+    val aeronave = aeronaveUiState.aeronaves.find { it.aeronaveId == reserva.categoriaId }
 
     val fecha = uiState.fecha
     val tipoCliente = uiState.tipoCliente

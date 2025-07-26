@@ -33,5 +33,6 @@ data class UiState (
     val successMessage: String? = "",
     val errorMessage: String? = "",
     val reservaSeleccionada: ReservaEntity? = null,
-    val reservas: List<ReservaEntity> = emptyList()
+    val reservas: List<ReservaEntity> = emptyList(),
+    val userId:String = ""
 )
