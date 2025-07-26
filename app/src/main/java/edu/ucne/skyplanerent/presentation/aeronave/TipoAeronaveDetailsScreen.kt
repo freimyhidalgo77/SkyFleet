@@ -1,6 +1,8 @@
 package edu.ucne.skyplanerent.presentation.aeronave
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,6 +32,7 @@ fun TipoAeronaveDetailsScreen (
     aeronaveId: Int?,
     ViewModel: AeronaveViewModel = hiltViewModel(),
     goBack: () -> Unit,
+    onReservar: () -> Unit,
 ) {
     val uiState by ViewModel.uiState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
@@ -62,7 +65,9 @@ fun TipoAeronaveDetailsScreen (
     TipoAeronaveDetailsBodyScreen(
         uiState = uiState,
         goBack = goBack,
-        snackbarHostState = snackbarHostState
+        snackbarHostState = snackbarHostState,
+        onReservar = onReservar
+
     )
 }
 
@@ -71,7 +76,8 @@ fun TipoAeronaveDetailsScreen (
 fun TipoAeronaveDetailsBodyScreen (
     uiState: AeronaveUiState,
     goBack: () -> Unit,
-    snackbarHostState: SnackbarHostState
+    snackbarHostState: SnackbarHostState,
+    onReservar: () -> Unit,
 ) {
     val refreshing = uiState.isLoading // Usamos el estado de carga del UI
 
@@ -227,6 +233,22 @@ fun TipoAeronaveDetailsBodyScreen (
                             color = Color.Blue
                         )
                         Spacer(modifier = Modifier.height(16.dp))
+
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 16.dp),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            Button(
+                                onClick = onReservar,
+                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0A80ED),
+                                    contentColor = Color.White)
+                            ) {
+                                Text("Reservar ahora", color = Color.White)
+                            }
+
+                        }
 
                        } else {
                         Text(

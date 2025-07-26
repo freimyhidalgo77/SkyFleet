@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -55,7 +56,7 @@ fun Rutas_Viajes_Screen(
     goBackDetails: (Int) -> Unit,
     goTopreReserva: (Int)-> Unit,
     goToRuta: (Int) -> Unit,
-
+    goBack: () -> Unit
 
     ) {
 
@@ -110,7 +111,8 @@ fun Rutas_Viajes_Screen(
         goTopreReserva = goTopreReserva,
         goToRuta = goToRuta,
         reservaViewModel = reservaViewModel,
-        reservaUiState = reservaUiState
+        reservaUiState = reservaUiState,
+        goBack = goBack
 
     )
 }
@@ -130,6 +132,7 @@ fun Vuelos_RutasBodyListScreen(
     onReserva: (Date) -> Unit,
     goBackDetails: (Int) -> Unit,
     goToRuta: (Int) -> Unit,
+    goBack:()-> Unit,
     goTopreReserva: (Int)-> Unit,
     reservaUiState:UiState
 
@@ -203,6 +206,11 @@ fun Vuelos_RutasBodyListScreen(
                         fontSize = 18.sp,
                         color = Color.Black
                     )
+                },
+                navigationIcon = {
+                    IconButton(onClick = { goBack() }) {
+                        Icon(Icons.Filled.ArrowBack, contentDescription = "Volver atrás")
+                    }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                     containerColor = Color.White

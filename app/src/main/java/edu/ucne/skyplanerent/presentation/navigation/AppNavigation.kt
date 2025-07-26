@@ -142,7 +142,10 @@ fun AppNavigation() {
                     navController.navigate(Screen.PreReserva(0))
                 },
                 scope = scope,
-                reservaViewModel = reservaViewModel
+                reservaViewModel = reservaViewModel,
+                goBack = {
+                    navController.navigate(Screen.Home)
+                }
             )
         }
 
@@ -434,6 +437,9 @@ fun AppNavigation() {
                 aeronaveId = args.aeronaveIde,
                 ViewModel = viewModel,
                 goBack = { navController.popBackStack() },
+                onReservar = {
+                    navController.navigate(Screen.Rutas_y_viajes)
+                }
             )
         }
 
