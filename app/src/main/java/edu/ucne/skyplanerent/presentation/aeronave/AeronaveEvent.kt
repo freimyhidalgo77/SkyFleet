@@ -46,5 +46,6 @@ sealed interface AeronaveEvent {
     data object New: AeronaveEvent
     data object postAeronave: AeronaveEvent
     data object ResetSuccessMessage: AeronaveEvent
+    data class FilterByCategoria(val categoriaId: Int) : AeronaveEvent // Nuevo evento
 
 }
