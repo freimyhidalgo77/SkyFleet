@@ -79,7 +79,7 @@ fun TipoAeronaveDetailsBodyScreen (
     snackbarHostState: SnackbarHostState,
     onReservar: () -> Unit,
 ) {
-    val refreshing = uiState.isLoading // Usamos el estado de carga del UI
+    val refreshing = uiState.isLoading
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -89,7 +89,7 @@ fun TipoAeronaveDetailsBodyScreen (
                     Text(
                         text = "Detalles de la Aeronave",
                         style = MaterialTheme.typography.titleLarge,
-                        color = Color.White
+                        color = Color.Black
                     )
                 },
                 navigationIcon = {
@@ -97,12 +97,12 @@ fun TipoAeronaveDetailsBodyScreen (
                         Icon(
                             Icons.Default.ArrowBack,
                             contentDescription = "Volver",
-                            tint = Color.White
+                            tint = Color.Black
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF272D4D)
+                    containerColor = Color.White
                 )
             )
         },
@@ -137,7 +137,7 @@ fun TipoAeronaveDetailsBodyScreen (
                             CircularProgressIndicator()
                         }
                     } else if (uiState.AeronaveId != null) {
-                        // Capacidad
+
                         Text(
                             text = "Capacidad",
                             style = MaterialTheme.typography.titleMedium,

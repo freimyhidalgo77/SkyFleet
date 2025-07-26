@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edu.ucne.skyplanerent.data.local.entity.CategoriaAeronaveEntity
@@ -87,10 +88,12 @@ private fun CategoriaAeronaveRow(
                 model = path,
                 contentDescription = "Imagen de ${it.descripcionCategoria}",
                 modifier = Modifier
-                    .size(100.dp)
-                    .clip(RoundedCornerShape(8.dp)),
+                    .fillMaxWidth()
+                    .height(180.dp)
+                    .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)),
                 contentScale = ContentScale.Crop
             )
+
         } ?: Spacer(modifier = Modifier.size(100.dp))
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -128,7 +131,8 @@ fun CategoriaReservaAeronaveScreen(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { Text("Lista de Categorías de Aeronaves") },
+                title = { Text("Explora nuestras aeronaves") },
+
                 navigationIcon = {
                     IconButton(onClick = goBack) {
                         Icon(
@@ -146,6 +150,18 @@ fun CategoriaReservaAeronaveScreen(
                 .fillMaxWidth()
                 .padding(padding)
         ) {
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "Explore nuestra flota de aeronaves, desde monomotores a " +
+                        "piston hasta lujosos jets ejecutivos. Encuentre el avión" +
+                        " perfecto para su próxima aventura!",
+                fontSize = 12.sp,
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
             LazyColumn(modifier = Modifier.fillMaxWidth()) {
                 items(uiState.categorias) { categoria ->
                     CategoriaAeronaveRow(

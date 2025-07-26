@@ -91,7 +91,7 @@ fun TipoAeronaveBodyListScreen(
                     Text(
                         text = "Aeronaves",
                         style = MaterialTheme.typography.titleLarge,
-                        color = Color.White
+                        color = Color.Black
                     )
                 },
                 navigationIcon = {
@@ -99,12 +99,12 @@ fun TipoAeronaveBodyListScreen(
                         Icon(
                             Icons.Default.ArrowBack,
                             contentDescription = "Volver",
-                            tint = Color.White
+                            tint = Color.Black
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF272D4D)
+                    containerColor = Color.White
                 )
             )
         },
@@ -180,7 +180,7 @@ private fun AeronaveRow(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
-            .clickable { goToAeronave(it.aeronaveId ?: 0) } // Hacer clic en toda la fila
+            .clickable { goToAeronave(it.aeronaveId ?: 0) }
     ) {
         // Imagen de la aeronave
         if (it.imagePath != null) {
