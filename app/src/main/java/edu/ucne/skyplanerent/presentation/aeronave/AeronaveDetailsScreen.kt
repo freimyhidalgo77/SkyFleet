@@ -3,6 +3,7 @@ package edu.ucne.skyplanerent.presentation.aeronave
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
@@ -20,12 +22,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import edu.ucne.skyplanerent.presentation.UiEvent
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -85,7 +95,7 @@ fun AeronaveDetailsBodyScreen(
     onEdit: () -> Unit,
     snackbarHostState: SnackbarHostState
 ) {
-    val refreshing = uiState.isLoading // Usamos el estado de carga del UI
+    val showDeleteDialog = remember { mutableStateOf(false) } // Estado para el diálogo de eliminación
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -95,7 +105,7 @@ fun AeronaveDetailsBodyScreen(
                     Text(
                         text = "Detalles de la Aeronave",
                         style = MaterialTheme.typography.titleLarge,
-                        color = Color.White
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 },
                 navigationIcon = {
@@ -103,12 +113,12 @@ fun AeronaveDetailsBodyScreen(
                         Icon(
                             Icons.Default.ArrowBack,
                             contentDescription = "Volver",
-                            tint = Color.White
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF272D4D)
+                    containerColor = Color.White
                 )
             )
         },
@@ -127,13 +137,33 @@ fun AeronaveDetailsBodyScreen(
                 .padding(padding)
         ) {
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 item {
+                    // Imagen principal
+                    uiState.imageUri?.let { path ->
+                        AsyncImage(
+                            model = path,
+                            contentDescription = "Imagen de ${uiState.ModeloAvion}",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(200.dp)
+                                .clip(RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp)),
+                            contentScale = ContentScale.Crop,
+                            placeholder = painterResource(id = android.R.drawable.ic_menu_gallery),
+                            error = painterResource(id = android.R.drawable.ic_menu_gallery)
+                        )
+                    } ?: Spacer(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                    )
+                }
+
+                item {
                     if (uiState.isLoading) {
-                        // Mostrar indicador de carga mientras se obtienen los datos
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -143,29 +173,35 @@ fun AeronaveDetailsBodyScreen(
                             CircularProgressIndicator()
                         }
                     } else if (uiState.AeronaveId != null) {
-                        // Capacidad
+                        // Especificaciones Clave
                         Text(
-                            text = "Capacidad",
+                            text = "Especificaciones Clave",
                             style = MaterialTheme.typography.titleMedium,
                             color = Color.Black
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Peso Máximo: ${uiState.Peso?.toString() ?: "0.0"} kg",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Blue
-                        )
-                        Text(
-                            text = "Tipo: ${uiState.DescripcionCategoria ?: "N/A"}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Blue
-                        )
-                        Text(
-                            text = "Rango: ${uiState.Rango?.toString() ?: "0"} km",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Blue
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Row(modifier = Modifier.fillMaxWidth()) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("Capacidad", color = Color.Gray)
+                                Text("${uiState.CapacidadPasajeros ?: "0"} Personas", color = Color.Black)
+                                Spacer(modifier = Modifier.height(12.dp))
+
+                                Text("Tipo", color = Color.Gray)
+                                Text("${uiState.DescripcionCategoria ?: "N/A"}", color = Color.Black)
+                            }
+
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("Peso Máximo", color = Color.Gray)
+                                Text("${uiState.Peso ?: "0.0"} kg", color = Color.Black)
+                                Spacer(modifier = Modifier.height(12.dp))
+
+                                Text("Rango", color = Color.Gray)
+                                Text("${uiState.Rango ?: "0"} NM", color = Color.Black)
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(24.dp))
 
                         // Especificaciones
                         Text(
@@ -174,22 +210,28 @@ fun AeronaveDetailsBodyScreen(
                             color = Color.Black
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Motor: ${uiState.DescripcionMotor ?: "N/A"}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Blue
-                        )
-                        Text(
-                            text = "Velocidad Máxima: ${uiState.VelocidadMaxima?.toString() ?: "0.0"} km/h",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Blue
-                        )
-                        Text(
-                            text = "Altitud Máxima: ${uiState.AltitudMaxima?.toString() ?: "0"} m",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Blue
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Row(modifier = Modifier.fillMaxWidth()) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("Motor", color = Color.Gray)
+                                Text("${uiState.DescripcionMotor ?: "N/A"}", color = Color.Black)
+                                Spacer(modifier = Modifier.height(12.dp))
+
+                                Text("Combustible", color = Color.Gray)
+                                Text("${uiState.CapacidadCombustible ?: "0"} gal", color = Color.Black)
+                            }
+
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text("Velocidad de Crucero", color = Color.Gray)
+                                Text("${uiState.VelocidadMaxima ?: "0"} KTAS", color = Color.Black)
+                                Spacer(modifier = Modifier.height(12.dp))
+
+                                Text("Altitud Máxima", color = Color.Gray)
+                                Text("${uiState.AltitudMaxima ?: "0"} m", color = Color.Black)
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(24.dp))
 
                         // Información Operacional
                         Text(
@@ -198,66 +240,61 @@ fun AeronaveDetailsBodyScreen(
                             color = Color.Black
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Modelo: ${uiState.ModeloAvion ?: "N/A"}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Blue
-                        )
-                        Text(
-                            text = "Registración: ${uiState.Registracion ?: "N/A"}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Blue
-                        )
-                        Text(
-                            text = "Licencia: ${uiState.Licencia ?: "N/A"}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Blue
-                        )
-                        Text(
-                            text = "Costo por Hora: $${uiState.CostoXHora?.toString() ?: "0.0"}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Blue
-                        )
-                        Text(
-                            text = "Capacidad de Combustible: ${uiState.CapacidadCombustible?.toString() ?: "0"} L",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Blue
-                        )
-                        Text(
-                            text = "Consumo por Hora: ${uiState.ConsumoXHora?.toString() ?: "0"} L/h",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Blue
-                        )
-                        Text(
-                            text = "Capacidad de Pasajeros: ${uiState.CapacidadPasajeros?.toString() ?: "0"}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Blue
-                        )
-                        Text(
-                            text = "Descripción: ${uiState.DescripcionAeronave ?: "N/A"}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = Color.Blue
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
 
-                        // Botones
-                        Row(
+                        Column {
+                            Text("Modelo", color = Color.Gray)
+                            Text("${uiState.ModeloAvion ?: "N/A"}", color = Color.Black)
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text("Registración", color = Color.Gray)
+                            Text("${uiState.Registracion ?: "N/A"}", color = Color.Black)
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text("Licencia", color = Color.Gray)
+                            Text("${uiState.Licencia ?: "N/A"}", color = Color.Black)
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text("Costo por Hora", color = Color.Gray)
+                            Text("$${uiState.CostoXHora ?: "0.0"}", color = Color.Black)
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text("Consumo por Hora", color = Color.Gray)
+                            Text("${uiState.ConsumoXHora ?: "0"} L/h", color = Color.Black)
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text("Descripción", color = Color.Gray)
+                            Text("${uiState.DescripcionAeronave ?: "N/A"}", color = Color.Black)
+                        }
+
+                        Spacer(modifier = Modifier.height(24.dp))
+
+                        // Botones centrados verticalmente
+                        Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(top = 16.dp),
-                            horizontalArrangement = Arrangement.SpaceEvenly
+                                .padding(horizontal = 16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
                             Button(
-                                onClick = onDelete,
-                                colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                                onClick = onEdit,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primary,
+                                    contentColor = Color.White
+                                ),
+                                modifier = Modifier.fillMaxWidth()
                             ) {
-                                Text("Eliminar Aeronave", color = Color.White)
+                                Text("Modificar Aeronave")
                             }
                             Button(
-                                onClick = onEdit,
-                                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                                onClick = { showDeleteDialog.value = true },
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color.Red,
+                                    contentColor = Color.White
+                                ),
+                                modifier = Modifier.fillMaxWidth()
                             ) {
-                                Text("Modificar Aeronave", color = Color.White)
+                                Text("Eliminar Aeronave")
                             }
                         }
                     } else {
@@ -287,5 +324,31 @@ fun AeronaveDetailsBodyScreen(
                 )
             }
         }
+    }
+
+    // Diálogo de confirmación para eliminar
+    if (showDeleteDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog.value = false },
+            title = { Text("Confirmar eliminación") },
+            text = { Text("¿Estás seguro de que quieres eliminar la aeronave ${uiState.ModeloAvion ?: "N/A"}?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onDelete()
+                        showDeleteDialog.value = false
+                    }
+                ) {
+                    Text("Confirmar")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showDeleteDialog.value = false }
+                ) {
+                    Text("Rechazar")
+                }
+            }
+        )
     }
 }
