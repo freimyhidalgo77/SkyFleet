@@ -487,7 +487,11 @@ fun AppNavigation(context: Context) {
                     createAeronave = {
                         navController.navigate(Screen.Aeronave(null))
                     },
+                    goToAdminPanel = {
+                        navController.navigate(Screen.AdminPanel)
+                    },
                     goBack = { navController.popBackStack() }
+
                 )
             }
 
