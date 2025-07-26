@@ -99,7 +99,7 @@ fun ReservaBodyListScreen(
     onEdit: (ReservaEntity) -> Unit,
     onDelete: (ReservaEntity) -> Unit,
     rutaUiState: RutaUiState,
-    navController: NavController // <-- Agregado
+    navController: NavController
 ) {
     val items = listOf(
         BottomNavItem("Inicio", Icons.Default.Home, Screen.Home),

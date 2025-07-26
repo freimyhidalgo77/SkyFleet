@@ -11,9 +11,11 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface ReservaDao {
 
+    //Guardar reserva
     @Upsert
     suspend fun save(reserva: ReservaEntity)
 
+    //Actualizar reserva
     @Update
     suspend fun update(reserva: ReservaEntity)
 
@@ -29,6 +31,7 @@ interface ReservaDao {
     @Query("SELECT * FROM Reservas")
     fun getAll(): Flow<List<ReservaEntity>>
 
+    //Filtrar reserrva por id de usuario
     @Query("SELECT * FROM Reservas WHERE userId = :userId")
     fun getReservasByUserId(userId: String): Flow<List<ReservaEntity>>
 

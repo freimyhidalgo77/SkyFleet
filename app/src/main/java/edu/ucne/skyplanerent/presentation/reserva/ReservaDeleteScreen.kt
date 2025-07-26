@@ -54,7 +54,7 @@ fun ReservaDeleteScreen(
     rutaViewModel: RutaViewModel = hiltViewModel(),
     tipoVueloViewModel: TipoVueloViewModel = hiltViewModel(),
     aeronaveViewModel: AeronaveViewModel = hiltViewModel(),
-    goBack: (Int) -> Unit
+    goBack: (Int) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val rutaUiState by rutaViewModel.uiState.collectAsStateWithLifecycle()

@@ -28,6 +28,7 @@ object AppModule {
         ).fallbackToDestructiveMigration().build()
     }
 
+    //Provide de Firebase
     @Provides
     @Singleton
     fun provideFirebaseAuth(): FirebaseAuth {

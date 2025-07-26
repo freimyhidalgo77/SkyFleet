@@ -9,6 +9,7 @@ class ReservaRepository @Inject constructor(
     val reservaDao: ReservaDao
 
 ){
+    //Mejorando metodo para evaluar si se ha actualizado una reserva o si solo se va a guardar
     suspend fun saveReserva(reserva: ReservaEntity) {
         if (reserva.reservaId != null) {
             reservaDao.update(reserva) // <- Actualizar si tiene ID
@@ -25,6 +26,7 @@ class ReservaRepository @Inject constructor(
 
     fun getAll(): Flow<List<ReservaEntity>> = reservaDao.getAll()
 
+    //Metodo para filtrado de reserva por id de usuario
     fun getReservasByUserId(userId: String): Flow<List<ReservaEntity>> {
         return reservaDao.getReservasByUserId(userId)
     }

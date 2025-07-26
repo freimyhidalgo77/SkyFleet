@@ -108,13 +108,14 @@ class ReservaViewModel @Inject constructor(
     }
 
 
-
+   //Inicializando el metodo loadUserReserva para cargar el usuario perteneciente a esa reserva
     init{
         //getReserva()
         loadUserReservas()
     }
 
 
+    //Cargar reserva por usuario
      fun loadUserReservas() {
         val currentUser = auth.currentUser
         if (currentUser != null) {
@@ -346,7 +347,7 @@ class ReservaViewModel @Inject constructor(
                     return@launch
                 }
 
-                // Si no está en las cargadas, buscar en el repositorio
+                // Si no esta en las cargadas, buscar en el repositorio
                // val reserva = reservaRepository.findReserva(reservaId)
                 if (reserva != null && reserva.userId == currentUserId) {
                     _uiState.update {

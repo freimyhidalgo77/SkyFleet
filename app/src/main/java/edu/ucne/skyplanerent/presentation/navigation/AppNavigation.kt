@@ -304,7 +304,6 @@ fun AppNavigation(context: Context) {
                 goBack = {
                     navController.navigate(Screen.Reserva)
                 },
-
             )
 
         }
@@ -408,7 +407,8 @@ fun AppNavigation(context: Context) {
                 goToCategoria = { categoriaId ->
                     navController.navigate("tipoAeronaveList?categoriaId=$categoriaId")
                 },
-                goBack = { navController.popBackStack() }
+                goBack = { navController.popBackStack() },
+                navController = navController
             )
         }
 
