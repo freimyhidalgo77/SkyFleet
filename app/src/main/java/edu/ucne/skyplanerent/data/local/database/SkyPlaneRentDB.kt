@@ -25,7 +25,7 @@ import edu.ucne.skyplanerent.data.local.entity.TipoVueloEntity
         AeronaveEntity::class,
         CategoriaAeronaveEntity::class,
     ],
-    version = 13,
+    version = 14,
     exportSchema = false
 )
 

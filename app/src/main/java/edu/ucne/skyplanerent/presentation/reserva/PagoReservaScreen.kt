@@ -2,6 +2,7 @@ package edu.ucne.skyplanerent.presentation.reserva
 
 import android.app.DatePickerDialog
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,13 +15,20 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBalance
+import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -36,13 +44,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.times
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.times
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
+import edu.ucne.skyplanerent.R
 import edu.ucne.skyplanerent.data.local.entity.ReservaEntity
 import edu.ucne.skyplanerent.data.local.entity.RutaEntity
 import edu.ucne.skyplanerent.data.local.entity.TipoVueloEntity
@@ -156,10 +167,15 @@ fun PagoReservaBodyListScreen(
     val reservaUiState by reservaViewModel.uiState.collectAsStateWithLifecycle()
     val licenciaSeleccionada = reservaUiState.licenciaPiloto
 
+
+    var metodoPagoSeleccionado by remember { mutableStateOf<MetodoPago?>(null) }
+
     /*Calcular
      val tarifaBase = duracionVuelo * costoXHora
      val impuesto = tarifaBase * 0.10
      val precioTotal = tarifaBase + impuesto*/
+
+    var mostrarFormularioTransferencia by remember { mutableStateOf(false) }
 
 
     Scaffold(
@@ -325,7 +341,110 @@ fun PagoReservaBodyListScreen(
 
 
                 item {
+                    Text(
+                        text = "Método de pago",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+
+                    // Tarjeta de crédito
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 4.dp)
+                            .clickable {
+                                metodoPagoSeleccionado = MetodoPago.TARJETA_CREDITO
+                                mostrarFormularioTransferencia = false
+                            },
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (metodoPagoSeleccionado == MetodoPago.TARJETA_CREDITO)
+                                Color.LightGray else Color.White
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CreditCard,
+                                contentDescription = "Tarjeta de crédito"
+                            )
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Text("Tarjeta de crédito")
+                        }
+                    }
+                  /*  // PayPal
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 4.dp)
+                            .clickable { metodoPagoSeleccionado = MetodoPago.PAYPAL },
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (metodoPagoSeleccionado == MetodoPago.PAYPAL)
+                                Color.LightGray else Color.White
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.paypal), // Asegúrate de tener este icono
+                                contentDescription = "PayPal"
+                            )
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Text("PayPal")
+                        }
+                    }*/
+
+                    // Transferencia bancaria
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 4.dp)
+                            .clickable {
+                                metodoPagoSeleccionado = MetodoPago.TRANSFERENCIA_BANCARIA
+                                mostrarFormularioTransferencia = true
+                            },
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (metodoPagoSeleccionado == MetodoPago.TRANSFERENCIA_BANCARIA)
+                                Color.LightGray else Color.White
+                        )
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.AccountBalance,
+                                contentDescription = "Transferencia bancaria"
+                            )
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Text("Transferencia bancaria")
+                        }
+                    }
+                }
+
+                if (metodoPagoSeleccionado == MetodoPago.TRANSFERENCIA_BANCARIA && mostrarFormularioTransferencia) {
+                    item {
+                        FormularioTransferenciaBancaria(
+                            precioTotal = precioTotal,
+                            onConfirmarTransferencia = { datosTransferencia ->
+                                // Procesar la transferencia
+                                procesarTransferenciaBancaria(datosTransferencia)
+                                mostrarFormularioTransferencia = false
+                            },
+                            onCancelar = {
+                                mostrarFormularioTransferencia = false
+                            }
+                        )
+                    }
+                }
+
+
+                item {
                     Spacer(modifier = Modifier.height(12.dp))
+
 
                     Button(
                         onClick = {
@@ -346,7 +465,8 @@ fun PagoReservaBodyListScreen(
                                 impuesto = impuesto,
                                 precioTotal = precioTotal,
                                 tipoCliente = tipoCliente,
-                                pasajero = pasajero
+                                pasajero = pasajero,
+                                metodoPago = metodoPagoSeleccionado?.name
 
                             )
 
@@ -363,12 +483,166 @@ fun PagoReservaBodyListScreen(
                         Text("Realizar pago")
                     }
 
+                   /* Button(
+                        onClick = { goBack() },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFFED0A0A),
+                            contentColor = Color.White
+                        )
+                    ) {
+                        Text("Cancelar Pago")
+                    }*/
+
                 }
             }
         }
     }
 }
 
+@Composable
+fun FormularioTransferenciaBancaria(
+    precioTotal: Double,
+    onConfirmarTransferencia: (DatosTransferencia) -> Unit,
+    onCancelar: () -> Unit
+) {
+    var bancoSeleccionado by remember { mutableStateOf("") }
+    var numeroCuenta by remember { mutableStateOf("") }
+    var nombreTitular by remember { mutableStateOf("") }
+    var referencia by remember { mutableStateOf("") }
 
+    val bancos = listOf(
+        "Banco Popular",
+        "Banco BHD León",
+        "Banco Reservas",
+        "Banco Santa Cruz",
+        "Otro banco"
+    )
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text(
+                text = "Transferencia Bancaria",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(bottom = 16.dp)
+            )
+
+            Text(
+                text = "Total a pagar: RD$${"%.2f".format(precioTotal)}",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
+            // Banco
+            Text("Banco:", modifier = Modifier.padding(top = 8.dp))
+            bancos.forEach { banco ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { bancoSeleccionado = banco }
+                        .padding(8.dp)
+                ) {
+                    RadioButton(
+                        selected = bancoSeleccionado == banco,
+                        onClick = { bancoSeleccionado = banco }
+                    )
+                    Text(
+                        text = banco,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                }
+            }
+
+            // Número de cuenta
+            OutlinedTextField(
+                value = numeroCuenta,
+                onValueChange = { numeroCuenta = it },
+                label = { Text("Número de cuenta destino") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            )
+
+            // Nombre del titular
+            OutlinedTextField(
+                value = nombreTitular,
+                onValueChange = { nombreTitular = it },
+                label = { Text("Nombre del titular") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp)
+            )
+
+            // Referencia
+            OutlinedTextField(
+                value = referencia,
+                onValueChange = { referencia = it },
+                label = { Text("Número de referencia") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            )
+
+            // Instrucciones
+            Text(
+                text = "Por favor realice la transferencia a la cuenta indicada y proporcione el número de referencia.",
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(vertical = 16.dp)
+            )
+
+            // Botones
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Button(
+                    onClick = onCancelar,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Gray,
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("Cancelar")
+                }
+
+                Button(
+                    onClick = {
+                        if (bancoSeleccionado.isNotEmpty() &&
+                            numeroCuenta.isNotEmpty() &&
+                            nombreTitular.isNotEmpty() &&
+                            referencia.isNotEmpty()) {
+
+                            onConfirmarTransferencia(
+                                DatosTransferencia(
+                                    banco = bancoSeleccionado,
+                                    numeroCuenta = numeroCuenta,
+                                    nombreTitular = nombreTitular,
+                                    referencia = referencia,
+                                    monto = precioTotal
+                                )
+                            )
+                        }
+                    },
+                    enabled = bancoSeleccionado.isNotEmpty() &&
+                            numeroCuenta.isNotEmpty() &&
+                            nombreTitular.isNotEmpty() &&
+                            referencia.isNotEmpty()
+                ) {
+                    Text("Confirmar Transferencia")
+                }
+            }
+        }
+    }
+}
 
 

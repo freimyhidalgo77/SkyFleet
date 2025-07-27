@@ -10,7 +10,7 @@ data class ReservaEntity(
     val reservaId:Int? = null,
     val estadoId:Int? = null,
     val formularioId:Int? = null,
-    val metodoPagoId:Int? = null,
+    //val metodoPagoId:Int? = null,
     val tipoVueloId:Int? = null,
     val categoriaId:Int? = null, // Categoria de aeronave
     val rutaId:Int? = null,
@@ -21,7 +21,9 @@ data class ReservaEntity(
     val precioTotal:Double,
     val tipoCliente:Boolean?,
     val licenciaPiloto:String? = null,
-    val userId: String
+    val userId: String,
+    val metodoPago: String? = null,
+    val estadoPago: String = "PENDIENTE"
     //val aeronaveId:Int = 0,
 
 ){

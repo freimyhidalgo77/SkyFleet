@@ -112,7 +112,8 @@ fun Rutas_Viajes_Screen(
                     impuesto = 0.0,
                     precioTotal = 0.0,
                     tipoCliente = soyPiloto ?: false,
-                    pasajero = 0
+                    pasajero = 0,
+                    metodoPago = ""
 
                 )//aqui se pasa a reserva en el metodo saveReserva(reserva:ReservaEntity)
             }
@@ -513,8 +514,8 @@ fun Vuelos_RutasBodyListScreen(
 
             item {
                 val puedeContinuar = selectedAeronave != null &&
-                        /*fechaSeleccionada != null &&
-                        (soyPiloto != true || licenciaSeleccionada != null) && */selectedRuta != null && selectedTipoVuelo != null
+                        fechaSeleccionada != null &&
+                        (soyPiloto != true || licenciaSeleccionada != null) && selectedRuta != null && selectedTipoVuelo != null
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
                     onClick = {

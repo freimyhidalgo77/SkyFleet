@@ -99,21 +99,17 @@ fun PreReservaListScreen(
 @Composable
 fun ReservaBodyListScreen(
     uiState: UiState,
-    reservaViewModel:ReservaViewModel,
+    reservaViewModel: ReservaViewModel,
     tipoVueloViewModel: TipoVueloViewModel = hiltViewModel(),
     rutaViewModel: RutaViewModel = hiltViewModel(),
-    tipoVueloList:List<TipoVueloEntity>,
-    rutaList:List<RutaEntity>,
-    goToFormulario: (Int)-> Unit,
+    tipoVueloList: List<TipoVueloEntity>,
+    rutaList: List<RutaEntity>,
+    goToFormulario: (Int) -> Unit,
     aeronaveUiState: AeronaveUiState,
     rutaUiState: RutaUiState,
     tipoVueloUiState: TipoVueloUiState,
-    goBack:()->Unit,
+    goBack: () -> Unit,
 ) {
-
-    /*val tipoVueloSeleccionado by reservaViewModel.tipoVueloSeleccionadoId.collectAsState()
-    val rutaSeleccionadaId by  rutaViewModel.rutaSeleccionadaId.collectAsState()*/
-
     val idTipoVueloSeleccionado by reservaViewModel.tipoVueloSeleccionadoId.collectAsState()
     val tipoVueloSeleccionado =
         tipoVueloUiState.tipovuelo.find { it.tipoVueloId == idTipoVueloSeleccionado }
@@ -126,9 +122,7 @@ fun ReservaBodyListScreen(
         aeronaveUiState.aeronaves.find { it.aeronaveId == idAeronaveSeleccionada }
 
     val fechaVuelo by reservaViewModel.fechaSeleccionada.collectAsState()
-
     val tipoCliente by reservaViewModel.tipoCliente.collectAsState()
-
     val reservaUiState by reservaViewModel.uiState.collectAsStateWithLifecycle()
     val licenciaSeleccionada = reservaUiState.licenciaPiloto
 
@@ -152,111 +146,179 @@ fun ReservaBodyListScreen(
         LazyColumn(
             modifier = Modifier
                 .padding(innerPadding)
-                .padding(8.dp)
+                .padding(16.dp)
                 .fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
-            horizontalAlignment = Alignment.Start
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-
             item {
                 Text(
-                    text = "Tipo de vuelo: ${tipoVueloSeleccionado?.nombreVuelo ?: "No seleccionado"}",
-                    style = androidx.compose.ui.text.TextStyle(
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.onSurface
-                    ),
-                    modifier = Modifier.padding(horizontal = 16.dp)
+                    text = "Detalles del vuelo",
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(bottom = 8.dp)
                 )
             }
 
             item {
+                Column(modifier = Modifier.padding(10.dp)) {
+
+                    }
+
                 Text(
-                    text = rutaSeleccionada?.let { "Origen: ${it.origen}" } ?: "No seleccionado",
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-            }
+                    text = "Tipo de vuelo",
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 4.dp)
 
-            item {
+                )
                 Text(
-                    text = rutaSeleccionada?.let { "Destino: ${it.destino}" } ?: "No seleccionado",
-                    modifier = Modifier.padding(horizontal = 16.dp)
+                    text = tipoVueloSeleccionado?.nombreVuelo ?: "No seleccionado",
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 8.dp)
                 )
-            }
 
-            item {
-                Text(
-                    text = "Aeronave seleccionada: ${aeronaveSeleccionada?.modeloAvion ?: "No seleccionado"}",
-                    style = androidx.compose.ui.text.TextStyle(
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.onSurface
-                    ),
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-            }
-
-            fechaVuelo?.let { fecha ->
-                val formato = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                val fechaFormateada = formato.format(fecha)
-
-                item {
                     Text(
-                        text = "Fecha seleccionada: $fechaFormateada",
-                        fontSize = 16.sp,
-                        color = Color(0xFF0A80ED),
-                        modifier = Modifier.padding(horizontal = 16.dp)
+                        text = "Origen",
+                        color = Color.Gray,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(bottom = 4.dp)
                     )
-                }
-
-                item {
                     Text(
-                        text = rutaSeleccionada?.let { "Duración estimada: ${it.duracion}" }
-                            ?: "Duración: No disponible",
-                        modifier = Modifier.padding(horizontal = 16.dp)
+                        text = rutaSeleccionada?.origen ?: "No seleccionado",
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(bottom = 8.dp)
                     )
-                }
 
-                item {
-                    Text(text = "Piloto?", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Text(
+                        text = "Destino",
+                        color = Color.Gray,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
+                    Text(
+                        text = rutaSeleccionada?.destino ?: "No seleccionado",
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                    // Aeronave
+                    Text(
+                        text = "Aeronave",
+                        color = Color.Gray,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
+                    Text(
+                        text = aeronaveSeleccionada?.modeloAvion ?: "No seleccionado",
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                    // Fecha
+                    fechaVuelo?.let { fecha ->
+                        val formato = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                        val fechaFormateada = formato.format(fecha)
+
+                        Text(
+                            text = "Fecha",
+                            color = Color.Gray,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.padding(bottom = 4.dp)
+                        )
+                        Text(
+                            text = fechaFormateada,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.padding(bottom = 8.dp)
+                        )
+                    }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                    // Hora
+                    Text(
+                        text = "Tiempo",
+                        color = Color.Gray,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
+                    Text(
+                        text = "10:00 AM - 12:00 PM", // Esto debería venir de tus datos
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                    // Duración
+                    Text(
+                        text = "Duración estimada",
+                        color = Color.Gray,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
+
+                    Text(
+                        text = rutaSeleccionada?.let { "${it.duracion} minutos" }
+                            ?: "No disponible",
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+
+                    // Piloto
+                    Text(
+                        text = "Piloto?",
+                        color = Color.Gray,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
                     Text(
                         text = when (tipoCliente) {
                             true -> "Sí"
                             false -> "No"
                             else -> "No especificado"
                         },
-                        fontSize = 16.sp,
-                        color = Color.Gray
-
-                    )
-                }
-
-                item{
-                    Text(
-                        text = "Licencia seleccionada: ${reservaUiState.licenciaPiloto?.descripcion ?: "No aplica"}",
-                        modifier = Modifier.padding(16.dp)
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(bottom = 8.dp)
                     )
 
-                }
-
-                item {
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Button(
-                        onClick = { goToFormulario(0) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF0A80ED),
-                            contentColor = Color.White
+                    // Licencia (solo si es piloto)
+                    if (tipoCliente == true) {
+                        Text(
+                            text = "Licencia:",
+                            color = Color.Gray,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.padding(bottom = 4.dp)
                         )
-                    ) {
-                        Text("Continuar reserva")
+                        Text(
+                            text = reservaUiState.licenciaPiloto?.descripcion ?: "No especificada",
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
                     }
+                }
+
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    onClick = { goToFormulario(0) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF0A80ED),
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("Continuar reserva", fontSize = 16.sp)
                 }
             }
         }
     }
-
 }
 
 

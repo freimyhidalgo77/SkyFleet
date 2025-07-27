@@ -12,7 +12,6 @@ data class UiState (
     val reservaId: Int? = null,
     val estadoId: Int? = 0,
     val formularioId: Int? = 0,
-    val metodoPagoId: Int? = 0,
     val tipoVueloId: Int? = 0,
     val categoriaId: Int? = 0,
     val rutaId: Int? = 0,
@@ -23,6 +22,8 @@ data class UiState (
     val precioTotal: Double = 0.0,
     val tipoCliente: Boolean? = false,
     val licenciaPiloto: TipoLicencia? = null,
+    val metodoPago: String? = null,
+    val estadoPago: String = "PENDIENTE",
 
     // UI extras para mostrar descripciones
     val tipoVueloSeleccionado: TipoVueloDTO? = null,

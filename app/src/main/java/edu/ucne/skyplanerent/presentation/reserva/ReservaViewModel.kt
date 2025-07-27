@@ -220,6 +220,8 @@ class ReservaViewModel @Inject constructor(
         precioTotal: Double,
         tipoCliente: Boolean?,
         pasajero: Int,
+        metodoPago: String?
+
     ) {
         viewModelScope.launch {
             val fecha = _fechaSeleccionada.value
@@ -249,7 +251,8 @@ class ReservaViewModel @Inject constructor(
                 tipoCliente = tipoCliente,
                 precioTotal = precioTotal,
                 pasajeros = pasajero,
-                userId = currentUser.uid
+                userId = currentUser.uid,
+                estadoPago = if (metodoPago != null) "COMPLETADO" else "PENDIENTE"
             )
 
             reservaRepository.saveReserva(reserva)
@@ -334,7 +337,7 @@ class ReservaViewModel @Inject constructor(
                             rutaId = reserva.rutaId,
                             estadoId = reserva.estadoId,
                             formularioId = reserva.formularioId,
-                            metodoPagoId = reserva.metodoPagoId,
+                            metodoPago = reserva.metodoPago?:"",
                             tipoVueloId = reserva.tipoVueloId,
                             categoriaId = reserva.categoriaId,
                             pasajeros = reserva.pasajeros?:0,
@@ -413,7 +416,7 @@ class ReservaViewModel @Inject constructor(
         rutaId = rutaId,
         estadoId = estadoId,
         formularioId = formularioId,
-        metodoPagoId = metodoPagoId,
+        metodoPago = metodoPago,
         tipoVueloId = tipoVueloId,
         categoriaId = categoriaId,
         fecha = fecha,

@@ -50,6 +50,7 @@ import edu.ucne.skyplanerent.data.remote.dto.TipoVueloDTO
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveUiState
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveViewModel
 import edu.ucne.skyplanerent.presentation.navigation.Screen
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.formulario.FormularioUiState
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.formulario.FormularioViewModel
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaUiState
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaViewModel
@@ -64,6 +65,7 @@ fun ReservaDetailsScreen(
     rutaViewModel: RutaViewModel = hiltViewModel(),
     tipoVueloViewModel: TipoVueloViewModel = hiltViewModel(),
     aeronaveViewModel: AeronaveViewModel =  hiltViewModel(),
+    formularioViewModel: FormularioViewModel = hiltViewModel(),
     scope: CoroutineScope,
     goBack:(Int)->Unit,
     goToEdit: (Int)->Unit,
@@ -74,6 +76,7 @@ fun ReservaDetailsScreen(
     val rutaUiState by rutaViewModel.uiState.collectAsStateWithLifecycle()
     val tipoVueloUiState by tipoVueloViewModel.uiState.collectAsStateWithLifecycle()
     val aeronaveUiState by aeronaveViewModel.uiState.collectAsStateWithLifecycle()
+    val formularioUiState by formularioViewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(reservaId) {
         viewModel.selectReserva(reservaId)
@@ -88,7 +91,8 @@ fun ReservaDetailsScreen(
         reservaId = reservaId,
         tipoVueloUiState = tipoVueloUiState,
         rutaUiState = rutaUiState,
-        aeronaveUiState = aeronaveUiState
+        aeronaveUiState = aeronaveUiState,
+        formularioUiState = formularioUiState
     )
 }
 
@@ -103,9 +107,10 @@ fun ReservaDetailsBodyScreen(
     tipoVueloUiState: TipoVueloUiState,
     rutaUiState: RutaUiState,
     aeronaveUiState: AeronaveUiState,
-    reservaId:Int
+    reservaId:Int,
+    formularioUiState: FormularioUiState,
 
-){
+    ){
 
     /* val ruta = uiState.rutaSeleccionada
      val tipoVuelo = uiState.tipoVueloSeleccionado
@@ -167,7 +172,8 @@ fun ReservaDetailsBodyScreen(
                             goToDelete = goToDelete,
                             fecha = uiState.fecha?.toString(),
                             tipoCliente = uiState.tipoCliente,
-                            licenciaDescripcion = uiState.licenciaPiloto?.descripcion
+                            licenciaDescripcion = uiState.licenciaPiloto?.descripcion,
+                            formularioUiState = formularioUiState
                         )
                     }
 
@@ -181,6 +187,7 @@ fun ReservaDetailsBodyScreen(
 @Composable
 fun ReservaDetailsRow(
     reserva: ReservaEntity,
+    formularioUiState: FormularioUiState,
     ruta: RutaDTO?,
     tipoVuelo: TipoVueloDTO?,
     aeronave: AeronaveDTO?,
@@ -190,6 +197,8 @@ fun ReservaDetailsRow(
     tipoCliente: Boolean?,
     licenciaDescripcion: String?
 ) {
+
+    val formulario = formularioUiState.formularios.find { it.formularioId == reserva.formularioId }
 
     Column(
         modifier = Modifier
@@ -215,11 +224,16 @@ fun ReservaDetailsRow(
         InfoRow("Pasajeros", reserva.pasajeros.toString())
         InfoRow("Fecha", fecha ?: "No seleccionada")
         InfoRow("Piloto", when (tipoCliente) {
+
             true -> "Sí"
             false -> "No"
             else -> "No especificado"
         })
         InfoRow("Licencia", licenciaDescripcion ?: "No aplica")
+
+        InfoRow("Detalles del cliente", "${formulario?.nombre ?: "Nombre"} ${formulario?.apellido ?: "no encontrado"}")
+
+        InfoRow("Metodo pago", reserva.metodoPago?:"")
 
         Spacer(modifier = Modifier.height(20.dp))
 
