@@ -76,7 +76,8 @@ fun AeronaveListScreen(
     goToAeronave: (Int) -> Unit,
     createAeronave: () -> Unit,
     goBack: () -> Unit,
-    goToAdminPanel: () -> Unit // Añadido para navegar al panel de administración
+    goToAdminPanel: () -> Unit, // Añadido para navegar al panel de administración
+    goToPerfil: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val query by viewModel.searchQuery.collectAsStateWithLifecycle()
@@ -113,7 +114,8 @@ fun AeronaveListScreen(
         onEvent = viewModel::onEvent,
         createAeronave = createAeronave,
         goBack = goBack,
-        goToAdminPanel = goToAdminPanel // Pasar el callback
+        goToAdminPanel = goToAdminPanel, // Pasar el callback
+        goToPerfil = goToPerfil
     )
 }
 
@@ -128,7 +130,8 @@ fun AeronaveListBodyScreen(
     onEvent: (AeronaveEvent) -> Unit,
     createAeronave: () -> Unit,
     goBack: () -> Unit,
-    goToAdminPanel: () -> Unit // Añadido para navegar al panel de administración
+    goToAdminPanel: () -> Unit, // Añadido para navegar al panel de administración
+    goToPerfil: () -> Unit
 ) {
     val pullRefreshState = rememberPullRefreshState(
         refreshing = uiState.isLoading,
@@ -225,7 +228,7 @@ fun AeronaveListBodyScreen(
                     },
                     label = { Text("Perfil") },
                     selected = false,
-                    onClick = {}
+                    onClick = goToPerfil
                 )
             }
         }
