@@ -209,140 +209,250 @@ fun PagoReservaBodyListScreen(
         ) {
 
             item {
+
+                Column(modifier = Modifier.fillMaxWidth()){}
+
                 Text(
-                    text = "Tipo de vuelo: ${tipoVueloSeleccionado?.nombreVuelo ?: "No seleccionado"}",
-                    style = androidx.compose.ui.text.TextStyle(
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontWeight = FontWeight.Bold,
-                    ),
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-            }
+                    text = "Tipo de vuelo",
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 4.dp)
 
-            item {
+                )
                 Text(
-                    text = rutaSeleccionada?.let { "Origen: ${it.origen}" } ?: "No seleccionado",
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(horizontal = 16.dp)
+                    text = tipoVueloSeleccionado?.nombreVuelo ?: "No seleccionado",
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 8.dp)
                 )
-            }
 
-            item {
                 Text(
-                    text = rutaSeleccionada?.let { "Destino: ${it.destino}" } ?: "No seleccionado",
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    fontWeight = FontWeight.Bold,
+                    text = "Origen",
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 4.dp)
                 )
-            }
-
-            item {
                 Text(
-                    text = "Aeronave seleccionada: ${aeronaveSeleccionada?.modeloAvion ?: "No seleccionado"}",
-                    style = androidx.compose.ui.text.TextStyle(
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontWeight = FontWeight.Bold,
-                    ),
-                    modifier = Modifier.padding(horizontal = 16.dp)
+                    text = rutaSeleccionada?.origen ?: "No seleccionado",
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 8.dp)
                 )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "Destino",
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                Text(
+                    text = rutaSeleccionada?.destino ?: "No seleccionado",
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Aeronave
+                Text(
+                    text = "Aeronave",
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                Text(
+                    text = aeronaveSeleccionada?.modeloAvion ?: "No seleccionado",
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Fecha
+                fechaVuelo?.let { fecha ->
+                    val formato = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                    val fechaFormateada = formato.format(fecha)
+
+                    Text(
+                        text = "Fecha",
+                        color = Color.Gray,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
+                    Text(
+                        text = fechaFormateada,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Hora
+                Text(
+                    text = "Tiempo",
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                Text(
+                    text = "10:00 AM - 12:00 PM", // Esto debería venir de tus datos
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Duración
+                Text(
+                    text = "Duración estimada",
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+
+                Text(
+                    text = rutaSeleccionada?.let { "${it.duracion} minutos" }
+                        ?: "No disponible",
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "Nombre",
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                Text(
+                    text = formularioUiState.nombre ?: "No seleccionado",
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "Apellido",
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                Text(
+                    text = formularioUiState.apellido ?: "No seleccionado",
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "Pasaporte",
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                Text(
+                    text = formularioUiState.pasaporte ?: "No seleccionado",
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+
+                Text(
+                    text = "Cantidad pasajeros",
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                Text(
+                    text = "${formularioUiState.cantidadPasajeros}",
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "¿Es Piloto?",
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                Text(
+
+                    text = when (tipoCliente) {
+                        true -> "Sí"
+                        false -> "No"
+                        else -> "No especificado"
+                    },
+                    fontSize = 16.sp,
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "Licencia seleccionada",
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                Text(
+                    text = "${licenciaSeleccionada ?: "No aplica"}",
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "Desgloce de precios",
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                Text(
+                    text = "${tarifaBase}",
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "Impuesto",
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                Text(
+                    text = "${impuesto}",
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "Precio total",
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                Text(
+                    text = "${precioTotal}",
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
             }
-
-            fechaVuelo?.let { fecha ->
-                val formato = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                val fechaFormateada = formato.format(fecha)
-
-                item {
-                    Text(
-                        text = "Fecha seleccionada: $fechaFormateada",
-                        fontSize = 16.sp,
-                        color = Color(0xFF0A80ED),
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(horizontal = 16.dp)
-                    )
-                }
-
-                item {
-                    Text(
-                        text = rutaSeleccionada?.let { "Duración estimada: ${it.duracion}" }
-                            ?: "Duración: No disponible",
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
-
-                item {
-                    Text(
-                        text = "Nombre ${formularioUiState.nombre} Apellido ${formularioUiState.apellido}",
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
-
-                item {
-                    Text(
-                        text = "Pasaporte ${formularioUiState.pasaporte}",
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
-
-
-                item {
-                    Text(
-                        text = "Cantidad pasajeros ${formularioUiState.cantidadPasajeros}",
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
-
-                item {
-                    Text(text = "¿Es Piloto?", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                    Text(
-                        text = when (tipoCliente) {
-                            true -> "Sí"
-                            false -> "No"
-                            else -> "No especificado"
-                        },
-                        fontSize = 16.sp,
-                        color = Color.Gray
-
-                    )
-                }
-
-                item {
-                    Text(
-                        text = "Licencia seleccionada: ${licenciaSeleccionada ?: "No aplica"}",
-                        fontSize = 16.sp,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
-
-
-                item {
-                    Text(
-                        text = "Desgloce de precio: $tarifaBase",
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
-
-                item {
-                    Text(
-                        text = "Impuesto: $impuesto",
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
-
-                item {
-                    Text(
-                        text = "Precio total: $precioTotal",
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
-
 
                 item {
                     Text(
@@ -523,7 +633,7 @@ fun PagoReservaBodyListScreen(
 
                 }
             }
-        }
+
 
 @Composable
 fun FormularioTransferenciaBancaria(
