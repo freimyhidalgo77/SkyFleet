@@ -20,6 +20,7 @@ import edu.ucne.skyplanerent.HomeScreen
 import edu.ucne.skyplanerent.data.local.entity.RutaEntity
 import edu.ucne.skyplanerent.data.local.entity.TipoVueloEntity
 import edu.ucne.skyplanerent.presentation.admin.AdminPanelScreen
+import edu.ucne.skyplanerent.presentation.admin.PerfilAdminScreen
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveListScreen
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveScreen
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveViewModel
@@ -199,6 +200,12 @@ fun AppNavigation(context: Context) {
                 createRuta = {
                     navController.navigate(Screen.Ruta(null))
                 },
+                goToAdminPanel = {
+                    navController.navigate(Screen.AdminPanel)
+                },
+                goToPerfil = {
+                    navController.navigate(Screen.PerfilAdmin)
+                },
                 goBack = { navController.popBackStack() }
             )
         }
@@ -355,6 +362,9 @@ fun AppNavigation(context: Context) {
                 goToAdminPanel = {
                     navController.navigate(Screen.AdminPanel)
                 },
+                goToPerfil = {
+                    navController.navigate(Screen.PerfilAdmin)
+                },
                 goBack = { navController.popBackStack() },
             )
         }
@@ -393,6 +403,9 @@ fun AppNavigation(context: Context) {
                 },
                 goToAdminPanel = {
                     navController.navigate(Screen.AdminPanel)
+                },
+                goToPerfil = {
+                    navController.navigate(Screen.PerfilAdmin)
                 },
                 goBack = { navController.popBackStack() },
                 onEdit = { categoriaId ->
@@ -462,9 +475,25 @@ fun AppNavigation(context: Context) {
             composable<Screen.AdminPanel> {
                 AdminPanelScreen(
                     navController = navController,
+                    goToPerfil = {
+                        navController.navigate(Screen.PerfilAdmin)
+                    },
                     goBack = { navController.popBackStack() }
                 )
             }
+
+        composable<Screen.PerfilAdmin> {
+            PerfilAdminScreen(
+                navController = navController,
+                goToAdminPanel = {
+                    navController.navigate(Screen.AdminPanel)
+                },
+                goToFirstScreen = {
+                    navController.navigate(Screen.FirstScreen)
+                },
+                goBack = { navController.popBackStack() }
+            )
+        }
 
             composable(
                 route = "aeronaveList?categoriaId={categoriaId}",
@@ -489,6 +518,9 @@ fun AppNavigation(context: Context) {
                     },
                     goToAdminPanel = {
                         navController.navigate(Screen.AdminPanel)
+                    },
+                    goToPerfil = {
+                        navController.navigate(Screen.PerfilAdmin)
                     },
                     goBack = { navController.popBackStack() }
 
