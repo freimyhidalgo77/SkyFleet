@@ -82,6 +82,7 @@ fun ReservaDetailsScreen(
         viewModel.selectReserva(reservaId)
     }
 
+
     ReservaDetailsBodyScreen(
         uiState = uiState,
         scope = scope,
@@ -233,7 +234,18 @@ fun ReservaDetailsRow(
 
         InfoRow("Detalles del cliente", "${formulario?.nombre ?: "Nombre"} ${formulario?.apellido ?: "no encontrado"}")
 
-        InfoRow("Metodo pago", reserva.metodoPago?:"")
+        Text("Información de pago", fontWeight = FontWeight.Bold, fontSize = 18.sp)
+
+        InfoRow("Método de pago", reserva.metodoPago ?: "No especificado")
+        InfoRow("Estado", reserva.estadoPago ?: "Pendiente")
+        InfoRow("Monto total", "RD$${"%.2f".format(reserva.precioTotal)}")
+
+        if (reserva.metodoPago == "TRANSFERENCIA_BANCARIA" && reserva.comprobante != null) {
+            val detalles = reserva.comprobante.split(", ")
+            detalles.forEach { detalle ->
+                InfoRow("", detalle)
+            }
+        }
 
         Spacer(modifier = Modifier.height(20.dp))
 

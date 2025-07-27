@@ -31,4 +31,9 @@ class ReservaRepository @Inject constructor(
         return reservaDao.getReservasByUserId(userId)
     }
 
+    // En ReservaRepository.kt
+    /* suspend fun actualizarEstadoPago(reservaId: Int, metodoPago: String, comprobante: String?) {
+        reservaDao.actualizarEstadoPago(reservaId, metodoPago, comprobante)
+    }*/
+
 }

@@ -79,7 +79,7 @@ fun Rutas_Viajes_Screen(
         vueloUiState = tipoVueloUiState,
         tiposDeVuelo = tipoVueloUiState.tipovuelo,
         scope = scope,
-        onReserva = { fecha ->
+        onReserva = { fecha, comprobante, metodoPago ->
 
             val currentUser = FirebaseAuth.getInstance().currentUser
 
@@ -100,7 +100,9 @@ fun Rutas_Viajes_Screen(
                     categoriaId = selectedAeronave!!.aeronaveId,
                     tipoCliente = soyPiloto ?: false,
                     licenciaPiloto = licenciaSeleccionada,
-                    userId = currentUser.uid
+                    userId = currentUser.uid,
+                    comprobante = comprobante,
+                    metodoPago = metodoPago?:""
 
                 )
                 reservaViewModel.guardarReserva(
@@ -113,7 +115,9 @@ fun Rutas_Viajes_Screen(
                     precioTotal = 0.0,
                     tipoCliente = soyPiloto ?: false,
                     pasajero = 0,
-                    metodoPago = ""
+                    metodoPago = metodoPago?:"",
+                    comprobante = comprobante?:"",
+                    formularioId = reservaUiState.formularioId?:0
 
                 )//aqui se pasa a reserva en el metodo saveReserva(reserva:ReservaEntity)
             }
@@ -140,7 +144,7 @@ fun Vuelos_RutasBodyListScreen(
     rutaViewModel: RutaViewModel = hiltViewModel(),
     tipoVueloViewModel: TipoVueloViewModel = hiltViewModel(),
     reservaViewModel: ReservaViewModel,
-    onReserva: (Date) -> Unit,
+    onReserva: (Date, String?, String?) -> Unit,
     goBackDetails: (Int) -> Unit,
     goToRuta: (Int) -> Unit,
     goBack:()-> Unit,

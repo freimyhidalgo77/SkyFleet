@@ -211,16 +211,27 @@ class ReservaViewModel @Inject constructor(
         }
     }
 
+    // En ReservaViewModel.kt
+   /* fun actualizarEstadoPago(reservaId: Int, metodoPago: String, comprobante: String? = null) {
+        viewModelScope.launch {
+            reservaRepository.actualizarEstadoPago(reservaId, metodoPago, comprobante)
+            // Actualizar el estado local si es necesario
+            _uiState.update { it.copy(metodoPago = metodoPago, comprobante = comprobante) }
+        }
+    }*/
+
     fun guardarReserva(
         rutaId: Int,
         tipoVueloId: Int,
         aeronaveId: Int,
+        formularioId:Int,
         tarifaBase: Double,
         impuesto: Double,
         precioTotal: Double,
         tipoCliente: Boolean?,
         pasajero: Int,
-        metodoPago: String?
+        metodoPago: String?,
+        comprobante: String?
 
     ) {
         viewModelScope.launch {
@@ -244,6 +255,7 @@ class ReservaViewModel @Inject constructor(
             val reserva = ReservaEntity(
                 rutaId = rutaId,
                 tipoVueloId = tipoVueloId,
+                formularioId = formularioId,
                 categoriaId = aeronaveId,
                 fecha = fecha,
                 tarifa = tarifaBase,
@@ -252,7 +264,8 @@ class ReservaViewModel @Inject constructor(
                 precioTotal = precioTotal,
                 pasajeros = pasajero,
                 userId = currentUser.uid,
-                estadoPago = if (metodoPago != null) "COMPLETADO" else "PENDIENTE"
+                estadoPago = if (metodoPago != null) "COMPLETADO" else "PENDIENTE",
+                comprobante = comprobante
             )
 
             reservaRepository.saveReserva(reserva)
@@ -425,7 +438,8 @@ class ReservaViewModel @Inject constructor(
         precioTotal = precioTotal,
         tipoCliente = tipoCliente?:false,
         pasajeros = pasajeros,
-        userId = userId
+        userId = userId,
+         comprobante = comprobante
 
         )
 
