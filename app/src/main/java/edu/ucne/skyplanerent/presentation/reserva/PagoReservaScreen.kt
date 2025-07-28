@@ -900,10 +900,12 @@ fun FormularioTransferenciaBancaria(
     goBack:()->Unit
 
 ) {
+    var montoIngresado by remember { mutableStateOf("") }
     var bancoSeleccionado by remember { mutableStateOf("") }
     var numeroCuenta by remember { mutableStateOf("") }
     var nombreTitular by remember { mutableStateOf("") }
     var referencia by remember { mutableStateOf("") }
+    var mostrarErrorMonto by remember { mutableStateOf(false) }
 
     val bancos = listOf(
         "Banco Popular",
@@ -987,12 +989,33 @@ fun FormularioTransferenciaBancaria(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
 
+            OutlinedTextField(
+                value = montoIngresado,
+                onValueChange = {
+                    if (it.isEmpty() || it.matches(Regex("^\\d*\\.?\\d*\$"))) {
+                        montoIngresado = it
+                        mostrarErrorMonto = false
+                    }
+                },
+                label = { Text("Monto a pagar (RD$)") },
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                isError = mostrarErrorMonto,
+                supportingText = {
+                    if (mostrarErrorMonto) {
+                        Text("El monto debe ser igual a RD$${"%.2f".format(precioTotal)}", color = Color.Red)
+                    }
+                }
+            )
+
+
             // Instrucciones
             Text(
                 text = "Por favor realice la transferencia a la cuenta indicada y proporcione el número de referencia.",
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(vertical = 16.dp)
             )
+
 
             // Botones
             Row(
@@ -1011,6 +1034,16 @@ fun FormularioTransferenciaBancaria(
 
                 Button(
                     onClick = {
+
+                        val montoValido = montoIngresado.toDoubleOrNull()?.let {
+                            it == precioTotal
+                        } ?: false
+
+                        if (!montoValido) {
+                            mostrarErrorMonto = true
+                            return@Button
+                        }
+
                         if (bancoSeleccionado.isNotEmpty() &&
                             numeroCuenta.isNotEmpty() &&
                             nombreTitular.isNotEmpty() &&
@@ -1059,7 +1092,8 @@ fun FormularioTransferenciaBancaria(
                     enabled = bancoSeleccionado.isNotEmpty() &&
                             numeroCuenta.isNotEmpty() &&
                             nombreTitular.isNotEmpty() &&
-                            referencia.isNotEmpty()
+                            referencia.isNotEmpty() &&
+                            montoIngresado.isNotEmpty()
                 ) {
                     Text("Confirmar Transferencia")
                 }
