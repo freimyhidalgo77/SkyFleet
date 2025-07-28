@@ -238,7 +238,8 @@ fun ReservaDetailsRow(
 
         InfoRow("Método de pago", reserva.metodoPago ?: "No especificado")
         InfoRow("Estado", reserva.estadoPago ?: "Pendiente")
-        InfoRow("Monto total", "RD$${"%.2f".format(reserva.precioTotal)}")
+
+        InfoRow("Monto Pagado:", "RD$${"%.2f".format(reserva.precioTotal)}")
 
         if (reserva.metodoPago == "TRANSFERENCIA_BANCARIA" && reserva.comprobante != null) {
             val detalles = reserva.comprobante.split(", ")
