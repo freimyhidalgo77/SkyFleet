@@ -16,9 +16,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.MaterialTheme.colors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.CreditCard
+import androidx.compose.material3.AlertDialogDefaults.containerColor
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -26,6 +28,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItemDefaults.contentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
@@ -800,7 +803,12 @@ fun FormularioTransferenciaBancaria(
                             onConfirmarTransferencia(datosTransferencia)
                             goBack()
                         }
+
                     },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF0A80ED),
+                        contentColor = Color.White
+                    ),
                     enabled = bancoSeleccionado.isNotEmpty() &&
                             numeroCuenta.isNotEmpty() &&
                             nombreTitular.isNotEmpty() &&

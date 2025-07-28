@@ -42,6 +42,7 @@ import edu.ucne.skyplanerent.presentation.aeronave.TipoAeronaveListScreen
 //import edu.ucne.skyplanerent.presentation.aeronave.CategoriaReservaAeronaveScreen
 //import edu.ucne.skyplanerent.presentation.aeronave.TipoAeronaveScreen
 import edu.ucne.skyplanerent.presentation.categoriaaeronave.CategoriaReservaAeronaveScreen
+import edu.ucne.skyplanerent.presentation.login.PerfilClientScreen
 import edu.ucne.skyplanerent.presentation.login.SessionManager
 import edu.ucne.skyplanerent.presentation.reserva.PagoReservaListScreen
 import edu.ucne.skyplanerent.presentation.reserva.ReservaDeleteScreen
@@ -96,7 +97,33 @@ fun AppNavigation(context: Context) {
                 },
                 onNavigateToRutas_Viajes = {
                     navController.navigate(Screen.Rutas_y_viajes)
+                },
+                onNavigateToPeril = {
+                    navController.navigate(Screen.Perfil)
                 }
+
+            )
+        }
+
+
+        composable<Screen.Perfil> {
+            PerfilClientScreen (
+                navController = navController,
+                goToAdminPanel = {
+                    navController.navigate(Screen.Perfil)
+                },
+                goToFirstScreen = {
+                    navController.navigate(Screen.Home)
+                },
+                onLogout = {
+                    auth.signOut()
+                    sessionManager.clearSession() // Limpia la sesión
+                    navController.navigate(Screen.FirstScreen) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                },
+
+                goBack = { navController.popBackStack() }
             )
         }
 

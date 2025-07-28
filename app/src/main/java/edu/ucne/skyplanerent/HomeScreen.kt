@@ -35,6 +35,7 @@ fun HomeScreen(
     onLogout: () -> Unit,
     onNavigateToReserva: () -> Unit,
     onNavigateToRutas_Viajes: () -> Unit,
+    onNavigateToPeril:()->Unit,
     navController: NavController
 ) {
     val items = listOf(
@@ -101,10 +102,6 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Button(onClick = onLogout)
-            {
-                Text("Cerrar sesión")
-            }
         }
     }
 }
