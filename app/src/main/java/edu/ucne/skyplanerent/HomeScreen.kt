@@ -20,8 +20,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AirplanemodeActive
+import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.res.painterResource
@@ -39,9 +42,9 @@ fun HomeScreen(
     navController: NavController
 ) {
     val items = listOf(
-        BottomNavItem("Reservas", Icons.Default.List, Screen.Reserva),
-        BottomNavItem("Aronaves", Icons.Default.List, Screen.CategoriaAeronaveReservaList),
-        BottomNavItem("Rutas y Viajes", Icons.Default.List, Screen.Rutas_y_viajes),
+        BottomNavItem("Reservas", Icons.Default.Book, Screen.Reserva),
+        BottomNavItem("Aronaves", Icons.Default.AirplanemodeActive, Screen.CategoriaAeronaveReservaList),
+        BottomNavItem("Rutas y Viajes", Icons.Default.Map, Screen.Rutas_y_viajes),
         BottomNavItem("Perfil", Icons.Default.Person, Screen.Perfil),
         //BottomNavItem("Inicio", Icons.Default.Home, Screen.Home),
     )
