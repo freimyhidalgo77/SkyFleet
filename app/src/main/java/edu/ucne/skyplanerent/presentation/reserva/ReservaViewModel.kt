@@ -10,6 +10,7 @@ import edu.ucne.skyplanerent.data.repository.ReservaRepository
 import edu.ucne.skyplanerent.data.repository.RutaRepository
 import edu.ucne.skyplanerent.data.repository.TipoVueloRepository
 import edu.ucne.skyplanerent.presentation.UiEvent
+import edu.ucne.skyplanerent.presentation.login.SessionManager
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaEvent
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.toEntity
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoLicencia
@@ -30,7 +31,9 @@ class ReservaViewModel @Inject constructor(
     private val reservaRepository: ReservaRepository,
     private val tipoRutaRepository: TipoVueloRepository,
     private val rutaRepository: RutaRepository,
-    private val auth: FirebaseAuth
+    private val auth: FirebaseAuth,
+    private val sessionManager: SessionManager
+
 
 ): ViewModel() {
 
@@ -116,18 +119,25 @@ class ReservaViewModel @Inject constructor(
 
 
     //Cargar reserva por usuario
-     fun loadUserReservas() {
-        val currentUser = auth.currentUser
-        if (currentUser != null) {
+    fun loadUserReservas() {
+        // Primero intenta con el usuario de Firebase (si está disponible)
+        val firebaseUser = auth.currentUser
+        val storedUserId = sessionManager.getCurrentUserId()
+
+        val userId = firebaseUser?.uid ?: storedUserId
+
+        if (userId != null) {
             viewModelScope.launch {
-                reservaRepository.getReservasByUserId(currentUser.uid)
+                reservaRepository.getReservasByUserId(userId)
                     .collect { reservas ->
                         _uiState.update { it.copy(reservas = reservas) }
                     }
             }
+        } else {
+            // No hay usuario autenticado ni en sesión
+            _uiState.update { it.copy(reservas = emptyList()) }
         }
     }
-
 
     /*fun seleccionarTipoVuelo(tipoVueloId: Int, tipoVueloDTO: TipoVueloDTO) {
        _tipoVueloSeleccionadoId.value = tipoVueloId

@@ -16,6 +16,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,11 +35,14 @@ import edu.ucne.skyplanerent.presentation.navigation.Screen
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
     onNavigateToRegister:()-> Unit,
-    auth: FirebaseAuth = FirebaseAuth.getInstance()
+    auth: FirebaseAuth = FirebaseAuth.getInstance(),
+    sessionManager: SessionManager,
+
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+
 
     Column(
         modifier = Modifier

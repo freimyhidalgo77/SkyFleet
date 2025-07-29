@@ -12,6 +12,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import edu.ucne.skyplanerent.SkyPlaneRent
 import edu.ucne.skyplanerent.data.local.database.SkyPlaneRentDB
+import edu.ucne.skyplanerent.presentation.login.SessionManager
 import javax.inject.Singleton
 
 @Module
@@ -33,6 +34,12 @@ object AppModule {
     @Singleton
     fun provideFirebaseAuth(): FirebaseAuth {
         return Firebase.auth
+    }
+
+    @Provides
+    @Singleton
+    fun provideSessionManager(@ApplicationContext context: Context): SessionManager {
+        return SessionManager(context)
     }
 
     @Provides

@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -71,6 +72,19 @@ fun AppNavigation(context: Context) {
     val navController = rememberNavController()
     val sessionManager = remember { SessionManager(context) }
 
+    var isAuthInitialized by remember { mutableStateOf(false) }
+
+    // Efecto para verificar el estado de autenticación
+    LaunchedEffect(Unit) {
+        auth.addAuthStateListener { firebaseAuth ->
+            firebaseAuth.currentUser?.let { user ->
+                sessionManager.saveUserData(user.uid, user.email)
+            }
+            isAuthInitialized = true
+        }
+    }
+
+
     // Verifica tanto FirebaseAuth como SharedPreferences
     val isLoggedIn = auth.currentUser != null || sessionManager.isLoggedIn()
 
@@ -128,16 +142,17 @@ fun AppNavigation(context: Context) {
         }
 
         composable<Screen.Login> {
+            val sessionManager = remember { SessionManager(context) }
             LoginScreen(
                 onLoginSuccess = {
-                    sessionManager.saveLoginState(true) // Guarda el estado de sesión
                     navController.navigate(Screen.Home) {
                         popUpTo(0) { inclusive = true }
                     }
                 },
                 onNavigateToRegister = {
                     navController.navigate(Screen.Register)
-                }
+                },
+                sessionManager = sessionManager
             )
         }
 
