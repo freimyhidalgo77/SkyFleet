@@ -34,6 +34,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,6 +66,7 @@ import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaUiState
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaViewModel
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloUiState
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloViewModel
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -673,6 +675,7 @@ fun FormularioTarjetaCredito(
     var cvv by remember { mutableStateOf("") }
     var tipoTarjetaSeleccionada by remember { mutableStateOf("Visa") }
     var mostrarErrorMonto by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
     val tiposTarjeta = listOf("Visa", "MasterCard", "American Express", "Discover")
 
@@ -804,6 +807,20 @@ fun FormularioTarjetaCredito(
 
                 Button(
                     onClick = {
+
+                        coroutineScope.launch {
+                            // Verificar autenticación antes de guardar
+                            val userId = viewModel.auth.currentUser?.uid
+                                ?: viewModel.sessionManager.getCurrentUserId()
+
+                            if (userId == null) {
+                                // Mostrar error o redirigir a login
+                                return@launch
+                            }
+                        }
+
+
+
                         val montoValido = montoIngresado.toDoubleOrNull()?.let {
                             it == precioTotal
                         } ?: false

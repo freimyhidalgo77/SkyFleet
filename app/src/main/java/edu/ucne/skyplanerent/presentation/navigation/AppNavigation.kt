@@ -59,6 +59,7 @@ import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaViewModel
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloDetailsScreen
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloEvent
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloViewModel
+import kotlinx.coroutines.delay
 
 
 @SuppressLint("RememberReturnType", "WrongNavigateRouteType")
@@ -72,18 +73,21 @@ fun AppNavigation(context: Context) {
     val navController = rememberNavController()
     val sessionManager = remember { SessionManager(context) }
 
-    var isAuthInitialized by remember { mutableStateOf(false) }
+    var authInitialized by remember { mutableStateOf(false) }
 
     // Efecto para verificar el estado de autenticación
+
     LaunchedEffect(Unit) {
         auth.addAuthStateListener { firebaseAuth ->
             firebaseAuth.currentUser?.let { user ->
-                sessionManager.saveUserData(user.uid, user.email)
+                sessionManager.saveAuthState(user)
             }
-            isAuthInitialized = true
+            authInitialized = true
         }
+        // Timeout para evitar bloqueos
+        delay(2000)
+        authInitialized = true
     }
-
 
     // Verifica tanto FirebaseAuth como SharedPreferences
     val isLoggedIn = auth.currentUser != null || sessionManager.isLoggedIn()
