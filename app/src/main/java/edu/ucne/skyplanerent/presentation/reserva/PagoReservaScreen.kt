@@ -175,7 +175,11 @@ fun PagoReservaBodyListScreen(
      val impuesto = tarifaBase * 0.10
      val precioTotal = tarifaBase + impuesto*/
 
+
+    var datosTransferencia by remember { mutableStateOf<DatosTransferencia?>(null) }
     var mostrarFormularioTransferencia by remember { mutableStateOf(false) }
+
+
 
 
     Scaffold(
@@ -205,140 +209,250 @@ fun PagoReservaBodyListScreen(
         ) {
 
             item {
+
+                Column(modifier = Modifier.fillMaxWidth()){}
+
                 Text(
-                    text = "Tipo de vuelo: ${tipoVueloSeleccionado?.nombreVuelo ?: "No seleccionado"}",
-                    style = androidx.compose.ui.text.TextStyle(
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontWeight = FontWeight.Bold,
-                    ),
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-            }
+                    text = "Tipo de vuelo",
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 4.dp)
 
-            item {
+                )
                 Text(
-                    text = rutaSeleccionada?.let { "Origen: ${it.origen}" } ?: "No seleccionado",
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(horizontal = 16.dp)
+                    text = tipoVueloSeleccionado?.nombreVuelo ?: "No seleccionado",
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 8.dp)
                 )
-            }
 
-            item {
                 Text(
-                    text = rutaSeleccionada?.let { "Destino: ${it.destino}" } ?: "No seleccionado",
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    fontWeight = FontWeight.Bold,
+                    text = "Origen",
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 4.dp)
                 )
-            }
-
-            item {
                 Text(
-                    text = "Aeronave seleccionada: ${aeronaveSeleccionada?.modeloAvion ?: "No seleccionado"}",
-                    style = androidx.compose.ui.text.TextStyle(
-                        fontSize = 18.sp,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontWeight = FontWeight.Bold,
-                    ),
-                    modifier = Modifier.padding(horizontal = 16.dp)
+                    text = rutaSeleccionada?.origen ?: "No seleccionado",
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 8.dp)
                 )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "Destino",
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                Text(
+                    text = rutaSeleccionada?.destino ?: "No seleccionado",
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Aeronave
+                Text(
+                    text = "Aeronave",
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                Text(
+                    text = aeronaveSeleccionada?.modeloAvion ?: "No seleccionado",
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Fecha
+                fechaVuelo?.let { fecha ->
+                    val formato = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                    val fechaFormateada = formato.format(fecha)
+
+                    Text(
+                        text = "Fecha",
+                        color = Color.Gray,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(bottom = 4.dp)
+                    )
+                    Text(
+                        text = fechaFormateada,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Hora
+                Text(
+                    text = "Tiempo",
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                Text(
+                    text = "10:00 AM - 12:00 PM", // Esto debería venir de tus datos
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Duración
+                Text(
+                    text = "Duración estimada",
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+
+                Text(
+                    text = rutaSeleccionada?.let { "${it.duracion} minutos" }
+                        ?: "No disponible",
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "Nombre",
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                Text(
+                    text = formularioUiState.nombre ?: "No seleccionado",
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "Apellido",
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                Text(
+                    text = formularioUiState.apellido ?: "No seleccionado",
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "Pasaporte",
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                Text(
+                    text = formularioUiState.pasaporte ?: "No seleccionado",
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+
+                Text(
+                    text = "Cantidad pasajeros",
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                Text(
+                    text = "${formularioUiState.cantidadPasajeros}",
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "¿Es Piloto?",
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                Text(
+
+                    text = when (tipoCliente) {
+                        true -> "Sí"
+                        false -> "No"
+                        else -> "No especificado"
+                    },
+                    fontSize = 16.sp,
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "Licencia seleccionada",
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                Text(
+                    text = "${licenciaSeleccionada ?: "No aplica"}",
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "Desgloce de precios",
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                Text(
+                    text = "${tarifaBase}",
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "Impuesto",
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                Text(
+                    text = "${impuesto}",
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "Precio total",
+                    color = Color.Gray,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+                Text(
+                    text = "${precioTotal}",
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
             }
-
-            fechaVuelo?.let { fecha ->
-                val formato = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                val fechaFormateada = formato.format(fecha)
-
-                item {
-                    Text(
-                        text = "Fecha seleccionada: $fechaFormateada",
-                        fontSize = 16.sp,
-                        color = Color(0xFF0A80ED),
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(horizontal = 16.dp)
-                    )
-                }
-
-                item {
-                    Text(
-                        text = rutaSeleccionada?.let { "Duración estimada: ${it.duracion}" }
-                            ?: "Duración: No disponible",
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
-
-                item {
-                    Text(
-                        text = "Nombre ${formularioUiState.nombre} Apellido ${formularioUiState.apellido}",
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
-
-                item {
-                    Text(
-                        text = "Pasaporte ${formularioUiState.pasaporte}",
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
-
-
-                item {
-                    Text(
-                        text = "Cantidad pasajeros ${formularioUiState.cantidadPasajeros}",
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
-
-                item {
-                    Text(text = "¿Es Piloto?", fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                    Text(
-                        text = when (tipoCliente) {
-                            true -> "Sí"
-                            false -> "No"
-                            else -> "No especificado"
-                        },
-                        fontSize = 16.sp,
-                        color = Color.Gray
-
-                    )
-                }
-
-                item{
-                    Text(
-                        text = "Licencia seleccionada: ${licenciaSeleccionada ?: "No aplica"}",
-                        fontSize = 16.sp,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                }
-
-
-                item {
-                    Text(
-                        text = "Desgloce de precio: $tarifaBase",
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
-
-                item {
-                    Text(
-                        text = "Impuesto: $impuesto",
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
-
-                item {
-                    Text(
-                        text = "Precio total: $precioTotal",
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        fontWeight = FontWeight.Bold,
-                    )
-                }
-
 
                 item {
                     Text(
@@ -373,7 +487,7 @@ fun PagoReservaBodyListScreen(
                             Text("Tarjeta de crédito")
                         }
                     }
-                  /*  // PayPal
+                    /*  // PayPal
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -425,49 +539,65 @@ fun PagoReservaBodyListScreen(
                     }
                 }
 
-                if (metodoPagoSeleccionado == MetodoPago.TRANSFERENCIA_BANCARIA && mostrarFormularioTransferencia) {
-                    item {
+                item {
+                    // En el item donde llamas al formulario
+                    // Dentro de tu composable principal (PagoReservaBodyListScreen o similar)
+                    if (mostrarFormularioTransferencia) {
                         FormularioTransferenciaBancaria(
                             precioTotal = precioTotal,
-                            onConfirmarTransferencia = { datosTransferencia ->
-                                // Procesar la transferencia
-                                procesarTransferenciaBancaria(datosTransferencia)
+                            viewModel = reservaViewModel,  // Pasa el ViewModel
+                            onConfirmarTransferencia = { datos ->
+                                // Puedes hacer algo adicional aquí si lo necesitas
                                 mostrarFormularioTransferencia = false
+
                             },
                             onCancelar = {
                                 mostrarFormularioTransferencia = false
-                            }
+                            },
+                            rutaId = rutaSeleccionada?.rutaId ?: 0,
+                            tipoVueloId = tipoVueloSeleccionado?.tipoVueloId ?: 0,
+                            aeronaveId = aeronaveSeleccionada?.aeronaveId ?: 0,
+                            tipoCliente = tipoCliente ?: false,
+                            pasajeros = formularioUiState.cantidadPasajeros,
+                            formularioId = formularioUiState.formularioId?:0,
+                            goBack = goBack
                         )
                     }
+
                 }
 
-
-                item {
+                /*  item {
                     Spacer(modifier = Modifier.height(12.dp))
-
 
                     Button(
                         onClick = {
-
                             val rutaId = rutaSeleccionada?.rutaId ?: return@Button
                             val tipoVueloId = tipoVueloSeleccionado?.tipoVueloId ?: return@Button
                             val aeronaveId = aeronaveSeleccionada?.aeronaveId ?: return@Button
-                            //val fechaFormateada = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(fechaVuelo ?: Date())
                             val tipoCliente = uiState?.tipoCliente ?: return@Button
                             val pasajero = formularioUiState.cantidadPasajeros
+
+                            // Guardar los datos de transferencia si el método es transferencia bancaria
+                            val comprobante = if (metodoPagoSeleccionado == MetodoPago.TRANSFERENCIA_BANCARIA) {
+                                datosTransferencia?.let {
+                                    "Banco: ${it.banco}, Cuenta: ${it.numeroCuenta}, " +
+                                            "Titular: ${it.nombreTitular}, Referencia: ${it.referencia}"
+                                } ?: ""
+                            } else {
+                                ""
+                            }
 
                             reservaViewModel.guardarReserva(
                                 rutaId = rutaId,
                                 tipoVueloId = tipoVueloId,
                                 aeronaveId = aeronaveId,
-                                //fecha = uiState.fecha,
                                 tarifaBase = tarifaBase,
                                 impuesto = impuesto,
                                 precioTotal = precioTotal,
                                 tipoCliente = tipoCliente,
                                 pasajero = pasajero,
-                                metodoPago = metodoPagoSeleccionado?.name
-
+                                metodoPago = metodoPagoSeleccionado?.name,
+                                comprobante = comprobante
                             )
 
                             goBack()
@@ -478,12 +608,17 @@ fun PagoReservaBodyListScreen(
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF0A80ED),
                             contentColor = Color.White
-                        )
+                        ),
+                        enabled = when (metodoPagoSeleccionado) {
+                            MetodoPago.TRANSFERENCIA_BANCARIA -> datosTransferencia != null
+                            else -> true
+                        }
                     ) {
                         Text("Realizar pago")
                     }
-
-                   /* Button(
+                }
+            }*/
+                /* Button(
                         onClick = { goBack() },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(
@@ -494,17 +629,26 @@ fun PagoReservaBodyListScreen(
                         Text("Cancelar Pago")
                     }*/
 
+                    }
+
                 }
             }
-        }
-    }
-}
+
 
 @Composable
 fun FormularioTransferenciaBancaria(
     precioTotal: Double,
+    viewModel: ReservaViewModel,  // Añade el ViewModel como parámetro
     onConfirmarTransferencia: (DatosTransferencia) -> Unit,
-    onCancelar: () -> Unit
+    onCancelar: () -> Unit,
+    rutaId: Int,                 // Parámetros necesarios para guardar la reserva
+    tipoVueloId: Int,
+    aeronaveId: Int,
+    formularioId:Int,
+    tipoCliente: Boolean,
+    pasajeros: Int,
+    goBack:()->Unit
+
 ) {
     var bancoSeleccionado by remember { mutableStateOf("") }
     var numeroCuenta by remember { mutableStateOf("") }
@@ -622,15 +766,39 @@ fun FormularioTransferenciaBancaria(
                             nombreTitular.isNotEmpty() &&
                             referencia.isNotEmpty()) {
 
-                            onConfirmarTransferencia(
-                                DatosTransferencia(
-                                    banco = bancoSeleccionado,
-                                    numeroCuenta = numeroCuenta,
-                                    nombreTitular = nombreTitular,
-                                    referencia = referencia,
-                                    monto = precioTotal
-                                )
+                            val datosTransferencia = DatosTransferencia(
+                                banco = bancoSeleccionado,
+                                numeroCuenta = numeroCuenta,
+                                nombreTitular = nombreTitular,
+                                referencia = referencia,
+                                monto = precioTotal
                             )
+
+                            // Crear el comprobante como string
+                            val comprobante = "Banco: ${datosTransferencia.banco}, " +
+                                    "Cuenta: ${datosTransferencia.numeroCuenta}, " +
+                                    "Titular: ${datosTransferencia.nombreTitular}, " +
+                                    "Referencia: ${datosTransferencia.referencia}"
+
+                            // Llamar al ViewModel para guardar la reserva
+                            viewModel.guardarReserva(
+                                rutaId =  rutaId,
+                                tipoVueloId = tipoVueloId,
+                                aeronaveId = aeronaveId,
+                                tarifaBase = precioTotal / 1.1, // Asumiendo 10% de impuesto
+                                impuesto = precioTotal * 0.1,
+                                precioTotal = precioTotal,
+                                tipoCliente = tipoCliente,
+                                pasajero = pasajeros,
+                                metodoPago = "TRANSFERENCIA_BANCARIA",
+                                comprobante = comprobante,
+                                formularioId = formularioId
+
+                            )
+
+                            // Notificar que la transferencia fue confirmada
+                            onConfirmarTransferencia(datosTransferencia)
+                            goBack()
                         }
                     },
                     enabled = bancoSeleccionado.isNotEmpty() &&

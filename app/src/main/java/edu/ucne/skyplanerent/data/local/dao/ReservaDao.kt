@@ -35,4 +35,8 @@ interface ReservaDao {
     @Query("SELECT * FROM Reservas WHERE userId = :userId")
     fun getReservasByUserId(userId: String): Flow<List<ReservaEntity>>
 
+    // En ReservaDao.kt
+    /*@Query("UPDATE reservas SET metodoPago = :metodoPago, comprobante = :comprobante WHERE reservaId = :reservaId")
+    suspend fun actualizarEstadoPago(reservaId: Int, metodoPago: String, comprobante: String?)*/
+
 }

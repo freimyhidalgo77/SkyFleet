@@ -24,6 +24,7 @@ data class UiState (
     val licenciaPiloto: TipoLicencia? = null,
     val metodoPago: String? = null,
     val estadoPago: String = "PENDIENTE",
+    val comprobante: String? =  null,
 
     // UI extras para mostrar descripciones
     val tipoVueloSeleccionado: TipoVueloDTO? = null,
