@@ -35,7 +35,7 @@ import edu.ucne.skyplanerent.presentation.navigation.Screen
 
 @Composable
 fun LoginScreen(
-    onLoginSuccess: () -> Unit,
+    onLoginSuccess: (String) -> Unit,
     onNavigateToRegister:()-> Unit,
     auth: FirebaseAuth = FirebaseAuth.getInstance(),
     sessionManager: SessionManager = SessionManager(LocalContext.current)
@@ -51,13 +51,13 @@ fun LoginScreen(
         authResult?.let { result ->
             result.user?.let { user ->
                 sessionManager.saveAuthState(user)
-                onLoginSuccess()
+                onLoginSuccess(user.email ?: "") // Pasar el email a la pantalla de éxito
             }
         }
     }
 
 
-        Column(
+    Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(24.dp),
@@ -98,17 +98,22 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(50.dp))
 
-            Button(
-                onClick = {
-                    auth.signInWithEmailAndPassword(email, password)
-                        .addOnCompleteListener { task ->
-                            if (task.isSuccessful) {
-                                onLoginSuccess()
-                            } else {
-                                errorMessage = task.exception?.message ?: "Error desconocido"
+        Button(
+            onClick = {
+                auth.signInWithEmailAndPassword(email, password)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            // Guardar en SessionManager y recuperar datos de Room
+                            task.result?.user?.email?.let { email ->
+                                sessionManager.saveAuthState(task.result.user!!)
+                                // Aquí podrías también recuperar los datos de Room si lo necesitas
+                                onLoginSuccess(email)
                             }
+                        } else {
+                            errorMessage = task.exception?.message ?: "Error desconocido"
                         }
-                },
+                    }
+            },
                 enabled = email.isNotBlank() && password.isNotBlank(),
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(

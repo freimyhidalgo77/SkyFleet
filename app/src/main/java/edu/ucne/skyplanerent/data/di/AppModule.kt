@@ -38,6 +38,10 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideProfileAuth(appDataDb: SkyPlaneRentDB)= appDataDb.userDao()
+
+    @Provides
+    @Singleton
     fun provideSessionManager(@ApplicationContext context: Context): SessionManager {
         return SessionManager(context)
     }

@@ -820,7 +820,6 @@ fun FormularioTarjetaCredito(
                         }
 
 
-
                         val montoValido = montoIngresado.toDoubleOrNull()?.let {
                             it == precioTotal
                         } ?: false
