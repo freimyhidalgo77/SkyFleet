@@ -104,6 +104,7 @@ fun ReservaBodyListScreen(
     val items = listOf(
         BottomNavItem("Inicio", Icons.Default.Home, Screen.Home),
         BottomNavItem("Perfil", Icons.Default.Person, Screen.Perfil),
+
     )
 
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route

@@ -1,6 +1,8 @@
 package edu.ucne.skyplanerent.presentation.aeronave
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +26,7 @@ import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -42,6 +45,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -175,51 +180,90 @@ private fun AeronaveRow(
     it: AeronaveDTO,
     goToAeronave: (Int) -> Unit
 ) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
-            .clickable { goToAeronave(it.aeronaveId ?: 0) }
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .clickable { goToAeronave(it.aeronaveId ?: 0) },
+        shape = RoundedCornerShape(12.dp)
     ) {
-        // Imagen de la aeronave
-        if (it.imagePath != null) {
-            AsyncImage(
-                model = it.imagePath,
-                contentDescription = "Imagen de ${it.modeloAvion}",
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            // Imagen de la aeronave (parte superior)
+            Box(
                 modifier = Modifier
-                    .size(64.dp)
-                    .clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Crop,
-                placeholder = painterResource(id = android.R.drawable.ic_menu_gallery),
-                error = painterResource(id = android.R.drawable.ic_menu_gallery)
-            )
-        } else {
-            Image(
-                imageVector = Icons.Default.AirplanemodeActive,
-                contentDescription = "Placeholder de ${it.modeloAvion}",
-                modifier = Modifier
-                    .size(64.dp)
-                    .clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Crop
-            )
-        }
-        Spacer(modifier = Modifier.width(16.dp))
+                    .fillMaxWidth()
+                    .height(180.dp) // Altura fija para la imagen
+                    .background(Color.LightGray.copy(alpha = 0.2f))
+            ) {
+                if (it.imagePath != null) {
+                    AsyncImage(
+                        model = it.imagePath,
+                        contentDescription = "Imagen de ${it.modeloAvion}",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop,
+                        placeholder = painterResource(id = android.R.drawable.ic_menu_gallery),
+                        error = painterResource(id = android.R.drawable.ic_menu_gallery)
+                    )
+                } else {
+                    Image(
+                        imageVector = Icons.Default.AirplanemodeActive,
+                        contentDescription = "Placeholder de ${it.modeloAvion}",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(32.dp),
+                        contentScale = ContentScale.Fit
+                    )
+                }
+            }
 
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = it.modeloAvion ?: "N/A",
-                color = Color.Black,
-                style = MaterialTheme.typography.titleMedium
-            )
-        }
-        IconButton(onClick = { goToAeronave(it.aeronaveId ?: 0) }) { // Botón opcional
-            Icon(
-                Icons.Default.ArrowForward,
-                contentDescription = "Ver detalles",
-                tint = MaterialTheme.colorScheme.primary
-            )
+            // Contenido de texto (parte inferior)
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                // Modelo de la aeronave (título principal)
+                Text(
+                    text = it.modeloAvion ?: "N/A",
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = Color.Black,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                // Primera línea de detalles
+                Text(
+                    text = "${it.capacidadPasajeros ?: 4} pasajeros · ${it.rango ?: 690} nm · monomotor",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Gray,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+
+                // Segunda línea de detalles
+                Text(
+                    text = "a piston · ${it.peso ?: 2550} lbs",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.Gray,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+
+                // Botón "Mas Info" alineado a la derecha
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    Text(
+                        text = "Mas Info",
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.Bold
+                        )
+                    )
+                }
+            }
         }
     }
-    HorizontalDivider()
 }

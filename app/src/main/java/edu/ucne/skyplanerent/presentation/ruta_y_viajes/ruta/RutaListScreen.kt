@@ -11,34 +11,32 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -49,6 +47,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -57,6 +56,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import edu.ucne.skyplanerent.R
 import edu.ucne.skyplanerent.data.remote.dto.RutaDTO
 import kotlinx.coroutines.delay
 
@@ -66,7 +66,9 @@ fun RutaListScreen(
     viewModel: RutaViewModel = hiltViewModel(),
     createRuta: () -> Unit,
     goToRuta: (Int) -> Unit,
-    goBack: () -> Unit
+    goBack: () -> Unit,
+    goToAdminPanel: () -> Unit, // Añadido para navegar al panel de administración
+    goToPerfil: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val query by viewModel.searchQuery.collectAsStateWithLifecycle()
@@ -75,7 +77,7 @@ fun RutaListScreen(
     var lastRetentionCount by remember { mutableStateOf(0) }
 
     LaunchedEffect(Unit) {
-        delay(180000) // Actualizar cada 3 minutos
+        delay(180000)
         viewModel.onEvent(RutaEvent.GetRutas)
     }
 
@@ -98,7 +100,9 @@ fun RutaListScreen(
         goToRuta = goToRuta,
         onEvent = viewModel::onEvent,
         createRuta = createRuta,
-        goBack = goBack
+        goBack = goBack,
+        goToAdminPanel = goToAdminPanel, // Pasar el callback
+        goToPerfil = goToPerfil
     )
 }
 
@@ -112,7 +116,9 @@ fun RutaListBodyScreen(
     goToRuta: (Int) -> Unit,
     onEvent: (RutaEvent) -> Unit,
     createRuta: () -> Unit,
-    goBack: () -> Unit
+    goBack: () -> Unit,
+    goToAdminPanel: () -> Unit,
+    goToPerfil: () -> Unit
 ) {
     val pullRefreshState = rememberPullRefreshState(
         refreshing = uiState.isLoading,
@@ -127,14 +133,14 @@ fun RutaListBodyScreen(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 8.dp), // Mueve el título hacia abajo
+                            .padding(bottom = 8.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = "Rutas",
                             style = MaterialTheme.typography.titleLarge.copy(
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface // Color que contrasta con el fondo
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                         )
                     }
@@ -144,7 +150,7 @@ fun RutaListBodyScreen(
                         Icon(
                             Icons.Default.ArrowBack,
                             contentDescription = "Volver",
-                            tint = MaterialTheme.colorScheme.onSurface // Color que contrasta
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 },
@@ -156,11 +162,56 @@ fun RutaListBodyScreen(
                         Icon(
                             imageVector = Icons.Filled.Add,
                             contentDescription = "Agregar nueva ruta",
-                            tint = MaterialTheme.colorScheme.onSurface // Color que contrasta
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
             )
+        },
+        bottomBar = {
+            NavigationBar(
+                containerColor = Color.White
+            ) {
+                NavigationBarItem(
+                    icon = {
+                        Icon(
+                            painterResource(id = R.drawable.admin),
+                            contentDescription = "Admin Panel",
+                            modifier = Modifier.size(24.dp),
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    },
+                    label = { Text("Admin") },
+                    selected = false,
+                    onClick = goToAdminPanel
+                )
+                NavigationBarItem(
+                    icon = {
+                        Icon(
+                            painterResource(id = R.drawable.ruta), // Ícono personalizado para Ruta
+                            contentDescription = "Ruta",
+                            modifier = Modifier.size(24.dp),
+                            tint = Color.Blue // Resaltado como seleccionado
+                        )
+                    },
+                    label = { Text("Ruta") },
+                    selected = true, // Indicamos que esta pestaña está seleccionada
+                    onClick = {} // No hace nada porque ya estamos en esta pantalla
+                )
+                NavigationBarItem(
+                    icon = {
+                        Icon(
+                            Icons.Default.Person,
+                            contentDescription = "Perfil",
+                            modifier = Modifier.size(24.dp),
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    },
+                    label = { Text("Perfil") },
+                    selected = false,
+                    onClick = goToPerfil // Aquí puedes agregar la navegación al perfil si es necesario
+                )
+            }
         }
     ) { padding ->
         Box(

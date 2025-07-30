@@ -32,6 +32,9 @@ sealed class Screen {
     object AdminPanel : Screen()
 
     @Serializable
+    object PerfilAdmin : Screen()
+
+    @Serializable
     data object RutaList: Screen()
 
     @Serializable

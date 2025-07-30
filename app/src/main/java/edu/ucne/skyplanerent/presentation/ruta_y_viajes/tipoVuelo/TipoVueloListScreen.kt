@@ -56,6 +56,7 @@ fun TipoVueloListScreen(
     goToAdminPanel: () -> Unit,
     goToTipoVuelo: (Int) -> Unit,
     goBack: () -> Unit,
+    goToPerfil: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -65,7 +66,8 @@ fun TipoVueloListScreen(
         onEvent = viewModel::onEvent,
         createTipoVuelo = createTipoVuelo,
         goToAdminPanel = goToAdminPanel,
-        goBack = goBack
+        goBack = goBack,
+        goToPerfil = goToPerfil
     )
 }
 
@@ -78,6 +80,7 @@ fun TipoVueloListBodyScreen(
     createTipoVuelo: () -> Unit,
     goToAdminPanel: () -> Unit,
     goBack: () -> Unit,
+    goToPerfil: () -> Unit
 ) {
     val refreshing = uiState.isLoading
     val pullRefreshState = rememberPullRefreshState(
@@ -142,7 +145,7 @@ fun TipoVueloListBodyScreen(
                     modifier = Modifier.size(32.dp),
                     tint = Color(0xFF1976D2) // Color destacado para indicar que estamos aquí
                 )
-                IconButton(onClick = { /* Navegar a Perfil */ }) {
+                IconButton(onClick = goToPerfil ) {
                     Icon(
                         imageVector = Icons.Default.Person,
                         contentDescription = "Perfil",

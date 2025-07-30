@@ -115,11 +115,11 @@ private fun CategoriaAeronaveRow(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(16.dp)
         ) {
-            Text(
+            /*Text(
                 modifier = Modifier.weight(1f),
                 text = it.categoriaId.toString(),
                 color = Color.Black
-            )
+            )*/
             Text(
                 modifier = Modifier.weight(2f),
                 text = it.descripcionCategoria,

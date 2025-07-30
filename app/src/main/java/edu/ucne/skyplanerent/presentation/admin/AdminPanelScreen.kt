@@ -53,7 +53,8 @@ fun AdminPanelScreen(
     navController: NavController,
     goBack: () -> Unit,
     aeronaveViewModel: AeronaveViewModel = hiltViewModel(),
-    reservaViewModel: ReservaViewModel = hiltViewModel()
+    reservaViewModel: ReservaViewModel = hiltViewModel(),
+    goToPerfil: () -> Unit
 ) {
     val aeronaveState by aeronaveViewModel.uiState.collectAsState()
     val reservaState by reservaViewModel.uiState.collectAsState()
@@ -352,7 +353,7 @@ fun AdminPanelScreen(
                     Text(text = "Admin Panel", fontSize = 12.sp)
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    IconButton(onClick = { /* Navegar a Perfil */ }) {
+                    IconButton(onClick = goToPerfil) {
                         Icon(imageVector = Icons.Default.Person, contentDescription = "Perfil")
                     }
                     Text(text = "Perfil", fontSize = 16.sp)
