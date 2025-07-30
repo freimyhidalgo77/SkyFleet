@@ -6,6 +6,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import edu.ucne.skyplanerent.data.remote.admins.AdminManagerApi
 import edu.ucne.skyplanerent.data.remote.aeronaves.AeronavesManagerApi
 import edu.ucne.skyplanerent.data.remote.dto.TipoVueloDTO
 import edu.ucne.skyplanerent.data.remote.rutas.RutaManagerApi
@@ -20,6 +21,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object ApiModule {
     private const val BASE_URL_SkyFleetApi = "http://skyfleetapi.somee.com/"
+    private const val BASE_URL_SkyFleetAdminApi = "http://skyfleetadminspapi.somee.com/"
 
     @Provides
     @Singleton
@@ -59,6 +61,18 @@ object ApiModule {
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
             .create(TipoVueloManagerApi::class.java)
+
+
+    }
+
+    @Provides
+    @Singleton
+    fun providesAdminManagerApi(moshi: Moshi): AdminManagerApi {
+        return Retrofit.Builder()
+            .baseUrl(BASE_URL_SkyFleetAdminApi)
+            .addConverterFactory(MoshiConverterFactory.create(moshi))
+            .build()
+            .create(AdminManagerApi::class.java)
 
 
     }
