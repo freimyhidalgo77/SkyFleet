@@ -71,7 +71,7 @@ fun FirstScreen(navController: NavHostController) {
         ) {
             Button(
                 onClick = {
-                    navController.navigate(Screen.Login(0))
+                    navController.navigate(Screen.Login)
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
@@ -101,7 +101,7 @@ fun FirstScreen(navController: NavHostController) {
 
             Button(
                 onClick = {
-                    navController.navigate(Screen.AdminPanel)
+                    navController.navigate(Screen.AdminPanel(1))
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
