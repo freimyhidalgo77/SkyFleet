@@ -1,5 +1,7 @@
 package edu.ucne.skyplanerent.presentation.admin
 
+import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
@@ -35,25 +38,40 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import edu.ucne.skyplanerent.R
-
+import edu.ucne.skyplanerent.data.remote.dto.AdminDTO
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PerfilAdminScreen(
+    adminId: Int,
     navController: NavController,
     goBack: () -> Unit,
-    goToAdminPanel: () -> Unit,
-    goToFirstScreen: () -> Unit
+    goToAdminPanel: (Int) -> Unit,
+    goToFirstScreen: () -> Unit,
+    viewModel: AdminViewModel = hiltViewModel()
 ) {
+    val adminState by viewModel.adminState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(adminId) {
+        Log.d("PerfilAdminScreen", "Cargando datos para adminId: $adminId")
+        viewModel.loadAdminData(adminId)
+    }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
@@ -99,7 +117,7 @@ fun PerfilAdminScreen(
                     },
                     label = { Text("Admin") },
                     selected = false,
-                    onClick = goToAdminPanel
+                    onClick = { goToAdminPanel(adminId) }
                 )
                 NavigationBarItem(
                     icon = {
@@ -107,12 +125,12 @@ fun PerfilAdminScreen(
                             imageVector = Icons.Default.Person,
                             contentDescription = "Perfil",
                             modifier = Modifier.size(24.dp),
-                            tint = Color.Blue // Resaltado como seleccionado
+                            tint = Color.Blue
                         )
                     },
                     label = { Text("Perfil") },
                     selected = true,
-                    onClick = {} // No navega a ningún lado, ya estamos en esta página
+                    onClick = {}
                 )
             }
         }
@@ -126,14 +144,16 @@ fun PerfilAdminScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(16.dp))
-            Icon(
-                imageVector = Icons.Default.Person,
-                contentDescription = "Foto de perfil",
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(CircleShape),
-                tint = Color.Black
-            )
+            adminState.admin?.foto?.let { foto ->
+                AsyncImage(
+                    model = foto,
+                    contentDescription = "Foto de perfil",
+                    modifier = Modifier
+                        .size(100.dp) // Tamaño igual a CategoriaAeronaveRow
+                        .clip(RoundedCornerShape(8.dp)), // Bordes redondeados como CategoriaAeronaveRow
+                    contentScale = ContentScale.Crop // Escala igual a CategoriaAeronaveRow
+                )
+            } ?: Spacer(modifier = Modifier.size(100.dp)) // Placeholder igual a CategoriaAeronaveRow
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "SkyrentPlaneAdministration",
@@ -147,7 +167,6 @@ fun PerfilAdminScreen(
             )
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Sección de Email
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
@@ -162,14 +181,13 @@ fun PerfilAdminScreen(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Email: Admin@gmail.com",
+                    text = "Email: ${adminState.admin?.correo ?: "Cargando..."}",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
             }
             Divider(color = Color.Gray.copy(alpha = 0.2f))
 
-            // Sección de Permisos
             Text(
                 text = "Permisos",
                 style = MaterialTheme.typography.titleMedium,
@@ -178,7 +196,6 @@ fun PerfilAdminScreen(
             )
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Permiso 1: Gestión de aeronaves
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
@@ -200,7 +217,6 @@ fun PerfilAdminScreen(
                 )
             }
 
-            // Permiso 2: Gestión de rutas
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
@@ -222,7 +238,6 @@ fun PerfilAdminScreen(
                 )
             }
 
-            // Permiso 3: Gestión de tipos de vuelo
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
@@ -246,7 +261,6 @@ fun PerfilAdminScreen(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Botón Salir
             Button(
                 onClick = goToFirstScreen,
                 modifier = Modifier
@@ -265,6 +279,16 @@ fun PerfilAdminScreen(
                     text = "Salir",
                     color = Color.White,
                     style = MaterialTheme.typography.bodyMedium
+                )
+            }
+
+            adminState.errorMessage?.let { error ->
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = error,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
             }
         }

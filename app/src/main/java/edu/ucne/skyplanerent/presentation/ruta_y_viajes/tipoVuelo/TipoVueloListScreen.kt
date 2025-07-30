@@ -53,10 +53,9 @@ import edu.ucne.skyplanerent.presentation.navigation.Screen
 fun TipoVueloListScreen(
     viewModel: TipoVueloViewModel = hiltViewModel(),
     createTipoVuelo: () -> Unit,
-    goToAdminPanel: () -> Unit,
+    goToAdminPanel: () -> Unit, // Modified to accept adminId
     goToTipoVuelo: (Int) -> Unit,
     goBack: () -> Unit,
-    goToPerfil: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -66,8 +65,7 @@ fun TipoVueloListScreen(
         onEvent = viewModel::onEvent,
         createTipoVuelo = createTipoVuelo,
         goToAdminPanel = goToAdminPanel,
-        goBack = goBack,
-        goToPerfil = goToPerfil
+        goBack = goBack
     )
 }
 
@@ -78,9 +76,8 @@ fun TipoVueloListBodyScreen(
     goToTipoVuelo: (Int) -> Unit,
     onEvent: (TipoVueloEvent) -> Unit,
     createTipoVuelo: () -> Unit,
-    goToAdminPanel: () -> Unit,
+    goToAdminPanel: () -> Unit, // Modified to lambda for passing adminId
     goBack: () -> Unit,
-    goToPerfil: () -> Unit
 ) {
     val refreshing = uiState.isLoading
     val pullRefreshState = rememberPullRefreshState(
@@ -131,7 +128,7 @@ fun TipoVueloListBodyScreen(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(onClick = goToAdminPanel) {
+                IconButton(onClick = goBack) {
                     Icon(
                         painter = painterResource(id = R.drawable.admin),
                         contentDescription = "Admin Panel",
@@ -145,13 +142,6 @@ fun TipoVueloListBodyScreen(
                     modifier = Modifier.size(32.dp),
                     tint = Color(0xFF1976D2) // Color destacado para indicar que estamos aquí
                 )
-                IconButton(onClick = goToPerfil ) {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = "Perfil",
-                        tint = Color.Black
-                    )
-                }
             }
         }
     ) { padding ->

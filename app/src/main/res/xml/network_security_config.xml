@@ -3,4 +3,8 @@
         <domain-config cleartextTrafficPermitted="true">
             <domain includeSubdomains="true">skyfleetapi.somee.com</domain>
         </domain-config>
-    </network-security-config>
+
+<domain-config cleartextTrafficPermitted="true">
+    <domain includeSubdomains="true">skyfleetadminspapi.somee.com</domain>
+</domain-config>
+</network-security-config>

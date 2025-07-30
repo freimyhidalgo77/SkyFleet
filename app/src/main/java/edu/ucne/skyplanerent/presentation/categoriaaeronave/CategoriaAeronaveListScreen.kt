@@ -62,8 +62,7 @@ fun CategoriaAeronaveListScreen(
     onEdit: (Int) -> Unit, // Para editar categoría (con ID)
     deleteCategoria: ((CategoriaAeronaveEntity) -> Unit)? = null,
     goBack: () -> Unit,
-    goToAdminPanel: () -> Unit,
-    goToPerfil: () -> Unit
+    goToAdminPanel: () -> Unit, // Modified to accept adminId
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     CategoriaAeronaveListBodyScreen(
@@ -76,9 +75,8 @@ fun CategoriaAeronaveListScreen(
             viewModel.onEvent(CategoriaAeronaveEvent.Delete)
         },
         goBack = goBack,
-        goToAdminPanel = goToAdminPanel,
-        goToPerfil = goToPerfil
-    )
+        goToAdminPanel = goToAdminPanel
+        )
 }
 
 @Composable
@@ -184,8 +182,7 @@ fun CategoriaAeronaveListBodyScreen(
     onEdit: (Int) -> Unit, // Para editar categoría
     deleteCategoria: (CategoriaAeronaveEntity) -> Unit,
     goBack: () -> Unit,
-    goToAdminPanel: () -> Unit,
-    goToPerfil: () -> Unit
+    goToAdminPanel: () -> Unit, // Modified to lambda for passing adminId
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -232,7 +229,7 @@ fun CategoriaAeronaveListBodyScreen(
                     },
                     label = { Text("Admin") },
                     selected = false,
-                    onClick = goToAdminPanel
+                    onClick = goBack
                 )
                 NavigationBarItem(
                     icon = {
@@ -246,19 +243,6 @@ fun CategoriaAeronaveListBodyScreen(
                     label = { Text("Aeronave") },
                     selected = true,
                     onClick = {}
-                )
-                NavigationBarItem(
-                    icon = {
-                        Icon(
-                            Icons.Default.Person,
-                            contentDescription = "Perfil",
-                            modifier = Modifier.size(24.dp),
-                            tint = if (!false) MaterialTheme.colorScheme.onSurface else Color.Unspecified
-                        )
-                    },
-                    label = { Text("Perfil") },
-                    selected = false,
-                    onClick = goToPerfil
                 )
             }
         }
