@@ -529,7 +529,7 @@ fun Vuelos_RutasBodyListScreen(
 
                         ReservaEvent.save
 
-                        goTopreReserva(0) // Navega a la próxima pantalla
+                        goTopreReserva(0)
                     },
                     enabled = puedeContinuar,
                     modifier = Modifier

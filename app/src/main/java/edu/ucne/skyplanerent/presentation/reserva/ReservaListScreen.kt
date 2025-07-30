@@ -36,6 +36,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -76,6 +77,11 @@ fun ReservaListScreen(
 ){
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val rutaUiState by rutaViewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(Unit) {
+        viewModel.loadUserReservas()
+    }
+
 
     ReservaBodyListScreen(
         uiState = uiState,

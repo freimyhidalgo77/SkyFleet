@@ -3,6 +3,7 @@ package edu.ucne.skyplanerent.presentation.reserva
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.ucne.skyplanerent.data.local.entity.ReservaEntity
 import edu.ucne.skyplanerent.data.remote.dto.TipoVueloDTO
@@ -10,6 +11,7 @@ import edu.ucne.skyplanerent.data.repository.ReservaRepository
 import edu.ucne.skyplanerent.data.repository.RutaRepository
 import edu.ucne.skyplanerent.data.repository.TipoVueloRepository
 import edu.ucne.skyplanerent.presentation.UiEvent
+import edu.ucne.skyplanerent.presentation.login.SessionManager
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaEvent
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.toEntity
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoLicencia
@@ -30,7 +32,9 @@ class ReservaViewModel @Inject constructor(
     private val reservaRepository: ReservaRepository,
     private val tipoRutaRepository: TipoVueloRepository,
     private val rutaRepository: RutaRepository,
-    private val auth: FirebaseAuth
+    val auth: FirebaseAuth,
+    val sessionManager: SessionManager
+
 
 ): ViewModel() {
 
@@ -116,19 +120,25 @@ class ReservaViewModel @Inject constructor(
 
 
     //Cargar reserva por usuario
-     fun loadUserReservas() {
-        val currentUser = auth.currentUser
-        if (currentUser != null) {
-            viewModelScope.launch {
-                reservaRepository.getReservasByUserId(currentUser.uid)
-                    .collect { reservas ->
-                        _uiState.update { it.copy(reservas = reservas) }
-                    }
+
+    fun loadUserReservas() {
+        viewModelScope.launch {
+            // Primero intentar con Firebase Auth
+            auth.currentUser?.let { user ->
+                reservaRepository.getReservasByUserId(user.uid).collect { reservas ->
+                    _uiState.update { it.copy(reservas = reservas) }
+                }
+                return@launch
+            }
+
+            // Si no hay usuario en Firebase Auth, intentar con SessionManager
+            sessionManager.getCurrentUserId()?.let { userId ->
+                reservaRepository.getReservasByUserId(userId).collect { reservas ->
+                    _uiState.update { it.copy(reservas = reservas) }
+                }
             }
         }
     }
-
-
     /*fun seleccionarTipoVuelo(tipoVueloId: Int, tipoVueloDTO: TipoVueloDTO) {
        _tipoVueloSeleccionadoId.value = tipoVueloId
        _uiState.update { it.copy(tipoVueloSeleccionado = tipoVueloDTO) }
@@ -234,9 +244,24 @@ class ReservaViewModel @Inject constructor(
         comprobante: String?
 
     ) {
+
+        val currentUser = auth.currentUser ?: sessionManager.getCurrentUserId()?.let { userId ->
+            // Si auth.currentUser es null pero tenemos userId en SessionManager
+            // Podemos proceder (esto es para el caso cuando la app se reinicia)
+            userId
+        } ?: run {
+            // No hay usuario autenticado ni en sesión
+            return
+        }
+
+        val userId = if (currentUser is FirebaseUser) currentUser.uid else currentUser.toString()
+
+
+
         viewModelScope.launch {
             val fecha = _fechaSeleccionada.value
             val currentUser = auth.currentUser
+            val userId = auth.currentUser?.uid ?: sessionManager.getCurrentUserId()
 
             if (fecha == null) {
                 _uiState.update {
@@ -251,6 +276,12 @@ class ReservaViewModel @Inject constructor(
                 }
                 return@launch
             }
+
+            if (userId == null) {
+                // Mostrar error o manejar caso de usuario no autenticado
+                return@launch
+            }
+
 
             val reserva = ReservaEntity(
                 rutaId = rutaId,

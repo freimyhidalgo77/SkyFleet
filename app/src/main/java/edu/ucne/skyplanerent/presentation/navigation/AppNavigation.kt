@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -43,6 +44,7 @@ import edu.ucne.skyplanerent.presentation.aeronave.TipoAeronaveListScreen
 //import edu.ucne.skyplanerent.presentation.aeronave.TipoAeronaveScreen
 import edu.ucne.skyplanerent.presentation.categoriaaeronave.CategoriaReservaAeronaveScreen
 import edu.ucne.skyplanerent.presentation.login.PerfilClientScreen
+import edu.ucne.skyplanerent.presentation.login.ProfileViewModel
 import edu.ucne.skyplanerent.presentation.login.SessionManager
 import edu.ucne.skyplanerent.presentation.reserva.PagoReservaListScreen
 import edu.ucne.skyplanerent.presentation.reserva.ReservaDeleteScreen
@@ -58,6 +60,7 @@ import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaViewModel
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloDetailsScreen
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloEvent
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloViewModel
+import kotlinx.coroutines.delay
 
 
 @SuppressLint("RememberReturnType", "WrongNavigateRouteType")
@@ -71,6 +74,22 @@ fun AppNavigation(context: Context) {
     val navController = rememberNavController()
     val sessionManager = remember { SessionManager(context) }
 
+    var authInitialized by remember { mutableStateOf(false) }
+
+    // Efecto para verificar el estado de autenticación
+
+    LaunchedEffect(Unit) {
+        auth.addAuthStateListener { firebaseAuth ->
+            firebaseAuth.currentUser?.let { user ->
+                sessionManager.saveAuthState(user)
+            }
+            authInitialized = true
+        }
+        // Timeout para evitar bloqueos
+        delay(2000)
+        authInitialized = true
+    }
+
     // Verifica tanto FirebaseAuth como SharedPreferences
     val isLoggedIn = auth.currentUser != null || sessionManager.isLoggedIn()
 
@@ -83,6 +102,8 @@ fun AppNavigation(context: Context) {
         }
 
         composable<Screen.Home> {
+            val profileViewModel: ProfileViewModel = hiltViewModel()
+            val currentUserEmail = auth.currentUser?.email ?: sessionManager.getCurrentUserId()
             HomeScreen(
                 navController = navController,
                 onLogout = {
@@ -100,54 +121,67 @@ fun AppNavigation(context: Context) {
                 },
                 onNavigateToPeril = {
                     navController.navigate(Screen.Perfil)
-                }
+                },
+                currentUserEmail = currentUserEmail,
+                userRepository = profileViewModel.userRepository
 
             )
         }
 
 
         composable<Screen.Perfil> {
-            PerfilClientScreen (
+            val profileViewModel: ProfileViewModel = hiltViewModel()
+            val currentUserEmail = auth.currentUser?.email ?: sessionManager.getCurrentUserId()
+
+            LaunchedEffect(currentUserEmail) {
+                profileViewModel.loadUser(currentUserEmail)
+            }
+
+            PerfilClientScreen(
                 navController = navController,
                 goToAdminPanel = {
-                    navController.navigate(Screen.Perfil)
+                    navController.navigate(Screen.AdminPanel)
                 },
                 goToFirstScreen = {
                     navController.navigate(Screen.Home)
                 },
                 onLogout = {
                     auth.signOut()
-                    sessionManager.clearSession() // Limpia la sesión
+                    sessionManager.clearSession()
                     navController.navigate(Screen.FirstScreen) {
                         popUpTo(0) { inclusive = true }
                     }
                 },
-
-                goBack = { navController.popBackStack() }
+                goBack = { navController.popBackStack() },
+                currentUserEmail = currentUserEmail,
+                userRepository = profileViewModel.userRepository
             )
         }
 
         composable<Screen.Login> {
+            val sessionManager = remember { SessionManager(context) }
             LoginScreen(
                 onLoginSuccess = {
-                    sessionManager.saveLoginState(true) // Guarda el estado de sesión
                     navController.navigate(Screen.Home) {
                         popUpTo(0) { inclusive = true }
                     }
                 },
                 onNavigateToRegister = {
                     navController.navigate(Screen.Register)
-                }
+                },
+                sessionManager = sessionManager
             )
         }
 
         composable<Screen.Register> {
+            val profileViewModel: ProfileViewModel = hiltViewModel()
             RegisterScreen(
                 onRegisterSuccess = {
                     navController.navigate(Screen.Login(0)) {
                         popUpTo(Screen.Register) { inclusive = true }
                     }
-                }
+                },
+                userRepository = profileViewModel.userRepository
             )
         }
 
