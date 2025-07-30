@@ -14,6 +14,7 @@ data class UserRegisterAccount(
     var telefono:String = "",
     var contrasena:String = "",
     var direcccion:String = "",
-    var fecha: Date?
+    var fecha: Date?,
+    val imagePath: String? = null
 
 )

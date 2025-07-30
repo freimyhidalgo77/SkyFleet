@@ -102,6 +102,8 @@ fun AppNavigation(context: Context) {
         }
 
         composable<Screen.Home> {
+            val profileViewModel: ProfileViewModel = hiltViewModel()
+            val currentUserEmail = auth.currentUser?.email ?: sessionManager.getCurrentUserId()
             HomeScreen(
                 navController = navController,
                 onLogout = {
@@ -119,7 +121,9 @@ fun AppNavigation(context: Context) {
                 },
                 onNavigateToPeril = {
                     navController.navigate(Screen.Perfil)
-                }
+                },
+                currentUserEmail = currentUserEmail,
+                userRepository = profileViewModel.userRepository
 
             )
         }

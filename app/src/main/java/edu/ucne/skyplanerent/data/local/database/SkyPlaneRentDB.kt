@@ -30,7 +30,7 @@ import edu.ucne.skyplanerent.data.local.entity.UserRegisterAccount
 
 
     ],
-    version = 18,
+    version = 19,
     exportSchema = false
 )
 
