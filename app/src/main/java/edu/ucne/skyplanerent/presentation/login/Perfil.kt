@@ -74,19 +74,18 @@ fun PerfilClientScreen(
     var user = remember { mutableStateOf<UserRegisterAccount?>(null) }
     val coroutineScope = rememberCoroutineScope()
 
-
-    var isLoading by remember { mutableStateOf(true) }
+    //var isLoading by remember { mutableStateOf(true) }
 
     LaunchedEffect(currentUserEmail) {
         if (currentUserEmail != null) {
             user.value = userRepository.getUserByEmail(currentUserEmail)
-            isLoading = false
+            //isLoading = false
         }
     }
 
-    if (isLoading) {
+    /*if (isLoading) {
         CircularProgressIndicator()
-    } else {
+    } else {*/
 
         Scaffold(
             modifier = Modifier.fillMaxSize(),
@@ -261,4 +260,3 @@ fun PerfilClientScreen(
 
     }
 
-}
