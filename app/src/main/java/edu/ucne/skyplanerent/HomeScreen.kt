@@ -223,7 +223,7 @@ fun ActionCard(icon: ImageVector, title: String, onClick: () -> Unit) {
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = title)
-        }
+        }//Mejoras
     }
 }
 
