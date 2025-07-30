@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import edu.ucne.skyplanerent.R
+import edu.ucne.skyplanerent.data.remote.dto.AdminDTO
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveViewModel
 import edu.ucne.skyplanerent.presentation.navigation.Screen
 import edu.ucne.skyplanerent.presentation.reserva.ReservaViewModel
@@ -50,11 +51,12 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun AdminPanelScreen(
+    adminId: Int,
     navController: NavController,
     goBack: () -> Unit,
+    goToPerfil: (Int) -> Unit,
     aeronaveViewModel: AeronaveViewModel = hiltViewModel(),
-    reservaViewModel: ReservaViewModel = hiltViewModel(),
-    goToPerfil: () -> Unit
+    reservaViewModel: ReservaViewModel = hiltViewModel()
 ) {
     val aeronaveState by aeronaveViewModel.uiState.collectAsState()
     val reservaState by reservaViewModel.uiState.collectAsState()
@@ -91,7 +93,7 @@ fun AdminPanelScreen(
                     ) {
                         Text(text = "Total de vuelos", fontSize = 16.sp)
                         Text(
-                            text = "1,234", // Valor estático por ahora
+                            text = "1,234",
                             fontSize = 24.sp,
                             style = MaterialTheme.typography.headlineSmall
                         )
@@ -131,7 +133,7 @@ fun AdminPanelScreen(
                     ) {
                         Text(text = "Usuarios registrados", fontSize = 16.sp)
                         Text(
-                            text = "567", // Valor estático por ahora
+                            text = "567",
                             fontSize = 24.sp,
                             style = MaterialTheme.typography.headlineSmall
                         )
@@ -188,7 +190,7 @@ fun AdminPanelScreen(
                         .height(200.dp)
                         .padding(top = 8.dp)) {
                         val months = listOf("Ene", "Feb", "Mar", "Abr", "May", "Jun")
-                        val staticValues = listOf(10f, 12f, 8f, 15f, 7f, 13f) // Valores estáticos
+                        val staticValues = listOf(10f, 12f, 8f, 15f, 7f, 13f)
                         val barWidth = size.width / staticValues.size
                         var lastX = 0f
                         var lastY = size.height - (staticValues[0] / 15f) * size.height
@@ -236,13 +238,13 @@ fun AdminPanelScreen(
                     Text(
                         text = "-5%",
                         fontSize = 24.sp,
-                        color = MaterialTheme.colorScheme.error,
+                        color = errorColor,
                         modifier = Modifier.padding(top = 8.dp)
                     )
                     Text(
                         text = "Últimos 30 días -5%",
                         fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.error,
+                        color = errorColor,
                         modifier = Modifier.padding(top = 4.dp)
                     )
                     Canvas(modifier = Modifier
@@ -250,7 +252,7 @@ fun AdminPanelScreen(
                         .height(200.dp)
                         .padding(top = 8.dp)) {
                         val months = listOf("Ene", "Feb", "Mar", "Abr", "May", "Jun")
-                        val staticValues = listOf(6f, 9f, 5f, 12f, 4f, 10f) // Valores estáticos
+                        val staticValues = listOf(6f, 9f, 5f, 12f, 4f, 10f)
                         val barWidth = size.width / staticValues.size
                         staticValues.forEachIndexed { index, value ->
                             val barHeight = (value / 15f) * size.height
@@ -347,16 +349,16 @@ fun AdminPanelScreen(
                     .wrapContentWidth(Alignment.CenterHorizontally)
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    IconButton(onClick = { /* Navegar a Admin Panel */ }) {
+                    IconButton(onClick = { /* Ya estamos en Admin Panel */ }) {
                         Icon(painter = painterResource(id = R.drawable.admin), contentDescription = "Admin Panel (Activo)", tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
                     }
                     Text(text = "Admin Panel", fontSize = 12.sp)
                 }
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    IconButton(onClick = goToPerfil) {
+                    IconButton(onClick = { goToPerfil(adminId) }) {
                         Icon(imageVector = Icons.Default.Person, contentDescription = "Perfil")
                     }
-                    Text(text = "Perfil", fontSize = 16.sp)
+                    Text(text = "Perfil", fontSize = 12.sp)
                 }
             }
         }
