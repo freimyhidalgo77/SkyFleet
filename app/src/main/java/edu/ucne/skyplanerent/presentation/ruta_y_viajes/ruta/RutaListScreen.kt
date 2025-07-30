@@ -56,8 +56,10 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import edu.ucne.skyplanerent.R
 import edu.ucne.skyplanerent.data.remote.dto.RutaDTO
+import edu.ucne.skyplanerent.presentation.navigation.Screen
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -67,8 +69,7 @@ fun RutaListScreen(
     createRuta: () -> Unit,
     goToRuta: (Int) -> Unit,
     goBack: () -> Unit,
-    goToAdminPanel: () -> Unit, // Añadido para navegar al panel de administración
-    goToPerfil: () -> Unit
+    goToAdminPanel: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val query by viewModel.searchQuery.collectAsStateWithLifecycle()
@@ -101,8 +102,7 @@ fun RutaListScreen(
         onEvent = viewModel::onEvent,
         createRuta = createRuta,
         goBack = goBack,
-        goToAdminPanel = goToAdminPanel, // Pasar el callback
-        goToPerfil = goToPerfil
+        goToAdminPanel = goToAdminPanel
     )
 }
 
@@ -118,7 +118,6 @@ fun RutaListBodyScreen(
     createRuta: () -> Unit,
     goBack: () -> Unit,
     goToAdminPanel: () -> Unit,
-    goToPerfil: () -> Unit
 ) {
     val pullRefreshState = rememberPullRefreshState(
         refreshing = uiState.isLoading,
@@ -183,33 +182,20 @@ fun RutaListBodyScreen(
                     },
                     label = { Text("Admin") },
                     selected = false,
-                    onClick = goToAdminPanel
+                    onClick = goBack
                 )
                 NavigationBarItem(
                     icon = {
                         Icon(
-                            painterResource(id = R.drawable.ruta), // Ícono personalizado para Ruta
+                            painterResource(id = R.drawable.ruta),
                             contentDescription = "Ruta",
                             modifier = Modifier.size(24.dp),
-                            tint = Color.Blue // Resaltado como seleccionado
+                            tint = Color.Blue
                         )
                     },
                     label = { Text("Ruta") },
-                    selected = true, // Indicamos que esta pestaña está seleccionada
-                    onClick = {} // No hace nada porque ya estamos en esta pantalla
-                )
-                NavigationBarItem(
-                    icon = {
-                        Icon(
-                            Icons.Default.Person,
-                            contentDescription = "Perfil",
-                            modifier = Modifier.size(24.dp),
-                            tint = MaterialTheme.colorScheme.onSurface
-                        )
-                    },
-                    label = { Text("Perfil") },
-                    selected = false,
-                    onClick = goToPerfil // Aquí puedes agregar la navegación al perfil si es necesario
+                    selected = true,
+                    onClick = {}
                 )
             }
         }
