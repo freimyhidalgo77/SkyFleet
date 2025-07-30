@@ -45,6 +45,7 @@ import edu.ucne.skyplanerent.presentation.aeronave.TipoAeronaveListScreen
 //import edu.ucne.skyplanerent.presentation.aeronave.TipoAeronaveScreen
 import edu.ucne.skyplanerent.presentation.categoriaaeronave.CategoriaReservaAeronaveScreen
 import edu.ucne.skyplanerent.presentation.login.PerfilClientScreen
+import edu.ucne.skyplanerent.presentation.login.ProfileViewModel
 import edu.ucne.skyplanerent.presentation.login.SessionManager
 import edu.ucne.skyplanerent.presentation.reserva.PagoReservaListScreen
 import edu.ucne.skyplanerent.presentation.reserva.ReservaDeleteScreen
@@ -104,6 +105,8 @@ fun AppNavigation(context: Context) {
         }
 
         composable<Screen.Home> {
+            val profileViewModel: ProfileViewModel = hiltViewModel()
+            val currentUserEmail = auth.currentUser?.email ?: sessionManager.getCurrentUserId()
             HomeScreen(
                 navController = navController,
                 onLogout = {
@@ -121,30 +124,40 @@ fun AppNavigation(context: Context) {
                 },
                 onNavigateToPeril = {
                     navController.navigate(Screen.Perfil)
-                }
+                },
+                currentUserEmail = currentUserEmail,
+                userRepository = profileViewModel.userRepository
 
             )
         }
 
 
         composable<Screen.Perfil> {
-            PerfilClientScreen (
+            val profileViewModel: ProfileViewModel = hiltViewModel()
+            val currentUserEmail = auth.currentUser?.email ?: sessionManager.getCurrentUserId()
+
+            LaunchedEffect(currentUserEmail) {
+                profileViewModel.loadUser(currentUserEmail)
+            }
+
+            PerfilClientScreen(
                 navController = navController,
                 goToAdminPanel = {
-                    navController.navigate(Screen.Perfil)
+                    navController.navigate(Screen.AdminPanel)
                 },
                 goToFirstScreen = {
                     navController.navigate(Screen.Home)
                 },
                 onLogout = {
                     auth.signOut()
-                    sessionManager.clearSession() // Limpia la sesión
+                    sessionManager.clearSession()
                     navController.navigate(Screen.FirstScreen) {
                         popUpTo(0) { inclusive = true }
                     }
                 },
-
-                goBack = { navController.popBackStack() }
+                goBack = { navController.popBackStack() },
+                currentUserEmail = currentUserEmail,
+                userRepository = profileViewModel.userRepository
             )
         }
         composable<Screen.Login> {
@@ -169,12 +182,14 @@ fun AppNavigation(context: Context) {
         }
 
         composable<Screen.Register> {
+            val profileViewModel: ProfileViewModel = hiltViewModel()
             RegisterScreen(
                 onRegisterSuccess = {
                     navController.navigate(Screen.Login) {
                         popUpTo(Screen.Register) { inclusive = true }
                     }
-                }
+                },
+                userRepository = profileViewModel.userRepository
             )
         }
 

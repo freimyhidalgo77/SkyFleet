@@ -44,9 +44,9 @@ import kotlinx.coroutines.flow.onEach
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
-    onLoginSuccess: () -> Unit,
+    onLoginSuccess: (String) -> Unit,
     onNavigateToRegister: () -> Unit,
-    goToAdminPanel: (Int) -> Unit, // Mantiene adminId como Int
+    goToAdminPanel: (Int) -> Unit,
     auth: FirebaseAuth = FirebaseAuth.getInstance(),
     sessionManager: SessionManager = SessionManager(LocalContext.current),
     adminRepository: AdminRepository
@@ -101,47 +101,42 @@ fun LoginScreen(
                 errorMessage = null
                 adminRepository.getAdminByEmail(email, password).onEach { resource ->
                     when (resource) {
-                        is Resource.Loading -> {
-                            isLoading = true
-                        }
+                        is Resource.Loading -> isLoading = true
                         is Resource.Success -> {
                             isLoading = false
-                            if (resource.data?.isNotEmpty() == true) {
-                                // Admin encontrado, convertir adminId a Int
-                                val admin = resource.data.first().adminId
-                                if (admin != null) {
-                                    goToAdminPanel(admin)
-                                }
+                            val admin = resource.data?.firstOrNull()?.adminId
+                            if (admin != null) {
+                                goToAdminPanel(admin)
                             } else {
                                 // No es admin, intentar autenticación con Firebase
                                 auth.signInWithEmailAndPassword(email, password)
                                     .addOnCompleteListener { task ->
                                         isLoading = false
                                         if (task.isSuccessful) {
-                                            task.result.user?.let { user ->
+                                            val user = task.result.user
+                                            if (user != null) {
                                                 sessionManager.saveAuthState(user)
-                                                onLoginSuccess()
+                                                onLoginSuccess(user.email ?: "")
                                             }
                                         } else {
-                                            errorMessage = task.exception?.message ?: "Credenciales inválidas para usuario"
+                                            errorMessage = task.exception?.message ?: "Credenciales inválidas"
                                         }
                                     }
                             }
                         }
                         is Resource.Error -> {
                             isLoading = false
-                            // Intentar autenticación con Firebase como respaldo
                             auth.signInWithEmailAndPassword(email, password)
                                 .addOnCompleteListener { task ->
                                     isLoading = false
                                     if (task.isSuccessful) {
-                                        task.result.user?.let { user ->
+                                        val user = task.result.user
+                                        if (user != null) {
                                             sessionManager.saveAuthState(user)
-                                            onLoginSuccess()
+                                            onLoginSuccess(user.email ?: "")
                                         }
                                     } else {
-                                        errorMessage = task.exception?.message
-                                            ?: "Error al autenticar: Verifica tus credenciales."
+                                        errorMessage = task.exception?.message ?: "Error de autenticación"
                                     }
                                 }
                         }
