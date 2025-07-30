@@ -67,6 +67,7 @@ dependencies {
     implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.benchmark.common)
     implementation(libs.androidx.benchmark.macro)
+    implementation(libs.androidx.navigation.runtime.android)
     annotationProcessor("androidx.room:room-compiler:2.6.1")
     ksp("androidx.room:room-compiler:2.6.1")
 
