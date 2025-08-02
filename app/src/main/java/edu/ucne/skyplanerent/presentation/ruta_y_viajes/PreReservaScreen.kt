@@ -266,7 +266,7 @@ fun ReservaBodyListScreen(
                         modifier = Modifier.padding(bottom = 4.dp)
                     )
                     Text(
-                        text = "10:00 AM - 12:00 PM", // Esto debería venir de tus datos
+                        text = "10:00 AM - 12:00 PM", // Esto debería venir en los datos
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
@@ -324,7 +324,7 @@ fun ReservaBodyListScreen(
             item {
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
-                    onClick = { goToFormulario(0) },
+                    onClick = { goToFormulario(preReservaId) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp),

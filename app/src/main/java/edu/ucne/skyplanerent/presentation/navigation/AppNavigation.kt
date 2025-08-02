@@ -63,6 +63,7 @@ import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloEvent
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloViewModel
 import kotlinx.coroutines.delay
 import edu.ucne.skyplanerent.data.remote.dto.AdminDTO
+import edu.ucne.skyplanerent.data.remote.dto.AeronaveDTO
 import edu.ucne.skyplanerent.presentation.admin.AdminViewModel
 
 
@@ -207,7 +208,6 @@ fun AppNavigation(context: Context) {
 
         composable<Screen.Rutas_y_viajes> { backStackEntry ->
             val reservaViewModel: ReservaViewModel = hiltViewModel(backStackEntry)
-
             Rutas_Viajes_Screen(
                 goToRuta = { id ->
                     navController.navigate(Screen.ReservaRutaDetails(id))
@@ -222,7 +222,7 @@ fun AppNavigation(context: Context) {
                 reservaViewModel = reservaViewModel,
                 goBack = {
                     navController.navigate(Screen.Home)
-                }
+                },
             )
         }
 
@@ -311,8 +311,8 @@ fun AppNavigation(context: Context) {
                 goBack = {
                     navController.navigate(Screen.Rutas_y_viajes)
                 },
-                goToFormulario = {
-                    navController.navigate(Screen.Formulario(0))
+                goToFormulario = {id->
+                    navController.navigate(Screen.Formulario(id))
                 },
                 tipoVueloList = tipoList,
                 rutaList = rutaList,
@@ -326,12 +326,15 @@ fun AppNavigation(context: Context) {
             val args = it.toRoute<Screen.Formulario>()
             FormularioScreen(
                 formularioId = args.formularioId,
-                goBack = {
-                    navController.navigate(Screen.Formulario(0))
+                goBack = {id->
+                    navController.navigate(Screen.Formulario(id))
                 },
                 goToPago = { pagoId ->
                     navController.navigate(Screen.PagoReserva(pagoId))
-                }
+                },
+               // capacidadAeronave = args.capacidadPasajeros
+                aeronaveSeleccionadaId = args.formularioId
+
             )
         }
 

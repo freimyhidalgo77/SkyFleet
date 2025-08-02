@@ -234,9 +234,19 @@ fun ReservaDetailsRow(
 
         InfoRow("Detalles del cliente", "${formulario?.nombre ?: "Nombre"} ${formulario?.apellido ?: "no encontrado"}")
 
+
+        InfoRow("Correo", "${formulario?.correo ?: "no encontrado"}")
+
+        InfoRow("Telefono", "${formulario?.telefono ?: "no encontrado"}")
+
+        InfoRow("Ciudad", "${formulario?.ciudadResidencia ?: "no encontrado"}")
+
+        InfoRow("Pasaporte", "${formulario?.pasaporte ?: "no encontrado"}")
+
         Text("Información de pago", fontWeight = FontWeight.Bold, fontSize = 18.sp)
 
         InfoRow("Método de pago", reserva.metodoPago ?: "No especificado")
+
         InfoRow("Estado", reserva.estadoPago ?: "Pendiente")
 
         InfoRow("Monto Pagado:", "RD$${"%.2f".format(reserva.precioTotal)}")

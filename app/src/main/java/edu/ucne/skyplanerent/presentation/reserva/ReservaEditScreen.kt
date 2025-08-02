@@ -29,6 +29,7 @@ import edu.ucne.skyplanerent.data.remote.dto.RutaDTO
 import edu.ucne.skyplanerent.data.remote.dto.TipoVueloDTO
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveUiState
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveViewModel
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.formulario.FormularioViewModel
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaUiState
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaViewModel
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloUiState
@@ -45,18 +46,23 @@ fun ReservaEditScreen(
     tipoVueloViewModel: TipoVueloViewModel = hiltViewModel(),
     rutaViewModel: RutaViewModel = hiltViewModel(),
     aeronaveViewModel: AeronaveViewModel = hiltViewModel(),
+    formularioViewModel: FormularioViewModel = hiltViewModel(),
     goBack: (Int) -> Unit
 ) {
     LaunchedEffect(reservaId) {
         viewModel.selectReserva(reservaId)
     }
 
-
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val tipoVueloUiState by tipoVueloViewModel.uiState.collectAsStateWithLifecycle()
     val rutaUiState by rutaViewModel.uiState.collectAsStateWithLifecycle()
     val aeronaveUiState by aeronaveViewModel.uiState.collectAsStateWithLifecycle()
 
+    LaunchedEffect(uiState.reservaSeleccionada?.formularioId) {
+        uiState.reservaSeleccionada?.formularioId?.let { formularioId ->
+            formularioViewModel.selectedFormulario(formularioId)
+        }
+    }
 
     if (uiState.reservaSeleccionada == null) {
         Column(
@@ -73,7 +79,10 @@ fun ReservaEditScreen(
     ReservaEditBodyScreen(
         uiState = uiState,
         onChangePasajeros = viewModel::onChangePasajeros,
-        save = viewModel::updateReserva,
+        save = {
+            formularioViewModel.upedateFormulario()
+            viewModel.updateReserva()
+        },
         goBack = goBack,
         tipoVueloUiState = tipoVueloUiState,
         rutaUiState = rutaUiState,
@@ -83,6 +92,8 @@ fun ReservaEditScreen(
         onChangeTipoVuelo = viewModel::onChangeTipoVuelo,
         onDateSelected = viewModel::onFechaChange,
         reservaId = reservaId,
+        formularioViewModel = formularioViewModel,
+        onChangeNombre = formularioViewModel::onNombreChange
 
 
     )
@@ -104,10 +115,20 @@ fun ReservaEditBodyScreen(
     onChangeTipoVuelo: (Int) -> Unit,
     onDateSelected:(String)->Unit,
     onChangePasajeros: (Int) -> Unit,
-    viewModel: ReservaViewModel = hiltViewModel()
+    onChangeNombre:(String)->Unit,
+    viewModel: ReservaViewModel = hiltViewModel(),
+    formularioViewModel:FormularioViewModel = hiltViewModel()
 ) {
 
+
     val reserva = uiState.reservaSeleccionada ?: return
+
+    val formularioState by formularioViewModel.uiState.collectAsStateWithLifecycle()
+
+    // Buscar el formulario asociado a la reserva
+    val formulario = formularioState.formularios.find { it.formularioId == reserva.formularioId }
+
+    //val reserva = uiState.reservaSeleccionada ?: return
 
     val tipoVuelo = tipoVueloUiState.tipovuelo.find { it.tipoVueloId == reserva.tipoVueloId }
     val ruta = rutaUiState.rutas.find { it.rutaId == reserva.rutaId }
@@ -200,7 +221,7 @@ fun ReservaEditBodyScreen(
                             }
                         }
                     },
-                    containerColor = Color.White // asegúrate de que no esté transparente
+                    containerColor = Color.White
                 )
 
             }
@@ -251,39 +272,45 @@ fun ReservaEditBodyScreen(
 
             Text("Modificación", fontWeight = FontWeight.Bold, fontSize = 18.sp)
 
-            Spacer(modifier = Modifier.height(8.dp))
 
-            Text("Modificar Tipo vuelo", fontWeight = FontWeight.Bold)
+            Text("Información personal", fontWeight = FontWeight.Bold, fontSize = 18.sp)
 
-            TipoVueloDropdown (
-                tipoVuelo = tipoVueloUiState.tipovuelo,
-                selectedTipoVuelo = selectedTipoVuelo,
-                onTipoVueloSelected = { selected ->
-                    onChangeTipoVuelo(selected.tipoVueloId ?: 0)
-                }
+            // Campo para editar nombre
+            OutlinedTextField(
+                value = formularioState?.nombre ?: "",
+                onValueChange = onChangeNombre,
+                label = { Text("Nombre") },
+                modifier = Modifier.fillMaxWidth()
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text("Modificar aeronave", fontWeight = FontWeight.Bold)
-            AeronavesDropdown(
-                aeronaves = aeronaveUiState.aeronaves,
-                selectedAeronave = selectedAeronave,
-                onAeronaveSelected = { selected ->
-                    onChangeAeronave(selected.aeronaveId ?: 0)
-                }
+            // Campo para editar apellido
+            OutlinedTextField(
+                value = formularioState?.apellido ?: "",
+                onValueChange = { formularioViewModel.onApellidoChange(it) },
+                label = { Text("Apellido") },
+                modifier = Modifier.fillMaxWidth()
             )
 
+            // Campo para editar correo
+            OutlinedTextField(
+                value = formularioState?.correo ?: "",
+                onValueChange = { formularioViewModel.onCorreoChange(it) },
+                label = { Text("Correo electrónico") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            // Campo para editar teléfono
+            OutlinedTextField(
+                value = formularioState?.telefono ?: "",
+                onValueChange = { formularioViewModel.onTelefonoChange(it) },
+                label = { Text("Teléfono") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+
             Spacer(modifier = Modifier.height(8.dp))
 
-            Text("Modificar ruta", fontWeight = FontWeight.Bold)
-            RutaDropdown(
-                rutas = rutaUiState.rutas,
-                selectedRuta = selectedRuta,
-                onRutaSelected = { selected ->
-                    onChangeRuta(selected.rutaId ?: 0)
-                }
-            )
+
 
             FechaPickerField(
                 selectedDate = fecha?.toString(),
@@ -343,7 +370,7 @@ fun AeronavesDropdown(
                     DropdownMenuItem(
                         text = { Text(aeronave.modeloAvion) },
                         onClick = {
-                            onAeronaveSelected(aeronave) // <- aquí se actualiza el estado en VM
+                            onAeronaveSelected(aeronave)
                             expanded = false
                         }
                     )

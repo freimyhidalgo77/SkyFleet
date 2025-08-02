@@ -127,7 +127,7 @@ fun Rutas_Viajes_Screen(
         goToRuta = goToRuta,
         reservaViewModel = reservaViewModel,
         reservaUiState = reservaUiState,
-        goBack = goBack
+        goBack = goBack,
 
     )
 }
@@ -565,7 +565,6 @@ fun Vuelos_RutasBodyListScreen(
                         selectedRuta?.let { reservaViewModel.seleccionarRuta(it.rutaId ?: 0) }
 
                         ReservaEvent.save
-
                         goTopreReserva(0)
                     },
                     enabled = puedeContinuar,

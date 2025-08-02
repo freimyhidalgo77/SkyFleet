@@ -1,5 +1,7 @@
 package edu.ucne.skyplanerent.data.remote.dto
 
+import kotlinx.serialization.Serializable
+
 data class AeronaveDTO(
     val aeronaveId:Int? = null,
     val estadoId:Int = 0,

@@ -14,6 +14,6 @@ data class FormularioUiState (
     val ciudadResidencia:String = "",
     val successMessage:String? = "",
     val errorMessage:String? = "",
-    val cantidadPasajeros:Int = 0,
+    val cantidadPasajeros:Int = 1,
     val formularios:List<FormularioEntity> = emptyList()
 )
