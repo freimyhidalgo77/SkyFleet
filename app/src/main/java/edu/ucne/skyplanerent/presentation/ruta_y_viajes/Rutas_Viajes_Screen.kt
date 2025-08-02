@@ -160,16 +160,6 @@ fun Vuelos_RutasBodyListScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
 
-    /* val licencias = listOf(
-         "PPL - Piloto Privado",
-         "CPL - Piloto Comercial",
-         "ATPL - Piloto de Transporte de Línea Aérea",
-         "IR - Habilitación de Vuelo por Instrumentos",
-         "ME - Habilitación Multimotor",
-         "Turboprop - Habilitación Turboprop",
-         "Jet Type Rating - Habilitación Jet"
-     )*/
-
     val licencias = TipoLicencia.values().toList()
 
 

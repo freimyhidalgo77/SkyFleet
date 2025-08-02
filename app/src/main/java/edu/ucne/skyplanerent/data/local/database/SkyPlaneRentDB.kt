@@ -31,7 +31,7 @@ import edu.ucne.skyplanerent.data.local.entity.UserRegisterAccount
         AdminEntity::class,
         UserRegisterAccount::class
     ],
-    version = 19,
+    version = 20,
     exportSchema = false
 )
 

@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -70,193 +71,208 @@ fun PerfilClientScreen(
     userRepository: UserRepository,
     currentUserEmail: String?
 ) {
-
     var user = remember { mutableStateOf<UserRegisterAccount?>(null) }
+    var showLogoutDialog by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
-
-    //var isLoading by remember { mutableStateOf(true) }
 
     LaunchedEffect(currentUserEmail) {
         if (currentUserEmail != null) {
             user.value = userRepository.getUserByEmail(currentUserEmail)
-            //isLoading = false
         }
     }
 
-    /*if (isLoading) {
-        CircularProgressIndicator()
-    } else {*/
 
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            topBar = {
-                CenterAlignedTopAppBar(
-                    title = {
-                        Text(
-                            text = "Perfil",
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = goBack) {
-                            Icon(
-                                imageVector = Icons.Default.ArrowBack,
-                                contentDescription = "Volver",
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                    }
-                )
-            },
-
-            ) { padding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = "Foto de perfil",
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(CircleShape),
-                    tint = Color.Black
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                // Usa user.value aquí
-                Text(
-                    text = "${user.value?.nombre ?: "Nombre"} ${user.value?.apellido ?: "Apellido"}",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = "Cliente",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Sección de Email
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Email,
-                        contentDescription = "Email",
-                        modifier = Modifier.size(24.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Email: ${user.value?.correo ?: "email@ejemplo.com"}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-                Divider(color = Color.Gray.copy(alpha = 0.2f))
-
-                // Informacion del usuario.
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                        .clickable { }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Phone,
-                        contentDescription = "Numero de telefono",
-                        modifier = Modifier.size(24.dp),
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = user.value?.telefono?.let { formatPhoneNumber(it) } ?: "Teléfono no disponible",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-
-                }
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                        .clickable { }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.House,
-                        contentDescription = "Direccion",
-                        modifier = Modifier.size(24.dp),
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = user.value?.direcccion?: "No disponible",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-
-                }
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                        .clickable { }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Cake,
-                        contentDescription = "Cumpleanos",
-                        modifier = Modifier.size(24.dp),
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = user.value?.fecha.toString()?: "No disponible",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-
-                }
-
-                Spacer(modifier = Modifier.weight(1f))
-
+    if (showLogoutDialog) {
+        AlertDialog(
+            onDismissRequest = { showLogoutDialog = false },
+            title = { Text("Confirmar cierre de sesión") },
+            text = { Text("¿Está seguro que desea cerrar su sesión?") },
+            confirmButton = {
                 Button(
-                    onClick = onLogout,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onSurface)
+                    onClick = {
+                        showLogoutDialog = false
+                        onLogout()
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.ExitToApp,
-                        contentDescription = "Cerrar sesión",
-                        modifier = Modifier.size(24.dp),
-                        tint = Color.White
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Cerrar sesión",
-                        color = Color.White,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
+                    Text("Confirmar")
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = { showLogoutDialog = false },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+                ) {
+                    Text("Cancelar")
                 }
             }
-        }
-
+        )
     }
 
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        text = "Perfil",
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = goBack) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Volver",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+            )
+        }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.height(16.dp))
+            Icon(
+                imageVector = Icons.Default.Person,
+                contentDescription = "Foto de perfil",
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(CircleShape),
+                tint = Color.Black
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "${user.value?.nombre ?: "Nombre"} ${user.value?.apellido ?: "Apellido"}",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = "Cliente",
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.Gray
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Sección de Email
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Email,
+                    contentDescription = "Email",
+                    modifier = Modifier.size(24.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Email: ${user.value?.correo ?: "email@ejemplo.com"}",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            Divider(color = Color.Gray.copy(alpha = 0.2f))
+
+            // Informacion del usuario.
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+                    .clickable { }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Phone,
+                    contentDescription = "Numero de telefono",
+                    modifier = Modifier.size(24.dp),
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = user.value?.telefono?.let { formatPhoneNumber(it) } ?: "Teléfono no disponible",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+                    .clickable { }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.House,
+                    contentDescription = "Direccion",
+                    modifier = Modifier.size(24.dp),
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = user.value?.direcccion?: "No disponible",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+                    .clickable { }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Cake,
+                    contentDescription = "Cumpleanos",
+                    modifier = Modifier.size(24.dp),
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = user.value?.fecha.toString()?: "No disponible",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            // Botón de cerrar sesión modificado para mostrar el diálogo
+            Button(
+                onClick = { showLogoutDialog = true },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onSurface)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ExitToApp,
+                    contentDescription = "Cerrar sesión",
+                    modifier = Modifier.size(24.dp),
+                    tint = Color.White
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Cerrar sesión",
+                    color = Color.White,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
+    }
+}
