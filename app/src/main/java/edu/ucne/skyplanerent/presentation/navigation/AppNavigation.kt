@@ -215,8 +215,8 @@ fun AppNavigation(context: Context) {
                 goBackDetails = {
                     navController.navigate(Screen.RutaDetails(0))
                 },
-                goTopreReserva = {
-                    navController.navigate(Screen.PreReserva(0))
+                goTopreReserva = {id->
+                    navController.navigate(Screen.PreReserva(id))
                 },
                 scope = scope,
                 reservaViewModel = reservaViewModel,
@@ -309,7 +309,7 @@ fun AppNavigation(context: Context) {
             PreReservaListScreen(
                 preReservaId = args.prereservaId,
                 goBack = {
-                    navController.navigate(Screen.PreReserva(0))
+                    navController.navigate(Screen.Rutas_y_viajes)
                 },
                 goToFormulario = {
                     navController.navigate(Screen.Formulario(0))

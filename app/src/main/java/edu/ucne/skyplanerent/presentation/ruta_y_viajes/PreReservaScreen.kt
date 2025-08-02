@@ -11,14 +11,20 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -35,6 +41,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.os.persistableBundleOf
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edu.ucne.skyplanerent.data.local.entity.ReservaEntity
@@ -61,7 +68,7 @@ fun PreReservaListScreen(
     tipoVueloViewModel: TipoVueloViewModel = hiltViewModel(),
     viewModel: ReservaViewModel,
     rutaViewModel: RutaViewModel = hiltViewModel(),
-    goBack:()->Unit,
+    goBack:(Int)->Unit,
     goToFormulario: (Int)-> Unit,
 
 
@@ -90,7 +97,8 @@ fun PreReservaListScreen(
         rutaUiState = rutaUiState,
         tipoVueloUiState = tipoVueloUiState,
         aeronaveUiState = aeronaevUiState,
-        reservaViewModel = viewModel
+        reservaViewModel = viewModel,
+        preReservaId = preReservaId
 
     )
 }
@@ -98,6 +106,7 @@ fun PreReservaListScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReservaBodyListScreen(
+    preReservaId: Int,
     uiState: UiState,
     reservaViewModel: ReservaViewModel,
     tipoVueloViewModel: TipoVueloViewModel = hiltViewModel(),
@@ -108,7 +117,7 @@ fun ReservaBodyListScreen(
     aeronaveUiState: AeronaveUiState,
     rutaUiState: RutaUiState,
     tipoVueloUiState: TipoVueloUiState,
-    goBack: () -> Unit,
+    goBack: (Int) -> Unit,
 ) {
     val idTipoVueloSeleccionado by reservaViewModel.tipoVueloSeleccionadoId.collectAsState()
     val tipoVueloSeleccionado =
@@ -126,22 +135,32 @@ fun ReservaBodyListScreen(
     val reservaUiState by reservaViewModel.uiState.collectAsStateWithLifecycle()
     val licenciaSeleccionada = reservaUiState.licenciaPiloto
 
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = "Pre-Reserva",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 26.sp,
-                        color = Color.Black
+
+    val snackbarHostState = remember { SnackbarHostState() }
+
+        Scaffold(
+            snackbarHost = { SnackbarHost(snackbarHostState) },
+            topBar = {
+                CenterAlignedTopAppBar(
+                    title = {
+                        Text(
+                            text = "Pre-Reserva",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 26.sp,
+                            color = Color.Black
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = { goBack(preReservaId) }) {
+                            Icon(Icons.Filled.ArrowBack, contentDescription = "Volver atrás")
+                        }
+                    },
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        containerColor = Color.White
                     )
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color.White
                 )
-            )
-        },
+            }
+
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
