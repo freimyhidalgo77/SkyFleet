@@ -259,17 +259,29 @@ fun Vuelos_RutasBodyListScreen(
                     contentPadding = PaddingValues(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+                    // Para los tipos de vuelo
                     items(vuelosAMostrar) { vuelo ->
+                        val isSelected = vuelo.tipoVueloId == selectedTipoVuelo?.tipoVueloId
                         Card(
                             shape = RoundedCornerShape(12.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color(0xFFBBDEFB)),
-                            elevation = CardDefaults.cardElevation(2.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = if (isSelected) Color(0xFF2196F3) else Color(0xFFBBDEFB)
+                            ),
+                            elevation = CardDefaults.cardElevation(if (isSelected) 4.dp else 2.dp),
                             modifier = Modifier
                                 .width(160.dp)
                                 .height(60.dp)
                                 .clickable {
-                                    selectedTipoVuelo = vuelo
-                                    reservaViewModel.seleccionarTipoVuelo(vuelo.tipoVueloId ?: 0)
+                                    if (isSelected) {
+                                        selectedTipoVuelo = null
+                                        reservaViewModel.seleccionarTipoVuelo(0)
+                                        scope.launch {
+                                            snackbarHostState.showSnackbar("Se ha cancelado la selección del tipo de vuelo")
+                                        }// 0 para indicar no selección
+                                    } else {
+                                        selectedTipoVuelo = vuelo
+                                        reservaViewModel.seleccionarTipoVuelo(vuelo.tipoVueloId ?: 0)
+                                    }
                                 }
                         ) {
                             Box(
@@ -282,7 +294,7 @@ fun Vuelos_RutasBodyListScreen(
                                     text = vuelo.nombreVuelo,
                                     fontSize = 16.sp,
                                     fontWeight = FontWeight.Medium,
-                                    color = Color.Black
+                                    color = if (isSelected) Color.White else Color.Black
                                 )
                             }
                         }
@@ -290,24 +302,36 @@ fun Vuelos_RutasBodyListScreen(
                 }
             }
 
-            val idTipoVueloSeleccionado = ideSeleccionado
-            if (idTipoVueloSeleccionado != null && idTipoVueloSeleccionado > 0) {
-                item {
-                    val tipoVueloSeleccionado =
-                        vueloUiState.tipovuelo.find { it.tipoVueloId == idTipoVueloSeleccionado }
-
-                    if (tipoVueloSeleccionado != null) {
-                        Text(
-                            text = "Tipo Vuelo Seleccionado: ${tipoVueloSeleccionado.descripcionTipoVuelo}",
-                            fontSize = 16.sp,
-                            color = Color(0xFF0A80ED),
-                            modifier = Modifier.padding(horizontal = 16.dp)
-                        )
+                val idTipoVueloSeleccionado = ideSeleccionado
+                if (idTipoVueloSeleccionado != null && idTipoVueloSeleccionado > 0) {
+                    item {
+                        val tipoVueloSeleccionado = vueloUiState.tipovuelo.find { it.tipoVueloId == idTipoVueloSeleccionado }
+                        if (tipoVueloSeleccionado != null) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(horizontal = 16.dp)
+                            ) {
+                                Text(
+                                    text = "Tipo Vuelo Seleccionado: ${tipoVueloSeleccionado.descripcionTipoVuelo}",
+                                    fontSize = 16.sp,
+                                    color = Color(0xFF0A80ED)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                TextButton(
+                                    onClick = {
+                                        selectedTipoVuelo = null
+                                        reservaViewModel.seleccionarTipoVuelo(0)
+                                    }
+                                ) {
+                                    Text("Cancelar", color = Color.Red)
+                                }
+                            }
+                        }
                     }
                 }
-            }
 
-            item {
+
+                item {
                 Text(
                     text = "Rutas disponibles",
                     fontSize = 20.sp,
@@ -316,62 +340,85 @@ fun Vuelos_RutasBodyListScreen(
                 )
             }
 
-            val idRutaSeleccionada = idSeleccionado
-            if (idRutaSeleccionada != null && idRutaSeleccionada > 0) {
-                item {
-                    val rutaSeleccionada = uiState.rutas.find { it.rutaId == idRutaSeleccionada }
-
-                    if (rutaSeleccionada != null) {
-                        Text(
-                            text = "Ruta seleccionada: ${rutaSeleccionada.origen} → ${rutaSeleccionada.destino}",
-                            fontSize = 16.sp,
-                            color = Color(0xFF0A80ED),
-                            modifier = Modifier.padding(horizontal = 16.dp)
-                        )
+                val idRutaSeleccionada = idSeleccionado
+                if (idRutaSeleccionada != null && idRutaSeleccionada > 0) {
+                    item {
+                        val rutaSeleccionada = uiState.rutas.find { it.rutaId == idRutaSeleccionada }
+                        if (rutaSeleccionada != null) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(horizontal = 16.dp)
+                            ) {
+                                Text(
+                                    text = "Ruta seleccionada: ${rutaSeleccionada.origen} → ${rutaSeleccionada.destino}",
+                                    fontSize = 16.sp,
+                                    color = Color(0xFF0A80ED)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                TextButton(
+                                    onClick = {
+                                        selectedRuta = null
+                                        reservaViewModel.seleccionarRuta(0)
+                                    }
+                                ) {
+                                    Text("Cancelar", color = Color.Red)
+                                }
+                            }
+                        }
                     }
                 }
-            }
 
-            items(rutasAMostrar) { ruta ->
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 4.dp)
-                        .clickable {
-                            selectedRuta = ruta
-                            reservaViewModel.seleccionarRuta(ruta.rutaId!!)
-                        },
-                    colors = CardDefaults.cardColors(containerColor = Color(0xFFE3F2FD)),
-                    shape = RoundedCornerShape(12.dp),
-                    elevation = CardDefaults.cardElevation(4.dp)
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(
-                            text = "Ruta: ${ruta.rutaId}",
-                            color = Color.Gray,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp
-                        )
-                        Text(
-                            text = "${ruta.origen} → ${ruta.destino}",
-                            fontSize = 16.sp
-                        )
-                        Text(
-                            text = "Distancia: ${ruta.distancia}",
-                            color = Color.Gray,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp
-                        )
-                        Text(
-                            text = "Duracion: ${ruta.duracion} hour ${if (uiState.duracionEstimada % 60 != 0) "${uiState.duracionEstimada % 60} minutes" else ""}",
-                            color = Color.Gray,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp
-                        )
-
+                items(rutasAMostrar) { ruta ->
+                    val isSelected = ruta.rutaId == selectedRuta?.rutaId
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 4.dp)
+                            .clickable {
+                                if (isSelected) {
+                                    selectedRuta = null
+                                    reservaViewModel.seleccionarRuta(0)// 0 para indicar no selección
+                                    scope.launch {
+                                        snackbarHostState.showSnackbar("Se ha cancelado la selección de la ruta")
+                                    }
+                                } else {
+                                    selectedRuta = ruta
+                                    reservaViewModel.seleccionarRuta(ruta.rutaId!!)
+                                }
+                            },
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (isSelected) Color(0xFF2196F3) else Color(0xFFE3F2FD)
+                        ),
+                        shape = RoundedCornerShape(12.dp),
+                        elevation = CardDefaults.cardElevation(if (isSelected) 8.dp else 4.dp)
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                text = "Ruta: ${ruta.rutaId}",
+                                color = if (isSelected) Color.White else Color.Gray,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp
+                            )
+                            Text(
+                                text = "${ruta.origen} → ${ruta.destino}",
+                                fontSize = 16.sp,
+                                color = if (isSelected) Color.White else Color.Black
+                            )
+                            Text(
+                                text = "Distancia: ${ruta.distancia}",
+                                color = if (isSelected) Color.White else Color.Gray,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp
+                            )
+                            Text(
+                                text = "Duracion: ${ruta.duracion} hour ${if (uiState.duracionEstimada % 60 != 0) "${uiState.duracionEstimada % 60} minutes" else ""}",
+                                color = if (isSelected) Color.White else Color.Gray,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 14.sp
+                            )
+                        }
                     }
                 }
-            }
         }
 
             item {
