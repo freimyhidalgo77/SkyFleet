@@ -111,6 +111,15 @@ class ReservaViewModel @Inject constructor(
         _uiState.update { it.copy(fecha = fechaConvertida) }
     }
 
+    // En ReservaViewModel
+    fun onPrecioChange(precio: Double) {
+        _uiState.update { it.copy(precioTotal = precio) }
+    }
+
+    fun onEstadoPagoChange(estado: String) {
+        _uiState.update { it.copy(estadoPago = estado) }
+    }
+
 
    //Inicializando el metodo loadUserReserva para cargar el usuario perteneciente a esa reserva
     init{

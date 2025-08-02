@@ -143,6 +143,8 @@ fun ReservaEditBodyScreen(
     val selectedRuta = rutaUiState.rutas.find { it.rutaId == uiState.rutaId }
     val selectedTipoVuelo = tipoVueloUiState.tipovuelo.find { it.tipoVueloId == uiState.tipoVueloId }
 
+    var showConfirmationDialog by remember { mutableStateOf(false) }
+
 
     Scaffold(
         topBar = {
@@ -166,13 +168,9 @@ fun ReservaEditBodyScreen(
             )
         },
 
-
         bottomBar = {
             Button(
-                onClick = {
-                    save()
-                    goBack(reservaId)
-                },
+                onClick = { showConfirmationDialog = true },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
@@ -225,6 +223,39 @@ fun ReservaEditBodyScreen(
                 )
 
             }
+
+            if (showConfirmationDialog) {
+                AlertDialog(
+                    onDismissRequest = { showConfirmationDialog = false },
+                    title = { Text("Confirmar cambios") },
+                    text = { Text("¿Estás seguro de que deseas guardar los cambios realizados?") },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                showConfirmationDialog = false
+                                save()
+                                goBack(reservaId)
+                            },
+                            colors = ButtonDefaults.textButtonColors(
+                                contentColor = Color(0xFF00F5A0)
+                            )
+                        ) {
+                            Text("Confirmar")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = { showConfirmationDialog = false },
+                            colors = ButtonDefaults.textButtonColors(
+                                contentColor = Color.Red
+                            )
+                        ) {
+                            Text("Cancelar")
+                        }
+                    }
+                )
+            }
+
 
 
             Text("Detalles de la reserva", fontWeight = FontWeight.Bold, fontSize = 18.sp)
