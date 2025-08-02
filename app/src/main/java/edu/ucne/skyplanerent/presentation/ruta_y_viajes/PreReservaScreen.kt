@@ -236,19 +236,6 @@ fun ReservaBodyListScreen(
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
 
-                // Aeronave
-                Text(
-                    text = "Capacidad",
-                    color = Color.Gray,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.padding(bottom = 4.dp)
-                )
-                Text(
-                    text = aeronaveSeleccionada?.capacidadPasajeros.toString() ?: "No seleccionado",
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-
                 Spacer(modifier = Modifier.height(12.dp))
 
                     // Fecha
