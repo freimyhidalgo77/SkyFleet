@@ -312,7 +312,7 @@ fun AppNavigation(context: Context) {
                     navController.navigate(Screen.Rutas_y_viajes)
                 },
                 goToFormulario = {id->
-                    navController.navigate(Screen.Formulario(id))
+                    navController.navigate(Screen.Formulario(0,id))
                 },
                 tipoVueloList = tipoList,
                 rutaList = rutaList,
@@ -322,7 +322,7 @@ fun AppNavigation(context: Context) {
         }
 
 
-        composable<Screen.Formulario> {
+       /* composable<Screen.Formulario> {
             val args = it.toRoute<Screen.Formulario>()
             FormularioScreen(
                 formularioId = args.formularioId,
@@ -332,9 +332,20 @@ fun AppNavigation(context: Context) {
                 goToPago = { pagoId ->
                     navController.navigate(Screen.PagoReserva(pagoId))
                 },
-               // capacidadAeronave = args.capacidadPasajeros
                 aeronaveSeleccionadaId = args.formularioId
 
+            )
+        }*/
+
+        composable<Screen.Formulario> { backStackEntry ->
+            val args = backStackEntry.toRoute<Screen.Formulario>()
+            FormularioScreen(
+                formularioId = args.formularioId,
+                aeronaveSeleccionadaId = args.aeronaveId,
+                goBack = { navController.popBackStack() },
+                goToPago = { pagoId ->
+                    navController.navigate(Screen.PagoReserva(pagoId))
+                }
             )
         }
 

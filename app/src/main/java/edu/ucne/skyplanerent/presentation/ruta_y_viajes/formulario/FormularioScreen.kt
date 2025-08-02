@@ -63,16 +63,27 @@ fun FormularioScreen (
     goBack: (Int) -> Unit,
     goToPago: (Int) -> Unit,
 
+
 ) {
 
     val uiState = viewModel.uiState.collectAsStateWithLifecycle()
     val aeronaveUiState = aeronaveViewModel.uiState.collectAsStateWithLifecycle()
 
+    // Obtén la aeronave usando el ID proporcionado
+    val selectedAeronave by remember(aeronaveSeleccionadaId) {
+        derivedStateOf {
+            aeronaveSeleccionadaId?.let { id ->
+                aeronaveUiState.value.aeronaves.find { it.aeronaveId == id }
+            }
+        }
+    }
 
+    // Pasa solo la capacidad máxima
+    val capacidadMaxima = selectedAeronave?.capacidadPasajeros ?: 0
 
     FormularioBodyScreen(
         uiState = uiState.value,
-        //selectedAeronave = selectedAeronave,
+        selectedAeronave = selectedAeronave,
         onChangeNombre = viewModel::onNombreChange,
         onChangeApellido = viewModel::onApellidoChange,
         onChangeTelefono = viewModel::onTelefonoChange,
@@ -85,7 +96,8 @@ fun FormularioScreen (
         goBack = goBack,
         goToPago = goToPago,
         aeronaveUiState = aeronaveUiState.value,
-        //capacidadMaxima = capacidadMaxima
+        capacidadMaxima = capacidadMaxima
+
 
     )
 }
@@ -107,12 +119,11 @@ fun FormularioBodyScreen(
     nuevo:()->Unit,
     goBack: (Int) -> Unit,
     goToPago:(Int)->Unit,
-    //selectedAeronave: AeronaveDTO?,
-    //capacidadMaxima: Int,
+    selectedAeronave: AeronaveDTO?,
+    capacidadMaxima: Int,
 
 
 ) {
-
 
     val scrollState = rememberScrollState()
 
@@ -120,7 +131,7 @@ fun FormularioBodyScreen(
     val aeronaveSeleccionada =
         aeronaveUiState.aeronaves.find { it.aeronaveId == idAeronaveSeleccionada }
 
-    /*val capacidadMostrar = aeronaveSeleccionada?.capacidadPasajeros ?: capacidadMaxima
+    val capacidadMostrar = capacidadMaxima
     val showCapacityAlert = remember { mutableStateOf(false) }
 
 
@@ -128,14 +139,14 @@ fun FormularioBodyScreen(
         AlertDialog(
             onDismissRequest = { showCapacityAlert.value = false },
             title = { Text("Capacidad máxima excedida") },
-            text = { Text("Esta aeronave solo soporta ${aeronaveSeleccionada?.capacidadPasajeros} pasajeros.") },
+            text = { Text("Esta aeronave solo soporta $capacidadMostrar pasajeros.") },
             confirmButton = {
                 Button(onClick = { showCapacityAlert.value = false }) {
                     Text("Entendido")
                 }
             }
         )
-    }*/
+    }
 
     Column(
         modifier = Modifier
@@ -227,6 +238,7 @@ fun FormularioBodyScreen(
         )
 
         Spacer(modifier = Modifier.height(30.dp))
+        Spacer(modifier = Modifier.height(30.dp))
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -241,7 +253,7 @@ fun FormularioBodyScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                // Decrement button
+                // Botón de decremento (restar 1)
                 IconButton(
                     onClick = {
                         if (uiState.cantidadPasajeros > 1) {
@@ -258,13 +270,13 @@ fun FormularioBodyScreen(
                 ) {
                     Icon(
                         Icons.Default.Remove,
-                        contentDescription = "Decrement",
+                        contentDescription = "Decrementar",
                         tint = if (uiState.cantidadPasajeros > 1) MaterialTheme.colorScheme.onPrimary
                         else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
-                // Passenger count display
+                // Contador de pasajeros
                 Text(
                     text = uiState.cantidadPasajeros.toString(),
                     style = MaterialTheme.typography.titleMedium,
@@ -272,24 +284,45 @@ fun FormularioBodyScreen(
                     textAlign = TextAlign.Center
                 )
 
-                // Increment button
+                // Botón de incremento (sumar 1)
                 IconButton(
-                    onClick = { onChangePasajero(uiState.cantidadPasajeros + 1) },
+                    onClick = {
+                        if (uiState.cantidadPasajeros < capacidadMostrar) {
+                            onChangePasajero(uiState.cantidadPasajeros + 1)
+                        } else {
+                            showCapacityAlert.value = true
+                        }
+                    },
                     modifier = Modifier
                         .size(40.dp)
                         .background(
-                            color = MaterialTheme.colorScheme.primary,
+                            color = if (uiState.cantidadPasajeros < capacidadMostrar)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.errorContainer,
                             shape = CircleShape
                         )
                 ) {
                     Icon(
                         Icons.Default.Add,
-                        contentDescription = "Increment",
-                        tint = MaterialTheme.colorScheme.onPrimary
+                        contentDescription = "Incrementar",
+                        tint = if (uiState.cantidadPasajeros < capacidadMostrar)
+                            MaterialTheme.colorScheme.onPrimary
+                        else
+                            MaterialTheme.colorScheme.onErrorContainer
                     )
                 }
             }
         }
+
+        Text(
+            text = "Máximo: $capacidadMostrar pasajeros",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.End
+        )
+        Spacer(modifier = Modifier.height(30.dp))
 
         val puedeContinuar = uiState.nombre.isNotBlank()
                 && uiState.apellido.isNotBlank()
@@ -297,7 +330,7 @@ fun FormularioBodyScreen(
                 && uiState.telefono.isNotBlank()
                 && uiState.pasaporte.isNotBlank()
                 && uiState.ciudadResidencia.isNotBlank()
-                && uiState.cantidadPasajeros > 0
+                && uiState.cantidadPasajeros != 0
         Button(
             onClick = {
                 save()
