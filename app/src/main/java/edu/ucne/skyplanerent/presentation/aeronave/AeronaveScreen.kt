@@ -7,10 +7,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -25,13 +22,18 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AddPhotoAlternate
+import androidx.compose.material.icons.filled.AirplanemodeActive
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -48,7 +50,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -57,14 +61,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import edu.ucne.skyplanerent.presentation.UiEvent
-import edu.ucne.skyplanerent.presentation.categoriaaeronave.CategoriaAeronaveEvent
+import edu.ucne.skyplanerent.presentation.categoriaaeronave.CategoriaAeronaveViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -72,6 +75,7 @@ import kotlinx.coroutines.launch
 fun AeronaveScreen(
     aeronaveId: Int? = null,
     viewModel: AeronaveViewModel = hiltViewModel(),
+    categoriaViewModel: CategoriaAeronaveViewModel = hiltViewModel(),
     goBack: () -> Unit
 ) {
     val context = LocalContext.current
@@ -104,6 +108,7 @@ fun AeronaveScreen(
         onEvent = viewModel::onEvent,
         goBack = goBack,
         viewModel = viewModel,
+        categoriaViewModel = categoriaViewModel,
         pickImage = {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 permissionLauncher.launch(Manifest.permission.READ_MEDIA_IMAGES)
@@ -121,10 +126,15 @@ fun AeronaveBodyScreen(
     onEvent: (AeronaveEvent) -> Unit,
     goBack: () -> Unit,
     viewModel: AeronaveViewModel,
+    categoriaViewModel: CategoriaAeronaveViewModel,
     pickImage: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+    val showDialog = remember { mutableStateOf(false) } // Estado para controlar el diálogo
+    val categoriaUiState by categoriaViewModel.uiState.collectAsState() // Estado de categorías
+    val expanded = remember { mutableStateOf(false) } // Estado para controlar el DropdownMenu
+
     // Validaciones
     val estadoIdError = uiState.estadoId == null || uiState.estadoId <= 0
     val modeloAvionError = uiState.ModeloAvion.isBlank()
@@ -147,6 +157,50 @@ fun AeronaveBodyScreen(
             !consumoXHoraError && !pesoError && !rangoError && !capacidadPasajerosError &&
             !altitudMaximaError && !licenciaError
 
+    // Obtener la descripción de la categoría seleccionada
+    val selectedCategoria = categoriaUiState.categorias.find { it.categoriaId == uiState.estadoId }?.descripcionCategoria ?: "Seleccione una categoría"
+
+    // Diálogo de éxito
+    if (showDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showDialog.value = false },
+            title = {
+                Text(
+                    text = "Aeronave Guardada Correctamente",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color.Black
+                )
+            },
+            text = {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AirplanemodeActive,
+                        contentDescription = "Aeronave Guardada Correctamente",
+                        tint = Color.Blue,
+                        modifier = Modifier.size(48.dp)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = { showDialog.value = false },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Blue,
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("OK")
+                }
+            },
+            containerColor = Color.White,
+            shape = RoundedCornerShape(16.dp)
+        )
+    }
+
+    // Manejo de eventos de UI
     LaunchedEffect(Unit) {
         viewModel.uiEvent.collect { event ->
             when (event) {
@@ -163,16 +217,11 @@ fun AeronaveBodyScreen(
         }
     }
 
-    // Mostrar Snackbar para éxito o error
+    // Mostrar diálogo para éxito o Snackbar para error
     LaunchedEffect(uiState.isSuccess, uiState.errorMessage) {
         if (uiState.isSuccess && !uiState.successMessage.isNullOrBlank()) {
-            scope.launch {
-                snackbarHostState.showSnackbar(
-                    message = uiState.successMessage,
-                    duration = SnackbarDuration.Short
-                )
-                onEvent(AeronaveEvent.ResetSuccessMessage)
-            }
+            showDialog.value = true
+            onEvent(AeronaveEvent.ResetSuccessMessage)
         } else if (!uiState.errorMessage.isNullOrBlank()) {
             scope.launch {
                 snackbarHostState.showSnackbar(
@@ -188,7 +237,7 @@ fun AeronaveBodyScreen(
             SnackbarHost(snackbarHostState) { data ->
                 Snackbar(
                     snackbarData = data,
-                    containerColor = if (uiState.isSuccess) Color.Green.copy(alpha = 0.8f) else Color.Red.copy(alpha = 0.8f)
+                    containerColor = Color.Red.copy(alpha = 0.8f) // Solo para errores
                 )
             }
         },
@@ -235,61 +284,110 @@ fun AeronaveBodyScreen(
                     Text(if (uiState.AeronaveId == null) "Nueva Aeronave" else "Editar Aeronave")
 
                     // Mostrar la imagen guardada o la seleccionada
-                    (uiState.imageUri)?.let { imageSource ->
-                        AsyncImage(
-                            model = imageSource,
-                            contentDescription = "Imagen de la aeronave",
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(200.dp)
-                                .clip(RoundedCornerShape(8.dp)),
-                            contentScale = ContentScale.Crop
-                        )
-                    } ?: Spacer(modifier = Modifier.height(200.dp)) // Espacio reservado si no hay imagen
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // Botón para seleccionar imagen
-                    OutlinedButton(
-                        onClick = pickImage,
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Blue),
-                        border = BorderStroke(1.dp, Color.Blue)
-                    ) {
-                        Icon(Icons.Default.Image, contentDescription = "Seleccionar imagen")
-                        Text("Seleccionar Imagen")
+                    when {
+                        uiState.imageUrl != null -> {
+                            AsyncImage(
+                                model = uiState.imageUrl,
+                                contentDescription = "Imagen de la aeronave",
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(200.dp)
+                                    .clip(RoundedCornerShape(8.dp)),
+                                contentScale = ContentScale.Crop
+                            )
+                        }
+                        uiState.imageUri != null -> {
+                            AsyncImage(
+                                model = uiState.imageUri,
+                                contentDescription = "Imagen de la aeronave",
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(200.dp)
+                                    .clip(RoundedCornerShape(8.dp)),
+                                contentScale = ContentScale.Crop
+                            )
+                        }
+                        else -> {
+                            Spacer(modifier = Modifier.height(200.dp)) // Espacio reservado si no hay imagen
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    OutlinedTextField(
-                        value = uiState.AeronaveId?.toString() ?: "Nuevo",
-                        onValueChange = {},
-                        label = { Text("ID Aeronave") },
-                        modifier = Modifier.fillMaxWidth(),
-                        readOnly = true,
-                        enabled = false
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    OutlinedTextField(
-                        value = uiState.estadoId?.toString() ?: "",
-                        onValueChange = { onEvent(AeronaveEvent.EstadoIdChange(it.toIntOrNull() ?: 0)) },
-                        label = { Text("ID Estado") },
-                        modifier = Modifier.fillMaxWidth(),
-                        isError = estadoIdError,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color.Blue,
-                            unfocusedBorderColor = Color.Gray,
-                            focusedLabelColor = Color.Blue,
-                            errorBorderColor = Color.Red
+                    // Campo para URL de la imagen (solo al editar)
+                    if (uiState.AeronaveId != null) {
+                        OutlinedTextField(
+                            value = uiState.imageUrl ?: "",
+                            onValueChange = { onEvent(AeronaveEvent.ImageUrlChange(it)) },
+                            label = { Text("URL de la Imagen") },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Color.Blue,
+                                unfocusedBorderColor = Color.Gray,
+                                focusedLabelColor = Color.Blue,
+                                errorBorderColor = Color.Red
+                            )
                         )
-                    )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+
+                    // Botón para seleccionar imagen (solo para nueva aeronave)
+                    if (uiState.AeronaveId == null) {
+                        OutlinedButton(
+                            onClick = pickImage,
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.Blue),
+                            border = BorderStroke(1.dp, Color.Blue)
+                        ) {
+                            Icon(Icons.Default.Image, contentDescription = "Seleccionar imagen")
+                            Text("Seleccionar Imagen")
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+
+                    // DropdownMenu para categorías
+                    ExposedDropdownMenuBox(
+                        expanded = expanded.value,
+                        onExpandedChange = { expanded.value = !expanded.value },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        OutlinedTextField(
+                            value = selectedCategoria,
+                            onValueChange = {},
+                            label = { Text("Categoría") },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .menuAnchor(),
+                            readOnly = true,
+                            isError = estadoIdError,
+                            trailingIcon = {
+                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded.value)
+                            },
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = Color.Blue,
+                                unfocusedBorderColor = Color.Gray,
+                                focusedLabelColor = Color.Blue,
+                                errorBorderColor = Color.Red
+                            )
+                        )
+                        ExposedDropdownMenu(
+                            expanded = expanded.value,
+                            onDismissRequest = { expanded.value = false }
+                        ) {
+                            categoriaUiState.categorias.forEach { categoria ->
+                                DropdownMenuItem(
+                                    text = { Text(categoria.descripcionCategoria ?: "") },
+                                    onClick = {
+                                        onEvent(AeronaveEvent.EstadoIdChange(categoria.categoriaId ?: 0))
+                                        expanded.value = false
+                                    }
+                                )
+                            }
+                        }
+                    }
                     if (estadoIdError) {
                         Text(
-                            text = "El ID de estado debe ser mayor que cero",
+                            text = "Debe seleccionar una categoría",
                             color = Color.Red,
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.padding(start = 16.dp, top = 4.dp)
@@ -675,7 +773,6 @@ fun AeronaveBodyScreen(
                                     } else {
                                         onEvent(AeronaveEvent.Save) // Editar aeronave existente
                                     }
-                                    goBack()
                                 }
                             },
                             enabled = isFormValid,
