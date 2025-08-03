@@ -401,6 +401,15 @@ fun ReservaEditBodyScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            OutlinedTextField(
+                value = formularioState?.ciudadResidencia ?: "",
+                onValueChange = { formularioViewModel.onCorreoChange(it) },
+                label = { Text("Correo electrónico") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
             FechaPickerField(
                 selectedDate = fecha?.toString(),
                 onDateSelected = { viewModel.onFechaChange(it) }

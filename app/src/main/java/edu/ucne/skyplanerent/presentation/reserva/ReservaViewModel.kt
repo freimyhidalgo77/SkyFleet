@@ -31,13 +31,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ReservaViewModel @Inject constructor(
-
     private val reservaRepository: ReservaRepository,
     private val tipoRutaRepository: TipoVueloRepository,
     private val rutaRepository: RutaRepository,
     val auth: FirebaseAuth,
     val sessionManager: SessionManager
-
 
 ): ViewModel() {
 
@@ -207,18 +205,28 @@ class ReservaViewModel @Inject constructor(
 
     fun loadUserReservas() {
         viewModelScope.launch {
-            // Primero intentar con Firebase Auth
-            auth.currentUser?.let { user ->
-                reservaRepository.getReservasByUserId(user.uid).collect { reservas ->
-                    _uiState.update { it.copy(reservas = reservas) }
-                }
+            // Primero verificar si hay sesión activa
+            if (!sessionManager.isLoggedIn()) {
+                _uiState.update { it.copy(errorMessage = "No hay sesión activa") }
                 return@launch
             }
 
-            // Si no hay usuario en Firebase Auth, intentar con SessionManager
-            sessionManager.getCurrentUserId()?.let { userId ->
-                reservaRepository.getReservasByUserId(userId).collect { reservas ->
-                    _uiState.update { it.copy(reservas = reservas) }
+            // Intentar obtener el usuario de Firebase primero
+            val firebaseUser = auth.currentUser
+            val userId = firebaseUser?.uid ?: sessionManager.getFirebaseUid()
+
+            if (userId == null) {
+                _uiState.update { it.copy(errorMessage = "No se pudo obtener el ID de usuario") }
+                return@launch
+            }
+
+            // Cargar reservas
+            reservaRepository.getReservasByUserId(userId).collect { reservas ->
+                _uiState.update {
+                    it.copy(
+                        reservas = reservas,
+                        isLoading = false
+                    )
                 }
             }
         }
@@ -460,38 +468,52 @@ class ReservaViewModel @Inject constructor(
 
     fun selectReserva(reservaId: Int) {
         viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+
             try {
-                val currentUserId = auth.currentUser?.uid
-                if (currentUserId == null) {
-                    _uiState.update { it.copy(errorMessage = "Usuario no autenticado") }
-                    return@launch
-                }
+                // Buscar en la lista local primero
+                val reservaLocal = _uiState.value.reservas.find { it.reservaId == reservaId }
 
-                val reserva = uiState.value.reservas.find { it.reservaId == reservaId && it.userId == currentUserId }
-                    ?: reservaRepository.findReserva(reservaId).takeIf { it?.userId == currentUserId }
-                    ?: throw Exception("Reserva no encontrada")
+                // Si no está local, buscar en el repositorio
+                val reserva = reservaLocal ?: reservaRepository.findReserva(reservaId)
 
-                // Guardar el precio original
-                _precioOriginal = reserva.precioTotal ?: 0.0
-                _precioCalculado = _precioOriginal
-                _camposRelevantesCambiados = false
+                if (reserva != null) {
+                    // Actualizar todos los estados relacionados
+                    _fechaSeleccionada.value = reserva.fecha
+                    _tipoCliente.value = reserva.tipoCliente
+                    _precioOriginal = reserva.precioTotal ?: 0.0
+                    _precioCalculado = _precioOriginal
+                    _camposRelevantesCambiados = false
 
-                _uiState.update {
-                    it.copy(
-                        reservaSeleccionada = reserva,
-                        rutaId = reserva.rutaId,
-                        tipoVueloId = reserva.tipoVueloId,
-                        categoriaId = reserva.categoriaId,
-                        pasajeros = reserva.pasajeros,
-                        fecha = reserva.fecha,
-                        tipoCliente = reserva.tipoCliente,
-                        impuesto = reserva.impuesto,
-                        tarifa = reserva.tarifa,
-                        precioTotal = reserva.precioTotal
-                    )
+                    _uiState.update {
+                        it.copy(
+                            reservaSeleccionada = reserva,
+                            rutaId = reserva.rutaId,
+                            tipoVueloId = reserva.tipoVueloId,
+                            categoriaId = reserva.categoriaId,
+                            pasajeros = reserva.pasajeros, // <- Asegurar que pasajeros se copia
+                            fecha = reserva.fecha,         // <- Asegurar que fecha se copia
+                            tarifa = reserva.tarifa,
+                            impuesto = reserva.impuesto,
+                            precioTotal = reserva.precioTotal,
+                            isLoading = false
+                        )
+                    }
+                } else {
+                    _uiState.update {
+                        it.copy(
+                            errorMessage = "Reserva no encontrada",
+                            isLoading = false
+                        )
+                    }
                 }
             } catch (e: Exception) {
-                _uiState.update { it.copy(errorMessage = "Error al cargar reserva") }
+                _uiState.update {
+                    it.copy(
+                        errorMessage = "Error al cargar reserva: ${e.message}",
+                        isLoading = false
+                    )
+                }
             }
         }
     }
