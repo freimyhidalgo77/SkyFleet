@@ -389,7 +389,7 @@ class ReservaViewModel @Inject constructor(
                 precioTotal = precioTotal,
                 pasajeros = pasajero,
                 userId = currentUser.uid,
-                estadoPago = if (metodoPago != null) "COMPLETADO" else "PENDIENTE",
+                estadoPago = if (metodoPago != null) "COMPLETADO" else "COMPLETADO",
                 comprobante = comprobante
             )
 

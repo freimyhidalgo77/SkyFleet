@@ -259,7 +259,7 @@ fun ReservaDetailsRow(
 
         InfoRow("Método de pago", reserva.metodoPago ?: "No especificado")
 
-        InfoRow("Estado", reserva.estadoPago ?: "Pendiente")
+        InfoRow("Estado", reserva.estadoPago ?: "COMPLETADO")
 
         InfoRow("Monto Pagado:", "RD$${"%.2f".format(reserva.precioTotal)}")
 
@@ -269,6 +269,7 @@ fun ReservaDetailsRow(
                 InfoRow("", detalle)
             }
         }
+
 
         Spacer(modifier = Modifier.height(20.dp))
 

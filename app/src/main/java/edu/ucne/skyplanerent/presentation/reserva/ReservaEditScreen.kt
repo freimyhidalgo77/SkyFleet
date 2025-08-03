@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -21,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -36,6 +38,7 @@ import edu.ucne.skyplanerent.presentation.aeronave.AeronaveUiState
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveViewModel
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.formulario.FormularioUiState
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.formulario.FormularioViewModel
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.formulario.formatPhoneNumber
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaUiState
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaViewModel
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloUiState
@@ -231,7 +234,8 @@ fun ReservaEditBodyScreen(
                     contentColor = Color.Black
                 )
             ) {
-                Text("Confirmar cambios", fontWeight = FontWeight.Bold)
+
+                Text("Confirmar cambios", color = Color.White)
             }
         }
     ) { innerPadding ->
@@ -382,12 +386,17 @@ fun ReservaEditBodyScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // Campo para editar teléfono
+
             OutlinedTextField(
-                value = formularioState?.telefono ?: "",
-                onValueChange = { formularioViewModel.onTelefonoChange(it) },
+                value = formatPhoneNumber(formularioState?.telefono ?: ""),
+                onValueChange = { newValue ->
+                    val digitsOnly = newValue.filter { it.isDigit() }
+                    val limitedDigits = if (digitsOnly.length > 10) digitsOnly.substring(0, 10) else digitsOnly
+                    formularioViewModel.onTelefonoChange(limitedDigits)
+                },
                 label = { Text("Teléfono") },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -488,6 +497,7 @@ fun ReservaEditBodyScreen(
 
         }
     }
+
 }
 
 
@@ -668,13 +678,11 @@ fun FechaPickerField(
             try {
                 calendar.set(parts[0].toInt(), parts[1].toInt() - 1, parts[2].toInt())
             } catch (e: NumberFormatException) {
-                // Usar fecha actual si el formato no es válido
                 calendar.time = Date()
             }
         }
     }
 
-    // Crear el DatePickerDialog
     val datePickerDialog = android.app.DatePickerDialog(
         context,
         { _, year, month, dayOfMonth ->
@@ -688,12 +696,6 @@ fun FechaPickerField(
         setCancelable(true)
     }
 
-    // Manejar el click para mostrar el diálogo
-    val clickHandler = {
-        showDialog = true
-        datePickerDialog.show()
-    }
-
     OutlinedTextField(
         value = selectedDate ?: "Seleccionar fecha",
         onValueChange = {},
@@ -701,17 +703,18 @@ fun FechaPickerField(
         label = { Text("Fecha del vuelo") },
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
-            .clickable(onClick = clickHandler),
+            .clickable(onClick = { datePickerDialog.show() }),
         trailingIcon = {
             Icon(
                 imageVector = Icons.Default.CalendarToday,
                 contentDescription = "Seleccionar fecha",
-                modifier = Modifier.clickable(onClick = clickHandler)
-            )
-        }
+                modifier = Modifier.clickable(onClick = { datePickerDialog.show() }))
+        },
+        shape = RoundedCornerShape(16.dp) // Mismo estilo que los otros campos
     )
 }
+
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PasajerosDropdown(
