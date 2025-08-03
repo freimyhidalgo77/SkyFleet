@@ -205,26 +205,33 @@ class ReservaViewModel @Inject constructor(
 
     fun loadUserReservas() {
         viewModelScope.launch {
-            // Primero verificar si hay sesión activa
-            if (!sessionManager.isLoggedIn()) {
-                _uiState.update { it.copy(errorMessage = "No hay sesión activa") }
-                return@launch
-            }
+            _uiState.update { it.copy(isLoading = true) }
 
-            // Intentar obtener el usuario de Firebase primero
-            val firebaseUser = auth.currentUser
-            val userId = firebaseUser?.uid ?: sessionManager.getFirebaseUid()
+            try {
+                val userId = obtenerUsuarioConReintento()
+                if (userId == null) {
+                    _uiState.update {
+                        it.copy(
+                            errorMessage = "Usuario no autenticado",
+                            isLoading = false
+                        )
+                    }
+                    return@launch
+                }
 
-            if (userId == null) {
-                _uiState.update { it.copy(errorMessage = "No se pudo obtener el ID de usuario") }
-                return@launch
-            }
-
-            // Cargar reservas
-            reservaRepository.getReservasByUserId(userId).collect { reservas ->
+                reservaRepository.getReservasByUserId(userId).collect { reservas ->
+                    _uiState.update {
+                        it.copy(
+                            reservas = reservas,
+                            isLoading = false,
+                            errorMessage = null
+                        )
+                    }
+                }
+            } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
-                        reservas = reservas,
+                        errorMessage = "Error al cargar reservas: ${e.message}",
                         isLoading = false
                     )
                 }
@@ -336,7 +343,7 @@ class ReservaViewModel @Inject constructor(
         rutaId: Int,
         tipoVueloId: Int,
         aeronaveId: Int,
-        formularioId:Int,
+        formularioId: Int,
         tarifaBase: Double,
         impuesto: Double,
         precioTotal: Double,
@@ -344,110 +351,154 @@ class ReservaViewModel @Inject constructor(
         pasajero: Int,
         metodoPago: String?,
         comprobante: String?
-
     ) {
-
-        val currentUser = auth.currentUser ?: sessionManager.getCurrentUserId()?.let { userId ->
-            // Si auth.currentUser es null pero tenemos userId en SessionManager
-            // Podemos proceder (esto es para el caso cuando la app se reinicia)
-            userId
-        } ?: run {
-            // No hay usuario autenticado ni en sesión
-            return
-        }
-
-        val userId = if (currentUser is FirebaseUser) currentUser.uid else currentUser.toString()
-
-
-
         viewModelScope.launch {
-            val fecha = _fechaSeleccionada.value
-            val currentUser = auth.currentUser
-            val userId = auth.currentUser?.uid ?: sessionManager.getCurrentUserId()
+            _uiState.update { it.copy(isLoading = true) }
 
-            if (fecha == null) {
-                _uiState.update {
-                    it.copy(errorMessage = "Debe seleccionar una fecha válida.")
-                }
-                return@launch
-            }
-
-            if (currentUser == null) {
-                _uiState.update {
-                    it.copy(errorMessage = "Usuario no autenticado. Por favor inicie sesión.")
-                }
-                return@launch
-            }
-
-            if (userId == null) {
-                // Mostrar error o manejar caso de usuario no autenticado
-                return@launch
-            }
-
-
-            val reserva = ReservaEntity(
-                rutaId = rutaId,
-                tipoVueloId = tipoVueloId,
-                formularioId = formularioId,
-                categoriaId = aeronaveId,
-                fecha = fecha,
-                tarifa = tarifaBase,
-                impuesto = impuesto,
-                tipoCliente = tipoCliente,
-                precioTotal = precioTotal,
-                pasajeros = pasajero,
-                userId = currentUser.uid,
-                estadoPago = if (metodoPago != null) "COMPLETADO" else "COMPLETADO",
-                comprobante = comprobante
-            )
-
-            reservaRepository.saveReserva(reserva)
-
-            _uiState.update {
-                it.copy(successMessage = "Reserva guardada con éxito.", errorMessage = null)
-            }
-        }
-    }
-
-
-    fun deleteReserva() {
-        viewModelScope.launch {
             try {
-                val currentUserId = auth.currentUser?.uid
-                if (currentUserId == null) {
-                    _uiState.update { it.copy(errorMessage = "Usuario no autenticado") }
+                // 1. Verificar autenticación con reintento
+                val userId = obtenerUsuarioConReintento()
+                if (userId == null) {
+                    _uiState.update {
+                        it.copy(
+                            errorMessage = "No se pudo autenticar al usuario",
+                            isLoading = false
+                        )
+                    }
                     return@launch
                 }
 
-                // Usar directamente la reserva seleccionada
-                val reserva = uiState.value.reservaSeleccionada
-                    ?: throw Exception("No hay reserva seleccionada para eliminar")
-
-                if (reserva.userId != currentUserId) {
-                    throw Exception("La reserva no pertenece al usuario")
+                // 2. Validar campos obligatorios
+                val fecha = _fechaSeleccionada.value ?: run {
+                    _uiState.update {
+                        it.copy(
+                            errorMessage = "Debe seleccionar una fecha válida",
+                            isLoading = false
+                        )
+                    }
+                    return@launch
                 }
 
-                reservaRepository.deleteReserva(reserva)
+                // 3. Crear y guardar reserva
+                val reserva = ReservaEntity(
+                    rutaId = rutaId,
+                    tipoVueloId = tipoVueloId,
+                    formularioId = formularioId,
+                    categoriaId = aeronaveId,
+                    fecha = fecha,
+                    tarifa = tarifaBase,
+                    impuesto = impuesto,
+                    tipoCliente = tipoCliente,
+                    precioTotal = precioTotal,
+                    pasajeros = pasajero,
+                    userId = userId,
+                    estadoPago = if (metodoPago != null) "COMPLETADO" else "PENDIENTE",
+                    comprobante = comprobante
+                )
 
-                // Limpiar la reserva seleccionada
+                reservaRepository.saveReserva(reserva)
+
+                // 4. Actualizar estado y lista
                 _uiState.update {
                     it.copy(
-                        reservaSeleccionada = null,
-                        successMessage = "Reserva eliminada correctamente",
-                        errorMessage = null
+                        successMessage = "Reserva guardada con éxito",
+                        errorMessage = null,
+                        isLoading = false
                     )
                 }
 
-                // Recargar las reservas del usuario
+                // 5. Recargar reservas
                 loadUserReservas()
 
             } catch (e: Exception) {
                 _uiState.update {
-                    it.copy(errorMessage = "Error al eliminar: ${e.message}")
+                    it.copy(
+                        errorMessage = "Error al guardar: ${e.message}",
+                        isLoading = false
+                    )
                 }
             }
         }
     }
+
+    private suspend fun obtenerUsuarioConReintento(): String? {
+        // Primero intentar con Firebase Auth
+        auth.currentUser?.uid?.let { return it }
+
+        // Si no hay usuario en Firebase, intentar con SessionManager
+        sessionManager.getFirebaseUid()?.let { return it }
+
+        // Esperar un poco y reintentar (para casos de reinicio de app)
+        delay(1000)
+        return auth.currentUser?.uid ?: sessionManager.getFirebaseUid()
+    }
+
+    fun deleteReserva() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+
+            try {
+                // 1. Obtener usuario con reintento
+                val userId = obtenerUsuarioConReintento()
+                if (userId == null) {
+                    _uiState.update {
+                        it.copy(
+                            errorMessage = "No se pudo autenticar al usuario",
+                            isLoading = false
+                        )
+                    }
+                    return@launch
+                }
+
+                // 2. Verificar reserva seleccionada
+                val reserva = uiState.value.reservaSeleccionada ?: run {
+                    _uiState.update {
+                        it.copy(
+                            errorMessage = "No hay reserva seleccionada",
+                            isLoading = false
+                        )
+                    }
+                    return@launch
+                }
+
+                // 3. Verificar propiedad
+                if (reserva.userId != userId) {
+                    _uiState.update {
+                        it.copy(
+                            errorMessage = "No tienes permiso para eliminar esta reserva",
+                            isLoading = false
+                        )
+                    }
+                    return@launch
+                }
+
+                // 4. Eliminar reserva
+                reservaRepository.deleteReserva(reserva)
+
+                // 5. Actualizar estado
+                _uiState.update {
+                    it.copy(
+                        reservaSeleccionada = null,
+                        successMessage = "Reserva eliminada correctamente",
+                        errorMessage = null,
+                        isLoading = false
+                    )
+                }
+
+                // 6. Recargar lista
+                loadUserReservas()
+
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        errorMessage = "Error al eliminar: ${e.message}",
+                        isLoading = false
+                    )
+                }
+            }
+        }
+    }
+
 
     fun getReservaPorId(id: Int): ReservaEntity? {
         return uiState.value.reservas.find { it.reservaId == id }
@@ -491,8 +542,8 @@ class ReservaViewModel @Inject constructor(
                             rutaId = reserva.rutaId,
                             tipoVueloId = reserva.tipoVueloId,
                             categoriaId = reserva.categoriaId,
-                            pasajeros = reserva.pasajeros, // <- Asegurar que pasajeros se copia
-                            fecha = reserva.fecha,         // <- Asegurar que fecha se copia
+                            pasajeros = reserva.pasajeros,
+                            fecha = reserva.fecha,
                             tarifa = reserva.tarifa,
                             impuesto = reserva.impuesto,
                             precioTotal = reserva.precioTotal,
