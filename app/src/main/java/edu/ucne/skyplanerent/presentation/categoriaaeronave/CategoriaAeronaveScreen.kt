@@ -2,26 +2,36 @@ package edu.ucne.skyplanerent.presentation.categoriaaeronave
 
 import android.Manifest
 import android.os.Build
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.AirplanemodeActive
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,22 +42,31 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoriaAeronaveScreen(
     categoriaId: Int?,
@@ -87,6 +106,9 @@ fun CategoriaAeronaveBodyScreen(
     }
     val descripcionCategoriaError = uiState.descripcionCategoria.isNullOrBlank()
     val isFormValid = !descripcionCategoriaError
+    val snackbarHostState = remember { SnackbarHostState() }
+    val showDialog = remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     // Permisos para acceder a imágenes
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
@@ -97,7 +119,81 @@ fun CategoriaAeronaveBodyScreen(
         }
     }
 
-    Scaffold { innerPadding ->
+    // Diálogo de éxito
+    if (showDialog.value) {
+        AlertDialog(
+            onDismissRequest = {
+                showDialog.value = false
+                onEvent(CategoriaAeronaveEvent.ResetSuccess) // Reiniciar estado de éxito al cerrar
+            },
+            title = {
+                Text(
+                    text = "Categoría Guardada Correctamente",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color.Black
+                )
+            },
+            text = {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AirplanemodeActive,
+                        contentDescription = "Categoría Guardada Correctamente",
+                        tint = Color.Blue,
+                        modifier = Modifier.size(48.dp)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showDialog.value = false
+                        onEvent(CategoriaAeronaveEvent.ResetSuccess) // Reiniciar estado de éxito al confirmar
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Blue,
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("OK")
+                }
+            },
+            containerColor = Color.White,
+            shape = RoundedCornerShape(16.dp)
+        )
+    }
+
+    // Mostrar Snackbar para error
+    LaunchedEffect(uiState.errorMessage) {
+        if (!uiState.errorMessage.isNullOrBlank()) {
+            scope.launch {
+                snackbarHostState.showSnackbar(
+                    message = uiState.errorMessage,
+                    duration = SnackbarDuration.Short
+                )
+            }
+        }
+    }
+
+    // Mostrar diálogo para éxito
+    LaunchedEffect(uiState.isSuccess) {
+        if (uiState.isSuccess) {
+            showDialog.value = true
+        }
+    }
+
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(snackbarHostState) { data ->
+                Snackbar(
+                    snackbarData = data,
+                    containerColor = Color.Red.copy(alpha = 0.8f)
+                )
+            }
+        }
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -127,14 +223,6 @@ fun CategoriaAeronaveBodyScreen(
                     Text("Registro de categorías de aeronaves")
 
                     OutlinedTextField(
-                        value = uiState.categoriaId?.toString() ?: "Nuevo",
-                        onValueChange = {},
-                        modifier = Modifier.fillMaxWidth(),
-                        readOnly = true,
-                        enabled = false
-                    )
-
-                    OutlinedTextField(
                         value = uiState.descripcionCategoria,
                         onValueChange = { onEvent(CategoriaAeronaveEvent.DescripcionCategoriaChange(it)) },
                         label = { Text("Descripción de la categoría") },
@@ -159,9 +247,9 @@ fun CategoriaAeronaveBodyScreen(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     // Mostrar la imagen guardada o la seleccionada
-                    (uiState.imageUri ?: uiState.imageUri)?.let { imageSource ->
+                    uiState.imageUri?.let { imageSource ->
                         AsyncImage(
-                            model = imageSource, // Usar imagePath si existe, de lo contrario imageUri
+                            model = imageSource,
                             contentDescription = "Imagen seleccionada o guardada",
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -190,10 +278,14 @@ fun CategoriaAeronaveBodyScreen(
                         Text("Seleccionar Imagen")
                     }
 
-                    Spacer(modifier = Modifier.padding(2.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
+
                     uiState.errorMessage?.let {
                         Text(text = it, color = Color.Red)
                     }
+
+                    Spacer(modifier = Modifier.padding(2.dp))
+
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center,
@@ -217,7 +309,6 @@ fun CategoriaAeronaveBodyScreen(
                             onClick = {
                                 if (isFormValid) {
                                     onEvent(CategoriaAeronaveEvent.Save)
-                                    goBack()
                                 }
                             },
                             enabled = isFormValid,
