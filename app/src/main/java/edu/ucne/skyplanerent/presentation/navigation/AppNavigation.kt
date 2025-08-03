@@ -200,7 +200,7 @@ fun AppNavigation(context: Context) {
                 scope = scope,
                 onCreate = { /* navController.navigate(...) */ },
                 onDetails = {reserva-> navController.navigate(Screen.ReservaDetails(reserva)) },
-                onEdit = { navController.navigate(Screen.ReservaEdit(0)) },
+                onEdit = {id-> navController.navigate(Screen.ReservaEdit(id, id)) },
                 onDelete = { navController.navigate(Screen.ReservaDelete(0)) },
                 navController = navController
             )
@@ -359,7 +359,7 @@ fun AppNavigation(context: Context) {
                 },
                 scope = scope,
                 goToEdit = {reservaId->
-                    navController.navigate(Screen.ReservaEdit(reservaId))
+                    navController.navigate(Screen.ReservaEdit(reservaId,reservaId))
                 },
 
                 goToDelete = {reservaId->
@@ -377,7 +377,8 @@ fun AppNavigation(context: Context) {
                 reservaId = args.reservaId,
                 goBack = {reservaId->
                     navController.navigate(Screen.ReservaDetails(reservaId))
-                }
+                },
+                aeronaveSeleccionadaId = args.reservaId
 
             )
         }

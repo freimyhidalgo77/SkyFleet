@@ -95,7 +95,7 @@ sealed class Screen {
     data class ReservaDetails(val reservaId: Int) : Screen()
 
     @Serializable
-    data class ReservaEdit(val reservaId: Int) : Screen()
+    data class ReservaEdit(val reservaId: Int, val aeronaveId:Int) : Screen()
 
     @Serializable
     data class ReservaDelete(val reservaId: Int) : Screen()

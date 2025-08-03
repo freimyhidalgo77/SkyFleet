@@ -70,7 +70,7 @@ fun ReservaListScreen(
     scope: CoroutineScope,
     onCreate:()-> Unit,
     onDetails: (Int) -> Unit,
-    onEdit:(ReservaEntity)-> Unit,
+    onEdit:(Int)-> Unit,
     onDelete:(ReservaEntity)-> Unit,
     navController: NavController
 
@@ -102,7 +102,7 @@ fun ReservaBodyListScreen(
     scope: CoroutineScope,
     onCreate: () -> Unit,
     onDetails: (Int) -> Unit,
-    onEdit: (ReservaEntity) -> Unit,
+    onEdit: (Int) -> Unit,
     onDelete: (ReservaEntity) -> Unit,
     rutaUiState: RutaUiState,
     navController: NavController

@@ -1,13 +1,17 @@
 package edu.ucne.skyplanerent.presentation.reserva
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -17,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -29,6 +34,7 @@ import edu.ucne.skyplanerent.data.remote.dto.RutaDTO
 import edu.ucne.skyplanerent.data.remote.dto.TipoVueloDTO
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveUiState
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveViewModel
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.formulario.FormularioUiState
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.formulario.FormularioViewModel
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaUiState
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaViewModel
@@ -47,16 +53,28 @@ fun ReservaEditScreen(
     rutaViewModel: RutaViewModel = hiltViewModel(),
     aeronaveViewModel: AeronaveViewModel = hiltViewModel(),
     formularioViewModel: FormularioViewModel = hiltViewModel(),
-    goBack: (Int) -> Unit
+    goBack: (Int) -> Unit,
+    aeronaveSeleccionadaId: Int?,
 ) {
     LaunchedEffect(reservaId) {
         viewModel.selectReserva(reservaId)
     }
 
+    val aeronaveUiState = aeronaveViewModel.uiState.collectAsStateWithLifecycle()
+
+    // Obtén la aeronave usando el ID proporcionado
+    val selectedAeronave by remember(aeronaveSeleccionadaId) {
+        derivedStateOf {
+            aeronaveSeleccionadaId?.let { id ->
+                aeronaveUiState.value.aeronaves.find { it.aeronaveId == id }
+            }
+        }
+    }
+
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val tipoVueloUiState by tipoVueloViewModel.uiState.collectAsStateWithLifecycle()
     val rutaUiState by rutaViewModel.uiState.collectAsStateWithLifecycle()
-    val aeronaveUiState by aeronaveViewModel.uiState.collectAsStateWithLifecycle()
+    val formularioUiState = formularioViewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(uiState.reservaSeleccionada?.formularioId) {
         uiState.reservaSeleccionada?.formularioId?.let { formularioId ->
@@ -75,6 +93,12 @@ fun ReservaEditScreen(
         return
     }
 
+    val aeronaveReserva = uiState.reservaSeleccionada?.let { reserva ->
+        aeronaveUiState.value.aeronaves.find { it.aeronaveId == reserva.categoriaId }
+    }
+
+    val capacidadMaxima = aeronaveReserva?.capacidadPasajeros ?: 0
+
 
     ReservaEditBodyScreen(
         uiState = uiState,
@@ -86,14 +110,16 @@ fun ReservaEditScreen(
         goBack = goBack,
         tipoVueloUiState = tipoVueloUiState,
         rutaUiState = rutaUiState,
-        aeronaveUiState = aeronaveUiState,
+        aeronaveUiState = aeronaveUiState.value,
         onChangeRuta = viewModel::onChangeRuta,
         onChangeAeronave = viewModel::categoriaIdChange,
         onChangeTipoVuelo = viewModel::onChangeTipoVuelo,
         onDateSelected = viewModel::onFechaChange,
         reservaId = reservaId,
         formularioViewModel = formularioViewModel,
-        onChangeNombre = formularioViewModel::onNombreChange
+        onChangeNombre = formularioViewModel::onNombreChange,
+        formularioUiState = formularioUiState.value,
+        capacidadMaxima = capacidadMaxima
 
 
     )
@@ -104,6 +130,7 @@ fun ReservaEditScreen(
 @Composable
 fun ReservaEditBodyScreen(
     uiState: UiState,
+    formularioUiState: FormularioUiState,
     reservaId: Int,
     save: () -> Unit,
     goBack: (Int) -> Unit,
@@ -117,7 +144,8 @@ fun ReservaEditBodyScreen(
     onChangePasajeros: (Int) -> Unit,
     onChangeNombre:(String)->Unit,
     viewModel: ReservaViewModel = hiltViewModel(),
-    formularioViewModel:FormularioViewModel = hiltViewModel()
+    formularioViewModel:FormularioViewModel = hiltViewModel(),
+    capacidadMaxima: Int,
 ) {
 
 
@@ -144,6 +172,23 @@ fun ReservaEditBodyScreen(
     val selectedTipoVuelo = tipoVueloUiState.tipovuelo.find { it.tipoVueloId == uiState.tipoVueloId }
 
     var showConfirmationDialog by remember { mutableStateOf(false) }
+
+    val capacidadMostrar = capacidadMaxima
+    val showCapacityAlert = remember { mutableStateOf(false) }
+
+
+    if (showCapacityAlert.value) {
+        AlertDialog(
+            onDismissRequest = { showCapacityAlert.value = false },
+            title = { Text("Capacidad máxima excedida") },
+            text = { Text("Esta aeronave solo soporta $capacidadMostrar pasajeros.") },
+            confirmButton = {
+                Button(onClick = { showCapacityAlert.value = false }) {
+                    Text("Entendido")
+                }
+            }
+        )
+    }
 
 
     Scaffold(
@@ -303,10 +348,9 @@ fun ReservaEditBodyScreen(
 
             Text("Modificación", fontWeight = FontWeight.Bold, fontSize = 18.sp)
 
-
             Text("Información personal", fontWeight = FontWeight.Bold, fontSize = 18.sp)
 
-            // Campo para editar nombre
+
             OutlinedTextField(
                 value = formularioState?.nombre ?: "",
                 onValueChange = onChangeNombre,
@@ -314,7 +358,7 @@ fun ReservaEditBodyScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // Campo para editar apellido
+
             OutlinedTextField(
                 value = formularioState?.apellido ?: "",
                 onValueChange = { formularioViewModel.onApellidoChange(it) },
@@ -322,7 +366,7 @@ fun ReservaEditBodyScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-            // Campo para editar correo
+
             OutlinedTextField(
                 value = formularioState?.correo ?: "",
                 onValueChange = { formularioViewModel.onCorreoChange(it) },
@@ -338,19 +382,100 @@ fun ReservaEditBodyScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-
             Spacer(modifier = Modifier.height(8.dp))
-
-
 
             FechaPickerField(
                 selectedDate = fecha?.toString(),
                 onDateSelected = { viewModel.onFechaChange(it) }
             )
 
-            PasajerosDropdown(
-                selectedPasajeros = uiState.pasajeros?:0,
-                onPasajerosSelected = { onChangePasajeros(it) }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "Cantidad de pasajeros",
+                    modifier = Modifier.weight(1f)
+                )
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // Botón de decremento (restar 1)
+                    IconButton(
+                        onClick = {
+                            if (uiState.pasajeros ?: 0 > 1) {
+                                onChangePasajeros((uiState.pasajeros ?: 0) - 1)
+                            }
+                        },
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(
+                                color = if ((uiState.pasajeros
+                                        ?: 0) > 1
+                                ) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.surfaceVariant,
+                                shape = CircleShape
+                            )
+                    ) {
+                        Icon(
+                            Icons.Default.Remove,
+                            contentDescription = "Decrementar",
+                            tint = if ((uiState.pasajeros
+                                    ?: 0) > 1
+                            ) MaterialTheme.colorScheme.onPrimary
+                            else MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    // Contador de pasajeros
+                    Text(
+                        text = (uiState.pasajeros ?: 0).toString(),
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.width(24.dp),
+                        textAlign = TextAlign.Center
+                    )
+
+                    // Botón de incremento (sumar 1)
+                    IconButton(
+                        onClick = {
+                            if ((uiState.pasajeros ?: 0) < capacidadMaxima) {
+                                onChangePasajeros((uiState.pasajeros ?: 0) + 1)
+                            } else {
+                                showCapacityAlert.value = true
+                            }
+                        },
+                        modifier = Modifier
+                            .size(40.dp)
+                            .background(
+                                color = if ((uiState.pasajeros ?: 0) < capacidadMaxima)
+                                    MaterialTheme.colorScheme.primary
+                                else
+                                    MaterialTheme.colorScheme.errorContainer,
+                                shape = CircleShape
+                            )
+                    ) {
+                        Icon(
+                            Icons.Default.Add,
+                            contentDescription = "Incrementar",
+                            tint = if ((uiState.pasajeros ?: 0) < capacidadMaxima)
+                                MaterialTheme.colorScheme.onPrimary
+                            else
+                                MaterialTheme.colorScheme.onErrorContainer
+                        )
+                    }
+                }
+            }
+
+            Text(
+                text = "Máximo: $capacidadMaxima pasajeros",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.End
             )
 
         }
