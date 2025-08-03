@@ -68,6 +68,7 @@ dependencies {
     implementation(libs.androidx.benchmark.common)
     implementation(libs.androidx.benchmark.macro)
     implementation(libs.androidx.navigation.runtime.android)
+    implementation(libs.places)
     annotationProcessor("androidx.room:room-compiler:2.6.1")
     ksp("androidx.room:room-compiler:2.6.1")
 
