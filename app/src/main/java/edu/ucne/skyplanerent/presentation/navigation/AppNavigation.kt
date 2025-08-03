@@ -541,8 +541,6 @@ fun AppNavigation(context: Context) {
                 goToPerfil = { adminId ->
                     navController.navigate(Screen.PerfilAdmin(adminId))
                 },
-                aeronaveViewModel = hiltViewModel(),
-                reservaViewModel = hiltViewModel()
             )
         }
 
