@@ -60,11 +60,23 @@ class ReservaViewModel @Inject constructor(
     // Modificar la función actualizarPrecio
     fun actualizarPrecio() {
         viewModelScope.launch {
-            // Solo recalcular si los campos relevantes han cambiado
-            if (_camposRelevantesCambiados) {
-                val duracionVuelo = rutaUiState.value.rutas.find { it.rutaId == _uiState.value.rutaId }?.duracion ?: 0
-                val costoXHora = aeronaveUiState.value.aeronaves.find { it.aeronaveId == _uiState.value.categoriaId }?.costoXHora ?: 0.0
+            try {
+                // Verificar que tenemos todos los datos necesarios
+                val rutaId = _uiState.value.rutaId
+                val categoriaId = _uiState.value.categoriaId
+
+                if (rutaId == null || categoriaId == null) {
+                    return@launch
+                }
+
+                // Obtener los datos actualizados
+                val duracionVuelo = rutaUiState.value.rutas.find { it.rutaId == rutaId }?.duracion ?: 0
+                val costoXHora = aeronaveUiState.value.aeronaves.find { it.aeronaveId == categoriaId }?.costoXHora ?: 0.0
                 val pasajeros = _uiState.value.pasajeros ?: 1
+
+                if (duracionVuelo == 0 || costoXHora == 0.0) {
+                    return@launch
+                }
 
                 val tarifaBase = duracionVuelo * costoXHora
                 val impuesto = tarifaBase * 0.10
@@ -77,17 +89,11 @@ class ReservaViewModel @Inject constructor(
                         precioTotal = _precioCalculado
                     )
                 }
-            } else {
-                // Mantener el precio original si no hay cambios relevantes
-                _uiState.update {
-                    it.copy(
-                        precioTotal = _precioOriginal
-                    )
-                }
+            } catch (e: Exception) {
+                // Manejar error si es necesario
             }
         }
     }
-
 
     //Seleccionar ruta de vuelo
     private val _rutaSeleccionadaId = MutableStateFlow<Int?>(null)
@@ -157,10 +163,16 @@ class ReservaViewModel @Inject constructor(
         actualizarPrecio()
     }
 
+
     fun onChangePasajeros(pasajero: Int) {
         _camposRelevantesCambiados = true
         _uiState.update { it.copy(pasajeros = pasajero) }
-        actualizarPrecio()
+
+        viewModelScope.launch {
+
+            delay(50)
+            actualizarPrecio()
+        }
     }
 
     // Para campos que no afectan el precio, no marcar como relevantes
@@ -399,24 +411,28 @@ class ReservaViewModel @Inject constructor(
                     return@launch
                 }
 
-                val reserva = _uiState.value.reservas.firstOrNull {
-                    it.reservaId == _uiState.value.reservaId && it.userId == currentUserId
+                // Usar directamente la reserva seleccionada
+                val reserva = uiState.value.reservaSeleccionada
+                    ?: throw Exception("No hay reserva seleccionada para eliminar")
+
+                if (reserva.userId != currentUserId) {
+                    throw Exception("La reserva no pertenece al usuario")
                 }
 
-                if (reserva != null) {
-                    reservaRepository.deleteReserva(reserva)
-                    _uiState.update {
-                        it.copy(
-                            successMessage = "Reserva eliminada!",
-                            errorMessage = null
-                        )
-                    }
-                    loadUserReservas() // Recargar lista actualizada
-                } else {
-                    _uiState.update {
-                        it.copy(errorMessage = "Reserva no encontrada o no pertenece al usuario")
-                    }
+                reservaRepository.deleteReserva(reserva)
+
+                // Limpiar la reserva seleccionada
+                _uiState.update {
+                    it.copy(
+                        reservaSeleccionada = null,
+                        successMessage = "Reserva eliminada correctamente",
+                        errorMessage = null
+                    )
                 }
+
+                // Recargar las reservas del usuario
+                loadUserReservas()
+
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(errorMessage = "Error al eliminar: ${e.message}")
