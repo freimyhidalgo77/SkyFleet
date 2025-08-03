@@ -9,10 +9,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Flight
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,12 +37,12 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -80,38 +84,73 @@ fun TipoVueloBodyScreen(
     viewModel: TipoVueloViewModel
 ) {
     val scope = rememberCoroutineScope()
+    val showDialog = remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
+
     // Validaciones
     val nombreVueloError = uiState.nombreVuelo.isBlank()
     val descripcionTipoVueloError = uiState.descripcionTipoVuelo.isBlank()
     val isFormValid = !nombreVueloError && !descripcionTipoVueloError
 
+    // Diálogo de éxito
+    if (showDialog.value) {
+        AlertDialog(
+            onDismissRequest = { showDialog.value = false },
+            title = {
+                Text(
+                    text = "Tipo de Vuelo Guardado Correctamente",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Color.Black
+                )
+            },
+            text = {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Flight,
+                        contentDescription = "Tipo de Vuelo Guardado Correctamente",
+                        tint = Color.Blue,
+                        modifier = Modifier.size(48.dp)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = { showDialog.value = false },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Blue,
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("OK")
+                }
+            },
+            containerColor = Color.White,
+            shape = RoundedCornerShape(16.dp)
+        )
+    }
+
+    // Manejo de eventos de UI
     LaunchedEffect(Unit) {
         viewModel.uiEvent.collect { event ->
             when (event) {
                 is UiEvent.NavigateUp -> goBack()
                 is UiEvent.ShowSnackbar -> {
                     scope.launch {
-                        snackbarHostState.showSnackbar(
-                            message = event.message,
-                            duration = SnackbarDuration.Short
-                        )
+                        // No mostramos Snackbar, pero mantenemos la lógica por compatibilidad
                     }
                 }
             }
         }
     }
 
-    // Mostrar Snackbar para éxito o error
+    // Mostrar diálogo para éxito o Snackbar para error
     LaunchedEffect(uiState.isSuccess, uiState.errorMessage) {
         if (uiState.isSuccess && !uiState.successMessage.isNullOrBlank()) {
-            scope.launch {
-                snackbarHostState.showSnackbar(
-                    message = uiState.successMessage,
-                    duration = SnackbarDuration.Short
-                )
-                onEvent(TipoVueloEvent.ResetSuccessMessage)
-            }
+            showDialog.value = true
+            onEvent(TipoVueloEvent.ResetSuccessMessage)
         } else if (!uiState.errorMessage.isNullOrBlank()) {
             scope.launch {
                 snackbarHostState.showSnackbar(
@@ -127,7 +166,7 @@ fun TipoVueloBodyScreen(
             SnackbarHost(snackbarHostState) { data ->
                 Snackbar(
                     snackbarData = data,
-                    containerColor = if (uiState.isSuccess) Color.Green.copy(alpha = 0.8f) else Color.Red.copy(alpha = 0.8f)
+                    containerColor = Color.Red.copy(alpha = 0.8f) // Solo para errores
                 )
             }
         },
@@ -171,17 +210,6 @@ fun TipoVueloBodyScreen(
                 ) {
                     Spacer(modifier = Modifier.height(32.dp))
                     Text(if (uiState.tipoVueloId == null) "Nuevo Tipo de Vuelo" else "Editar Tipo de Vuelo")
-
-                    OutlinedTextField(
-                        value = uiState.tipoVueloId?.toString() ?: "Nuevo",
-                        onValueChange = {},
-                        label = { Text("ID Tipo de Vuelo") },
-                        modifier = Modifier.fillMaxWidth(),
-                        readOnly = true,
-                        enabled = false
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
 
                     OutlinedTextField(
                         value = uiState.nombreVuelo,
