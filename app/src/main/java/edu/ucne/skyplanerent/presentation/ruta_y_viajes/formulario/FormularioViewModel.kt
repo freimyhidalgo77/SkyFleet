@@ -136,10 +136,12 @@ class FormularioViewModel @Inject constructor(
 
 
 
+
      fun deleteFormulario() {
         viewModelScope.launch {
             formularioRepository.deleteFormulario(_uiState.value.toEntity())
         }
+
     }
 
      fun getFormulario() {

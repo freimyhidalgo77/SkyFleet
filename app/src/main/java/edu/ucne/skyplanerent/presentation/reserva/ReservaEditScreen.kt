@@ -56,6 +56,7 @@ fun ReservaEditScreen(
     goBack: (Int) -> Unit,
     aeronaveSeleccionadaId: Int?,
 ) {
+
     LaunchedEffect(reservaId) {
         viewModel.selectReserva(reservaId)
     }
@@ -81,6 +82,11 @@ fun ReservaEditScreen(
             formularioViewModel.selectedFormulario(formularioId)
         }
     }
+
+    LaunchedEffect(uiState.rutaId, uiState.categoriaId, uiState.pasajeros) {
+        viewModel.actualizarPrecio()
+    }
+
 
     if (uiState.reservaSeleccionada == null) {
         Column(
@@ -278,7 +284,9 @@ fun ReservaEditBodyScreen(
                         TextButton(
                             onClick = {
                                 showConfirmationDialog = false
-                                save()
+                                viewModel.actualizarPrecio()
+                                viewModel.updateReserva()
+                                formularioViewModel.upedateFormulario()
                                 goBack(reservaId)
                             },
                             colors = ButtonDefaults.textButtonColors(

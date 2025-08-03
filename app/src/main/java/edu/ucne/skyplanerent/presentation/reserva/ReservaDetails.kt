@@ -81,6 +81,7 @@ fun ReservaDetailsScreen(
 
     LaunchedEffect(reservaId) {
         viewModel.selectReserva(reservaId)
+        viewModel.actualizarPrecio()
     }
 
 

@@ -32,6 +32,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -95,6 +96,7 @@ fun PagoReservaListScreen(
         }
     }
 
+
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val rutaUiState by rutaViewModel.uiState.collectAsStateWithLifecycle()
     val tipoVueloUiState by tipoVueloViewModel.uiState.collectAsStateWithLifecycle()
@@ -126,7 +128,7 @@ fun PagoReservaBodyListScreen(
     uiState: UiState,
     tipoVueloViewModel: TipoVueloViewModel = hiltViewModel(),
     rutaViewModel: RutaViewModel = hiltViewModel(),
-    reservaViewModel: ReservaViewModel,
+    reservaViewModel: ReservaViewModel = hiltViewModel(),
     // scope: CoroutineScope,
     tipoVueloList:List<TipoVueloEntity>,
     rutaList:List<RutaEntity>,
@@ -158,6 +160,9 @@ fun PagoReservaBodyListScreen(
     val impuesto = tarifaBase * 0.10
     val precioTotal = tarifaBase + impuesto
 
+   /* val precioTotal by reservaViewModel.uiState.collectAsState().let { state ->
+        derivedStateOf { state.value.precioTotal ?: 0.0 }
+    }*/
 
 
     val tipoCliente by reservaViewModel.tipoCliente.collectAsState()

@@ -11,10 +11,13 @@ import edu.ucne.skyplanerent.data.repository.ReservaRepository
 import edu.ucne.skyplanerent.data.repository.RutaRepository
 import edu.ucne.skyplanerent.data.repository.TipoVueloRepository
 import edu.ucne.skyplanerent.presentation.UiEvent
+import edu.ucne.skyplanerent.presentation.aeronave.AeronaveUiState
 import edu.ucne.skyplanerent.presentation.login.SessionManager
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaEvent
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaUiState
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.toEntity
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoLicencia
+import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloUiState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -41,6 +44,50 @@ class ReservaViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
+    private val _uiState_ruta = MutableStateFlow(RutaUiState())
+    val rutaUiState = _uiState_ruta.asStateFlow()
+
+    private val _uiState_aeronaves = MutableStateFlow(AeronaveUiState())
+    val aeronaveUiState = _uiState_aeronaves.asStateFlow()
+
+    private val _uiState_tipoVuelo = MutableStateFlow(TipoVueloUiState())
+    val tipoVueloUiState = _uiState_tipoVuelo.asStateFlow()
+
+    private var _precioOriginal: Double = 0.0
+    private var _precioCalculado: Double = 0.0
+    private var _camposRelevantesCambiados: Boolean = false
+
+    // Modificar la función actualizarPrecio
+    fun actualizarPrecio() {
+        viewModelScope.launch {
+            // Solo recalcular si los campos relevantes han cambiado
+            if (_camposRelevantesCambiados) {
+                val duracionVuelo = rutaUiState.value.rutas.find { it.rutaId == _uiState.value.rutaId }?.duracion ?: 0
+                val costoXHora = aeronaveUiState.value.aeronaves.find { it.aeronaveId == _uiState.value.categoriaId }?.costoXHora ?: 0.0
+                val pasajeros = _uiState.value.pasajeros ?: 1
+
+                val tarifaBase = duracionVuelo * costoXHora
+                val impuesto = tarifaBase * 0.10
+                _precioCalculado = tarifaBase + impuesto
+
+                _uiState.update {
+                    it.copy(
+                        tarifa = tarifaBase,
+                        impuesto = impuesto,
+                        precioTotal = _precioCalculado
+                    )
+                }
+            } else {
+                // Mantener el precio original si no hay cambios relevantes
+                _uiState.update {
+                    it.copy(
+                        precioTotal = _precioOriginal
+                    )
+                }
+            }
+        }
+    }
+
 
     //Seleccionar ruta de vuelo
     private val _rutaSeleccionadaId = MutableStateFlow<Int?>(null)
@@ -48,6 +95,7 @@ class ReservaViewModel @Inject constructor(
 
     fun seleccionarRuta(rutaId: Int) {
         _rutaSeleccionadaId.value = rutaId
+        actualizarPrecio()
     }
 
     //Seleccionar tipo de vuelo
@@ -56,6 +104,7 @@ class ReservaViewModel @Inject constructor(
 
     fun seleccionarTipoVuelo(tipoVueloId: Int) {
         _tipoVueloSeleccionadoId.value = tipoVueloId
+        actualizarPrecio()
     }
     //Seleciconar tipo aeronave
     private val _tipoAeronaveSeleccionadaId = MutableStateFlow<Int?>(null)
@@ -63,6 +112,7 @@ class ReservaViewModel @Inject constructor(
 
     fun seleccionarTipoAeronave(tipoAeronaveId: Int) {
         _tipoAeronaveSeleccionadaId.value = tipoAeronaveId
+        actualizarPrecio()
     }
 
     //Seleccionar fecha
@@ -71,6 +121,7 @@ class ReservaViewModel @Inject constructor(
 
     fun seleccionarFecha(fecha: Date) {
         _fechaSeleccionada.value = fecha
+        actualizarPrecio()
     }
 
     //Seleccionar tipo cliente
@@ -79,27 +130,40 @@ class ReservaViewModel @Inject constructor(
 
     fun seleccionarTipoCliente(valor: Boolean) {
         _tipoCliente.value = valor
+        actualizarPrecio()
     }
 
     fun seleccionarLicenciaPiloto(licencia: TipoLicencia) {
         _uiState.update { it.copy(licenciaPiloto = licencia) }
     }
 
-    fun categoriaIdChange(id: Int) {
-        _uiState.update {
-            it.copy(categoriaId = id)
-        }
 
+
+    fun categoriaIdChange(id: Int) {
+        _camposRelevantesCambiados = true
+        _uiState.update { it.copy(categoriaId = id) }
+        actualizarPrecio()
     }
 
     fun onChangeRuta(rutaId: Int) {
+        _camposRelevantesCambiados = true
         _uiState.update { it.copy(rutaId = rutaId) }
+        actualizarPrecio()
     }
 
     fun onChangeTipoVuelo(tipoVueloId: Int) {
-        _uiState.update { it.copy(tipoVueloId =  tipoVueloId) }
+        _camposRelevantesCambiados = true
+        _uiState.update { it.copy(tipoVueloId = tipoVueloId) }
+        actualizarPrecio()
     }
 
+    fun onChangePasajeros(pasajero: Int) {
+        _camposRelevantesCambiados = true
+        _uiState.update { it.copy(pasajeros = pasajero) }
+        actualizarPrecio()
+    }
+
+    // Para campos que no afectan el precio, no marcar como relevantes
     fun onFechaChange(nuevaFecha: String) {
         val formato = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
         val fechaConvertida: Date? = try {
@@ -107,7 +171,6 @@ class ReservaViewModel @Inject constructor(
         } catch (e: Exception) {
             null
         }
-
         _uiState.update { it.copy(fecha = fechaConvertida) }
     }
 
@@ -121,7 +184,7 @@ class ReservaViewModel @Inject constructor(
     }
 
 
-   //Inicializando el metodo loadUserReserva para cargar el usuario perteneciente a esa reserva
+    //Inicializando el metodo loadUserReserva para cargar el usuario perteneciente a esa reserva
     init{
         //getReserva()
         loadUserReservas()
@@ -198,23 +261,33 @@ class ReservaViewModel @Inject constructor(
                     throw Exception("La reserva no pertenece al usuario")
                 }
 
+                // Usar _precioCalculado si hay cambios relevantes, sino _precioOriginal
+                val precioFinal = if (_camposRelevantesCambiados) _precioCalculado else _precioOriginal
+
+                // Preservar todos los datos del formulario existente
+                val formularioId = reservaSeleccionada.formularioId
+                val metodoPago = reservaSeleccionada.metodoPago ?: uiState.value.metodoPago
+                val comprobante = reservaSeleccionada.comprobante ?: uiState.value.comprobante
+
                 val reservaActualizada = uiState.value.toEntity().copy(
                     reservaId = reservaSeleccionada.reservaId,
                     userId = currentUserId,
-                    // Asegurar que todos los campos se mantengan
                     rutaId = uiState.value.rutaId ?: reservaSeleccionada.rutaId,
                     tipoVueloId = uiState.value.tipoVueloId ?: reservaSeleccionada.tipoVueloId,
                     categoriaId = uiState.value.categoriaId ?: reservaSeleccionada.categoriaId,
                     fecha = uiState.value.fecha ?: reservaSeleccionada.fecha,
                     pasajeros = uiState.value.pasajeros ?: reservaSeleccionada.pasajeros ?: 1,
                     tipoCliente = uiState.value.tipoCliente ?: reservaSeleccionada.tipoCliente,
-                    impuesto = uiState.value.impuesto ?: 0.0,
-                    tarifa = uiState.value.tarifa ?: 0.0,
-
+                    impuesto = uiState.value.impuesto ?: reservaSeleccionada.impuesto ?: 0.0,
+                    tarifa = uiState.value.tarifa ?: reservaSeleccionada.tarifa ?: 0.0,
+                    precioTotal = precioFinal,
+                    formularioId = formularioId, // Preservar el formularioId existente
+                    metodoPago = metodoPago, // Preservar método de pago
+                    comprobante = comprobante // Preservar comprobante
                 )
 
                 reservaRepository.saveReserva(reservaActualizada)
-                loadUserReservas() // Recargar lista actualizada
+                loadUserReservas()
 
                 _uiState.update {
                     it.copy(
@@ -231,13 +304,13 @@ class ReservaViewModel @Inject constructor(
     }
 
     // En ReservaViewModel.kt
-   /* fun actualizarEstadoPago(reservaId: Int, metodoPago: String, comprobante: String? = null) {
-        viewModelScope.launch {
-            reservaRepository.actualizarEstadoPago(reservaId, metodoPago, comprobante)
-            // Actualizar el estado local si es necesario
-            _uiState.update { it.copy(metodoPago = metodoPago, comprobante = comprobante) }
-        }
-    }*/
+    /* fun actualizarEstadoPago(reservaId: Int, metodoPago: String, comprobante: String? = null) {
+         viewModelScope.launch {
+             reservaRepository.actualizarEstadoPago(reservaId, metodoPago, comprobante)
+             // Actualizar el estado local si es necesario
+             _uiState.update { it.copy(metodoPago = metodoPago, comprobante = comprobante) }
+         }
+     }*/
 
     fun guardarReserva(
         rutaId: Int,
@@ -382,45 +455,30 @@ class ReservaViewModel @Inject constructor(
                     ?: reservaRepository.findReserva(reservaId).takeIf { it?.userId == currentUserId }
                     ?: throw Exception("Reserva no encontrada")
 
-                // Buscar primero en las reservas ya cargadas
-                uiState.value.reservas.find { it.reservaId == reservaId && it.userId == currentUserId }?.let { reserva ->
-                    _uiState.update {
-                        it.copy(
-                            reservaId = reserva.reservaId,
-                            rutaId = reserva.rutaId,
-                            estadoId = reserva.estadoId,
-                            formularioId = reserva.formularioId,
-                            metodoPago = reserva.metodoPago?:"",
-                            tipoVueloId = reserva.tipoVueloId,
-                            categoriaId = reserva.categoriaId,
-                            pasajeros = reserva.pasajeros?:0,
-                            fecha = reserva.fecha,
-                            impuesto = reserva.impuesto ?: 0.0,
-                            tarifa = reserva.tarifa ?: 0.0,
-                            reservaSeleccionada = reserva
-                        )
-                    }
-                    return@launch
-                }
+                // Guardar el precio original
+                _precioOriginal = reserva.precioTotal ?: 0.0
+                _precioCalculado = _precioOriginal
+                _camposRelevantesCambiados = false
 
-                // Si no esta en las cargadas, buscar en el repositorio
-               // val reserva = reservaRepository.findReserva(reservaId)
-                if (reserva != null && reserva.userId == currentUserId) {
-                    _uiState.update {
-                        it.copy(
-                            reservaSeleccionada = reserva,
-                            // Actualizar campos como arriba
-                        )
-                    }
-                } else {
-                    _uiState.update { it.copy(errorMessage = "Reserva no encontrada") }
+                _uiState.update {
+                    it.copy(
+                        reservaSeleccionada = reserva,
+                        rutaId = reserva.rutaId,
+                        tipoVueloId = reserva.tipoVueloId,
+                        categoriaId = reserva.categoriaId,
+                        pasajeros = reserva.pasajeros,
+                        fecha = reserva.fecha,
+                        tipoCliente = reserva.tipoCliente,
+                        impuesto = reserva.impuesto,
+                        tarifa = reserva.tarifa,
+                        precioTotal = reserva.precioTotal
+                    )
                 }
             } catch (e: Exception) {
                 _uiState.update { it.copy(errorMessage = "Error al cargar reserva") }
             }
         }
     }
-
 
     fun nuevaReserva(){
         _uiState.update {
@@ -446,14 +504,14 @@ class ReservaViewModel @Inject constructor(
         }
     }*/
 
-    fun onChangePasajeros(pasajero:Int){
+    /*fun onChangePasajeros(pasajero:Int){
         _uiState.update {
             it.copy(
                 pasajeros = pasajero
             )
         }
 
-    }
+    }*/
 
     /*fun onChangeRuta(ruta:Int){
         _uiState.update {
@@ -479,8 +537,8 @@ class ReservaViewModel @Inject constructor(
         tipoCliente = tipoCliente?:false,
         pasajeros = pasajeros,
         userId = userId,
-         comprobante = comprobante
+        comprobante = comprobante
 
-        )
+    )
 
 }
