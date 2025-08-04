@@ -15,6 +15,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -26,13 +28,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import coil.compose.AsyncImage
 import edu.ucne.skyplanerent.presentation.UiEvent
 import kotlinx.coroutines.launch
 import coil.compose.AsyncImage
+import edu.ucne.skyplanerent.presentation.navigation.BottomNavItem
+import edu.ucne.skyplanerent.presentation.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -41,6 +48,7 @@ fun TipoAeronaveDetailsScreen (
     ViewModel: AeronaveViewModel = hiltViewModel(),
     goBack: () -> Unit,
     onReservar: () -> Unit,
+    navController: NavController
 ) {
     val uiState by ViewModel.uiState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
@@ -74,7 +82,8 @@ fun TipoAeronaveDetailsScreen (
         uiState = uiState,
         goBack = goBack,
         snackbarHostState = snackbarHostState,
-        onReservar = onReservar
+        onReservar = onReservar,
+        navController = navController
 
     )
 }
@@ -86,8 +95,18 @@ fun TipoAeronaveDetailsBodyScreen (
     goBack: () -> Unit,
     snackbarHostState: SnackbarHostState,
     onReservar: () -> Unit,
+    navController:NavController
 ) {
     val refreshing = uiState.isLoading
+
+
+    val items = listOf(
+        BottomNavItem("Inicio", Icons.Default.Home, Screen.Home),
+        BottomNavItem("Perfil", Icons.Default.Person, Screen.Perfil),
+    )
+
+    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -114,6 +133,26 @@ fun TipoAeronaveDetailsBodyScreen (
                 )
             )
         },
+
+        bottomBar = {
+            NavigationBar {
+                items.forEach { item ->
+                    NavigationBarItem(
+                        icon = { Icon(item.icon, contentDescription = item.title) },
+                        label = { Text(item.title) },
+                        selected = currentRoute == item.route.toString(),
+                        onClick = {
+                            if (currentRoute != item.route.toString()) {
+                                navController.navigate(item.route) {
+                                    popUpTo(Screen.Home) { inclusive = false }
+                                }
+                            }
+                        }
+                    )
+                }
+            }
+        },
+
         snackbarHost = {
             SnackbarHost(snackbarHostState) { data ->
                 Snackbar(
@@ -133,24 +172,46 @@ fun TipoAeronaveDetailsBodyScreen (
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+
                     item {
                         // Imagen principal
-                        uiState.imageUri?.let { path ->
-                            AsyncImage(
-                                model = path,
-                                contentDescription = "Imagen de ${uiState.DescripcionCategoria}",
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(200.dp)
-                                    .clip(RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp)),
-                                contentScale = ContentScale.Crop
-                            )
-                        } ?: Spacer(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(200.dp)
-                        )
+                        when {
+                            uiState.imageUrl != null -> {
+                                AsyncImage(
+                                    model = uiState.imageUrl,
+                                    contentDescription = "Imagen de ${uiState.ModeloAvion}",
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(200.dp)
+                                        .clip(RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp)),
+                                    contentScale = ContentScale.Crop,
+                                    placeholder = painterResource(id = android.R.drawable.ic_menu_gallery),
+                                    error = painterResource(id = android.R.drawable.ic_menu_gallery)
+                                )
+                            }
+                            uiState.imageUri != null -> {
+                                AsyncImage(
+                                    model = uiState.imageUri,
+                                    contentDescription = "Imagen de ${uiState.ModeloAvion}",
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(200.dp)
+                                        .clip(RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp)),
+                                    contentScale = ContentScale.Crop,
+                                    placeholder = painterResource(id = android.R.drawable.ic_menu_gallery),
+                                    error = painterResource(id = android.R.drawable.ic_menu_gallery)
+                                )
+                            }
+                            else -> {
+                                Spacer(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(200.dp)
+                                )
+                            }
+                        }
                     }
+
 
                     item {
                         if (uiState.isLoading) {

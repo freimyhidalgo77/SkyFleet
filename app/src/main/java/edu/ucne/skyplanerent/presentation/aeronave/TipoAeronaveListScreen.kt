@@ -23,6 +23,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AirplanemodeActive
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -33,6 +35,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -50,16 +54,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import edu.ucne.skyplanerent.data.remote.dto.AeronaveDTO
 import coil.compose.AsyncImage
-
+import edu.ucne.skyplanerent.presentation.navigation.BottomNavItem
+import edu.ucne.skyplanerent.presentation.navigation.Screen
 
 
 @Composable
 fun TipoAeronaveListScreen (
     viewModel: AeronaveViewModel = hiltViewModel(),
     goToAeronave: (Int) -> Unit,
-    //createAeronave: () -> Unit,
+    navController: NavController,
     goBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -69,7 +76,8 @@ fun TipoAeronaveListScreen (
         goToAeronave = { id -> goToAeronave(id) },
         onEvent = viewModel::onEvent,
         //createAeronave = createAeronave,
-        goBack = goBack
+        goBack = goBack,
+        navController = navController
     )
 }
 
@@ -80,13 +88,22 @@ fun TipoAeronaveBodyListScreen(
     goToAeronave: (Int) -> Unit,
     onEvent: (AeronaveEvent) -> Unit,
     //createAeronave: () -> Unit,
-    goBack: () -> Unit
+    goBack: () -> Unit,
+    navController: NavController
 ) {
     val refreshing = uiState.isLoading
     val pullRefreshState = rememberPullRefreshState(
         refreshing = refreshing,
         onRefresh = { onEvent(AeronaveEvent.GetAeronaves) }
     )
+
+    val items = listOf(
+        BottomNavItem("Inicio", Icons.Default.Home, Screen.Home),
+        BottomNavItem("Perfil", Icons.Default.Person, Screen.Perfil),
+    )
+
+    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -113,6 +130,26 @@ fun TipoAeronaveBodyListScreen(
                 )
             )
         },
+
+        bottomBar = {
+            NavigationBar {
+                items.forEach { item ->
+                    NavigationBarItem(
+                        icon = { Icon(item.icon, contentDescription = item.title) },
+                        label = { Text(item.title) },
+                        selected = currentRoute == item.route.toString(),
+                        onClick = {
+                            if (currentRoute != item.route.toString()) {
+                                navController.navigate(item.route) {
+                                    popUpTo(Screen.Home) { inclusive = false }
+                                }
+                            }
+                        }
+                    )
+                }
+            }
+        }
+
     ) { padding ->
         Box(
             modifier = Modifier

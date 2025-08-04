@@ -386,7 +386,6 @@ fun ReservaEditBodyScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
-
             OutlinedTextField(
                 value = formatPhoneNumber(formularioState?.telefono ?: ""),
                 onValueChange = { newValue ->
@@ -396,15 +395,13 @@ fun ReservaEditBodyScreen(
                 },
                 label = { Text("Teléfono") },
                 modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
-
-            Spacer(modifier = Modifier.height(8.dp))
 
             OutlinedTextField(
                 value = formularioState?.ciudadResidencia ?: "",
-                onValueChange = { formularioViewModel.onCorreoChange(it) },
-                label = { Text("Correo electrónico") },
+                onValueChange = { formularioViewModel.onCiudadResidenciaChange(it) },
+                label = { Text("Ciudad de residencia") },
                 modifier = Modifier.fillMaxWidth()
             )
 

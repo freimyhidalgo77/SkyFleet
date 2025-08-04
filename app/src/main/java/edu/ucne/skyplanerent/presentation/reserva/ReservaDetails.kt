@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -80,6 +81,7 @@ fun ReservaDetailsScreen(
 
     LaunchedEffect(reservaId) {
         viewModel.selectReserva(reservaId)
+        viewModel.actualizarPrecio()
     }
 
 
@@ -101,6 +103,7 @@ fun ReservaDetailsScreen(
 @Composable
 fun ReservaDetailsBodyScreen(
     uiState: UiState,
+    reservaViewModel: ReservaViewModel = hiltViewModel(),
     scope: CoroutineScope,
     goBack:(Int)-> Unit,
     goToEdit: (Int)->Unit,
@@ -196,10 +199,19 @@ fun ReservaDetailsRow(
     goToDelete: (Int) -> Unit,
     fecha: String?,
     tipoCliente: Boolean?,
-    licenciaDescripcion: String?
+    licenciaDescripcion: String?,
+    reservaViewModel: ReservaViewModel = hiltViewModel(),
+    aeronaveViewModel: AeronaveViewModel = hiltViewModel()
 ) {
 
+    val aeronaveUiState by aeronaveViewModel.uiState.collectAsStateWithLifecycle()
+
     val formulario = formularioUiState.formularios.find { it.formularioId == reserva.formularioId }
+
+    val idAeronaveSeleccionada by reservaViewModel.tipoAeronaveSeleccionadaId.collectAsState()
+    val aeronaveSeleccionada =
+        aeronaveUiState.aeronaves.find { it.aeronaveId == idAeronaveSeleccionada }
+
 
     Column(
         modifier = Modifier
@@ -234,10 +246,20 @@ fun ReservaDetailsRow(
 
         InfoRow("Detalles del cliente", "${formulario?.nombre ?: "Nombre"} ${formulario?.apellido ?: "no encontrado"}")
 
+
+        InfoRow("Correo", "${formulario?.correo ?: "no encontrado"}")
+
+        InfoRow("Telefono", "${formulario?.telefono ?: "no encontrado"}")
+
+        InfoRow("Ciudad", "${formulario?.ciudadResidencia ?: "no encontrado"}")
+
+        InfoRow("Pasaporte", "${formulario?.pasaporte ?: "no encontrado"}")
+
         Text("Información de pago", fontWeight = FontWeight.Bold, fontSize = 18.sp)
 
         InfoRow("Método de pago", reserva.metodoPago ?: "No especificado")
-        InfoRow("Estado", reserva.estadoPago ?: "Pendiente")
+
+        InfoRow("Estado", reserva.estadoPago ?: "COMPLETADO")
 
         InfoRow("Monto Pagado:", "RD$${"%.2f".format(reserva.precioTotal)}")
 
@@ -248,6 +270,7 @@ fun ReservaDetailsRow(
             }
         }
 
+
         Spacer(modifier = Modifier.height(20.dp))
 
         Column(
@@ -256,7 +279,14 @@ fun ReservaDetailsRow(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Button(
-                onClick = { goToEdit(reserva.reservaId ?: 0) },
+                //onClick = { goToEdit(reserva.reservaId ?: 0) },
+                onClick = {
+                    reserva.reservaId?.let {
+                        goToEdit(it)
+                        // O si necesitas ambos:
+                        // goToEdit(reservaId = it, aeronaveSeleccionadaId = reserva.categoriaId)
+                    }
+                },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color(0xFF0AEDA9),

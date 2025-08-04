@@ -223,6 +223,7 @@ fun AppNavigation(context: Context) {
                 goBack = {
                     navController.navigate(Screen.Home)
                 },
+                navController = navController
             )
         }
 
@@ -497,7 +498,8 @@ fun AppNavigation(context: Context) {
                 goToAeronave = {aeronaveId->
                     navController.navigate(Screen.TipoAeronaveDetails(aeronaveId))
                 },
-                goBack = { navController.popBackStack() }
+                goBack = { navController.popBackStack() },
+                navController = navController
             )
         }
 
@@ -512,7 +514,8 @@ fun AppNavigation(context: Context) {
                 goBack = { navController.popBackStack() },
                 onReservar = {
                     navController.navigate(Screen.Rutas_y_viajes)
-                }
+                },
+                navController = navController
             )
         }
 
