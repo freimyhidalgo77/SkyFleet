@@ -225,7 +225,7 @@ fun AppNavigation(context: Context) {
                 goBack = {
                     navController.navigate(Screen.Home)
                 },
-                //navController = navController
+                navController = navController
             )
         }
 
@@ -518,7 +518,8 @@ fun AppNavigation(context: Context) {
                 goBack = { navController.popBackStack() },
                 onReservar = {
                     navController.navigate(Screen.Rutas_y_viajes)
-                }
+                },
+                navController = navController
             )
         }
 
