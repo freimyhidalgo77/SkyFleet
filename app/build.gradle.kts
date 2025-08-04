@@ -89,6 +89,7 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation("com.google.firebase:firebase-analytics-ktx")
 
+
     //Hilt
     implementation("com.google.dagger:hilt-android:2.51")
     ksp("com.google.dagger:hilt-android-compiler:2.51")
