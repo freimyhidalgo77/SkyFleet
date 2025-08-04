@@ -1,35 +1,17 @@
 package edu.ucne.skyplanerent.presentation.admin
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.res.painterResource
@@ -38,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import edu.ucne.skyplanerent.R
+import androidx.compose.ui.geometry.Size
 import edu.ucne.skyplanerent.presentation.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -51,8 +34,10 @@ fun AdminPanelScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val primaryColor = MaterialTheme.colorScheme.primary
-    val errorColor = MaterialTheme.colorScheme.error
-    val neutralColor = Color(0xFFFFA500) // Naranja para rango intermedio
+    val errorColor = MaterialTheme.colorScheme.error // Rojo para baja actividad
+    val midRedColor = Color(0xFFFF5555) // Rojo claro para intermedio bajo
+    val neutralColor = Color(0xFFFFA500) // Amarillo para actividad estable
+    val midYellowColor = Color(0xFFFFD700) // Amarillo oscuro para intermedio alto
     val successColor = Color(0xFF388E3C) // Verde oscuro para alta actividad
 
     Scaffold(
@@ -220,10 +205,12 @@ fun AdminPanelScreen(
                         } else {
                             0f
                         }
-                        val (percentage, percentageText, graphColor) = when {
-                            rutasPorAeronave < 1f -> Triple("-10%", "Baja actividad en rutas", errorColor)
-                            rutasPorAeronave in 1f..2f -> Triple("0%", "Actividad estable", neutralColor)
-                            else -> Triple("+15%", "Alta actividad en rutas", successColor)
+                        val (percentage, percentageText, graphColor, values) = when {
+                            rutasPorAeronave < 0.5f -> Quad("-15%", "Muy baja actividad en rutas", errorColor, listOf(6f, 5f, 4f, 3f, 2f, 1f))
+                            rutasPorAeronave < 1f -> Quad("-10%", "Baja actividad en rutas", midRedColor, listOf(5f, 4.5f, 4f, 3.5f, 3f, 2.5f))
+                            rutasPorAeronave <= 2f -> Quad("0%", "Actividad estable", neutralColor, listOf(5f, 5f, 5f, 5f, 5f, 5f))
+                            rutasPorAeronave <= 3f -> Quad("+10%", "Actividad creciente", midYellowColor, listOf(5f, 6f, 4f, 6f, 4f, 5f))
+                            else -> Quad("+15%", "Alta actividad en rutas", successColor, listOf(1f, 3f, 5f, 7f, 9f, 11f))
                         }
                         Text(
                             text = percentage,
@@ -242,30 +229,43 @@ fun AdminPanelScreen(
                             .height(200.dp)
                             .padding(top = 8.dp)) {
                             val months = listOf("Ene", "Feb", "Mar", "Abr", "May", "Jun")
-                            val values = when {
-                                rutasPorAeronave < 1f -> listOf(6f, 5f, 4f, 3f, 2f, 1f)
-                                rutasPorAeronave in 1f..2f -> listOf(5f, 5f, 5f, 5f, 5f, 5f)
-                                else -> listOf(1f, 3f, 5f, 7f, 9f, 11f)
+                            val stepWidth = size.width / (values.size - 1)
+                            val points = values.mapIndexed { index, value ->
+                                val x = index * stepWidth
+                                val y = size.height - (value / 15f) * size.height
+                                Offset(x, y)
                             }
-                            val barWidth = size.width / values.size
-                            values.forEachIndexed { index, value ->
-                                val barHeight = (value / 15f) * size.height
-                                drawRect(
+
+                            // Dibujar líneas entre los puntos
+                            for (i in 0 until points.size - 1) {
+                                drawLine(
                                     color = graphColor,
-                                    topLeft = Offset(index * barWidth + barWidth / 4, size.height - barHeight),
-                                    size = Size(barWidth / 2, barHeight)
+                                    start = points[i],
+                                    end = points[i + 1],
+                                    strokeWidth = 4f
                                 )
                             }
 
+                            // Dibujar puntos en cada valor
+                            points.forEach { point ->
+                                drawCircle(
+                                    color = graphColor,
+                                    radius = 8f,
+                                    center = point
+                                )
+                            }
+
+                            // Dibujar etiquetas de los meses
                             months.forEachIndexed { index, month ->
                                 drawContext.canvas.nativeCanvas.apply {
                                     drawText(
                                         month,
-                                        index * barWidth,
+                                        index * stepWidth,
                                         size.height,
                                         android.graphics.Paint().apply {
                                             color = android.graphics.Color.GRAY
                                             textSize = 24f
+                                            textAlign = android.graphics.Paint.Align.CENTER
                                         }
                                     )
                                 }
@@ -283,10 +283,12 @@ fun AdminPanelScreen(
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(text = "Estadísticas de reservas", fontSize = 16.sp)
                         val reservasCount = uiState.reservas.size
-                        val (percentage, percentageText, graphColor) = when {
-                            reservasCount < 5 -> Triple("-5%", "Últimos 30 días -5%", errorColor)
-                            reservasCount in 5..15 -> Triple("0%", "Últimos 30 días estable", neutralColor)
-                            else -> Triple("+10%", "Últimos 30 días +10%", successColor)
+                        val (percentage, percentageText, graphColor, values) = when {
+                            reservasCount < 3 -> Quad("-15%", "Últimos 30 días -15%", errorColor, listOf(6f, 5f, 4f, 3f, 2f, 1f))
+                            reservasCount <= 7 -> Quad("-5%", "Últimos 30 días -5%", midRedColor, listOf(5f, 4.5f, 4f, 3.5f, 3f, 2.5f))
+                            reservasCount <= 15 -> Quad("0%", "Últimos 30 días estable", neutralColor, listOf(5f, 5f, 5f, 5f, 5f, 5f))
+                            reservasCount <= 25 -> Quad("+5%", "Últimos 30 días +5%", midYellowColor, listOf(5f, 6f, 4f, 6f, 4f, 5f))
+                            else -> Quad("+10%", "Últimos 30 días +10%", successColor, listOf(1f, 3f, 5f, 7f, 9f, 11f))
                         }
                         Text(
                             text = percentage,
@@ -305,11 +307,6 @@ fun AdminPanelScreen(
                             .height(200.dp)
                             .padding(top = 8.dp)) {
                             val months = listOf("Ene", "Feb", "Mar", "Abr", "May", "Jun")
-                            val values = when {
-                                reservasCount < 5 -> listOf(6f, 5f, 4f, 3f, 2f, 1f)
-                                reservasCount in 5..15 -> listOf(5f, 5f, 5f, 5f, 5f, 5f)
-                                else -> listOf(1f, 3f, 5f, 7f, 9f, 11f)
-                            }
                             val barWidth = size.width / values.size
                             values.forEachIndexed { index, value ->
                                 val barHeight = (value / 15f) * size.height
@@ -320,15 +317,17 @@ fun AdminPanelScreen(
                                 )
                             }
 
+                            // Dibujar etiquetas de los meses debajo del Canvas
                             months.forEachIndexed { index, month ->
                                 drawContext.canvas.nativeCanvas.apply {
                                     drawText(
                                         month,
-                                        index * barWidth,
-                                        size.height,
+                                        index * barWidth + barWidth / 2,
+                                        size.height + 20f, // Mover las etiquetas 20 píxeles debajo del Canvas
                                         android.graphics.Paint().apply {
                                             color = android.graphics.Color.GRAY
                                             textSize = 24f
+                                            textAlign = android.graphics.Paint.Align.CENTER
                                         }
                                     )
                                 }
@@ -420,3 +419,11 @@ fun AdminPanelScreen(
         }
     }
 }
+
+// Definición de Quad en el mismo archivo
+data class Quad(
+    val percentage: String,
+    val percentageText: String,
+    val color: Color,
+    val values: List<Float>
+)
