@@ -104,13 +104,47 @@ class FormularioViewModel @Inject constructor(
         }
     }
 
-     fun deleteFormulario() {
+    fun upedateFormulario() {
         viewModelScope.launch {
-            formularioRepository.deleteFormulario(_uiState.value.toEntity())
+            try {
+                val formulario = FormularioEntity(
+                    formularioId = uiState.value.formularioId,
+                    nombre = uiState.value.nombre,
+                    apellido = uiState.value.apellido,
+                    correo = uiState.value.correo,
+                    telefono = uiState.value.telefono,
+                    pasaporte = uiState.value.pasaporte,
+                    ciudadResidencia = uiState.value.ciudadResidencia
+                )
+                formularioRepository.saveFormulario(formulario)
+                _uiState.update {
+                    it.copy(
+                        successMessage = "Reserva actualizada correctamente",
+                        errorMessage = null
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        successMessage = "Hubo un error al guardar la reserva",
+                        errorMessage = null
+                    )
+                }
+            }
         }
     }
 
-     fun getFormulario() {
+
+
+
+    fun deleteFormulario() {
+        viewModelScope.launch {
+            formularioRepository.deleteFormulario(_uiState.value.toEntity())
+        }
+
+    }
+
+    fun getFormulario() {
         viewModelScope.launch {
             formularioRepository.getAll().collect { formulario ->
                 _uiState.update {
@@ -120,43 +154,43 @@ class FormularioViewModel @Inject constructor(
         }
     }
 
-     fun onFormularioChange(formularioId: Int) {
+    fun onFormularioChange(formularioId: Int) {
         _uiState.update {
             it.copy(formularioId = formularioId)
         }
     }
 
-     fun onNombreChange(nombre: String) {
-        _uiState.update {
-            it.copy(nombre = nombre)
+    fun onNombreChange(nombre: String) {
+        _uiState.update { currentState ->
+            currentState.copy(nombre = nombre)
         }
     }
 
     fun onApellidoChange(apellido: String) {
-        _uiState.update {
-            it.copy(apellido = apellido)
+        _uiState.update { currentState ->
+            currentState.copy(apellido = apellido)
         }
     }
 
-     fun onCorreoChange(correo: String) {
-        _uiState.update {
-            it.copy(correo = correo)
+    fun onCorreoChange(correo: String) {
+        _uiState.update { currentState ->
+            currentState.copy(correo = correo)
         }
     }
 
-      fun onTelefonoChange(telefono: String) {
-        _uiState.update {
-            it.copy(telefono = telefono)
+    fun onTelefonoChange(telefono: String) {
+        _uiState.update { currentState ->
+            currentState.copy(telefono = telefono)
         }
     }
 
-      fun onPasaporteChange(pasaporte: String) {
+    fun onPasaporteChange(pasaporte: String) {
         _uiState.update {
             it.copy(pasaporte = pasaporte)
         }
     }
 
-      fun onCiudadResidenciaChange(ciudad: String) {
+    fun onCiudadResidenciaChange(ciudad: String) {
         _uiState.update {
             it.copy(ciudadResidencia = ciudad)
         }
@@ -167,6 +201,7 @@ class FormularioViewModel @Inject constructor(
             it.copy(cantidadPasajeros = pasajero)
         }
     }
+
 
     fun FormularioUiState.toEntity() = FormularioEntity(
         formularioId = formularioId,

@@ -15,6 +15,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.CreditCard
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -31,6 +32,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -94,6 +96,7 @@ fun PagoReservaListScreen(
         }
     }
 
+
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val rutaUiState by rutaViewModel.uiState.collectAsStateWithLifecycle()
     val tipoVueloUiState by tipoVueloViewModel.uiState.collectAsStateWithLifecycle()
@@ -125,7 +128,7 @@ fun PagoReservaBodyListScreen(
     uiState: UiState,
     tipoVueloViewModel: TipoVueloViewModel = hiltViewModel(),
     rutaViewModel: RutaViewModel = hiltViewModel(),
-    reservaViewModel: ReservaViewModel,
+    reservaViewModel: ReservaViewModel = hiltViewModel(),
     // scope: CoroutineScope,
     tipoVueloList:List<TipoVueloEntity>,
     rutaList:List<RutaEntity>,
@@ -157,6 +160,9 @@ fun PagoReservaBodyListScreen(
     val impuesto = tarifaBase * 0.10
     val precioTotal = tarifaBase + impuesto
 
+    /* val precioTotal by reservaViewModel.uiState.collectAsState().let { state ->
+         derivedStateOf { state.value.precioTotal ?: 0.0 }
+     }*/
 
 
     val tipoCliente by reservaViewModel.tipoCliente.collectAsState()
@@ -451,90 +457,90 @@ fun PagoReservaBodyListScreen(
 
             }
 
-                item {
-                    Text(
-                        text = "Método de pago",
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            item {
+                Text(
+                    text = "Método de pago",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+
+                // Tarjeta de crédito
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 4.dp)
+                        .clickable {
+                            metodoPagoSeleccionado = MetodoPago.TARJETA_CREDITO
+                            mostrarFormularioTransferencia = false
+                        },
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (metodoPagoSeleccionado == MetodoPago.TARJETA_CREDITO)
+                            Color.LightGray else Color.White
                     )
-
-                    // Tarjeta de crédito
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 4.dp)
-                            .clickable {
-                                metodoPagoSeleccionado = MetodoPago.TARJETA_CREDITO
-                                mostrarFormularioTransferencia = false
-                            },
-                        colors = CardDefaults.cardColors(
-                            containerColor = if (metodoPagoSeleccionado == MetodoPago.TARJETA_CREDITO)
-                                Color.LightGray else Color.White
-                        )
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(
-                            modifier = Modifier.padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.CreditCard,
-                                contentDescription = "Tarjeta de crédito"
-                            )
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Text("Tarjeta de crédito")
-                        }
-                    }
-                    /*  // PayPal
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 4.dp)
-                            .clickable { metodoPagoSeleccionado = MetodoPago.PAYPAL },
-                        colors = CardDefaults.cardColors(
-                            containerColor = if (metodoPagoSeleccionado == MetodoPago.PAYPAL)
-                                Color.LightGray else Color.White
+                        Icon(
+                            imageVector = Icons.Default.CreditCard,
+                            contentDescription = "Tarjeta de crédito"
                         )
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.paypal), // Asegúrate de tener este icono
-                                contentDescription = "PayPal"
-                            )
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Text("PayPal")
-                        }
-                    }*/
-
-                    // Transferencia bancaria
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 4.dp)
-                            .clickable {
-                                metodoPagoSeleccionado = MetodoPago.TRANSFERENCIA_BANCARIA
-                                mostrarFormularioTransferencia = true
-                            },
-                        colors = CardDefaults.cardColors(
-                            containerColor = if (metodoPagoSeleccionado == MetodoPago.TRANSFERENCIA_BANCARIA)
-                                Color.LightGray else Color.White
-                        )
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.AccountBalance,
-                                contentDescription = "Transferencia bancaria"
-                            )
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Text("Transferencia bancaria")
-                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Text("Tarjeta de crédito")
                     }
                 }
+                /*  // PayPal
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 4.dp)
+                        .clickable { metodoPagoSeleccionado = MetodoPago.PAYPAL },
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (metodoPagoSeleccionado == MetodoPago.PAYPAL)
+                            Color.LightGray else Color.White
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.paypal), // Asegúrate de tener este icono
+                            contentDescription = "PayPal"
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Text("PayPal")
+                    }
+                }*/
+
+                // Transferencia bancaria
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 4.dp)
+                        .clickable {
+                            metodoPagoSeleccionado = MetodoPago.TRANSFERENCIA_BANCARIA
+                            mostrarFormularioTransferencia = true
+                        },
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (metodoPagoSeleccionado == MetodoPago.TRANSFERENCIA_BANCARIA)
+                            Color.LightGray else Color.White
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AccountBalance,
+                            contentDescription = "Transferencia bancaria"
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Text("Transferencia bancaria")
+                    }
+                }
+            }
 
 
             // En PagoReservaBodyListScreen, actualiza la parte del item que muestra el formulario:
@@ -585,73 +591,73 @@ fun PagoReservaBodyListScreen(
                 }
             }
 
-                /*  item {
-                    Spacer(modifier = Modifier.height(12.dp))
+            /*  item {
+                Spacer(modifier = Modifier.height(12.dp))
 
-                    Button(
-                        onClick = {
-                            val rutaId = rutaSeleccionada?.rutaId ?: return@Button
-                            val tipoVueloId = tipoVueloSeleccionado?.tipoVueloId ?: return@Button
-                            val aeronaveId = aeronaveSeleccionada?.aeronaveId ?: return@Button
-                            val tipoCliente = uiState?.tipoCliente ?: return@Button
-                            val pasajero = formularioUiState.cantidadPasajeros
+                Button(
+                    onClick = {
+                        val rutaId = rutaSeleccionada?.rutaId ?: return@Button
+                        val tipoVueloId = tipoVueloSeleccionado?.tipoVueloId ?: return@Button
+                        val aeronaveId = aeronaveSeleccionada?.aeronaveId ?: return@Button
+                        val tipoCliente = uiState?.tipoCliente ?: return@Button
+                        val pasajero = formularioUiState.cantidadPasajeros
 
-                            // Guardar los datos de transferencia si el método es transferencia bancaria
-                            val comprobante = if (metodoPagoSeleccionado == MetodoPago.TRANSFERENCIA_BANCARIA) {
-                                datosTransferencia?.let {
-                                    "Banco: ${it.banco}, Cuenta: ${it.numeroCuenta}, " +
-                                            "Titular: ${it.nombreTitular}, Referencia: ${it.referencia}"
-                                } ?: ""
-                            } else {
-                                ""
-                            }
-
-                            reservaViewModel.guardarReserva(
-                                rutaId = rutaId,
-                                tipoVueloId = tipoVueloId,
-                                aeronaveId = aeronaveId,
-                                tarifaBase = tarifaBase,
-                                impuesto = impuesto,
-                                precioTotal = precioTotal,
-                                tipoCliente = tipoCliente,
-                                pasajero = pasajero,
-                                metodoPago = metodoPagoSeleccionado?.name,
-                                comprobante = comprobante
-                            )
-
-                            goBack()
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF0A80ED),
-                            contentColor = Color.White
-                        ),
-                        enabled = when (metodoPagoSeleccionado) {
-                            MetodoPago.TRANSFERENCIA_BANCARIA -> datosTransferencia != null
-                            else -> true
+                        // Guardar los datos de transferencia si el método es transferencia bancaria
+                        val comprobante = if (metodoPagoSeleccionado == MetodoPago.TRANSFERENCIA_BANCARIA) {
+                            datosTransferencia?.let {
+                                "Banco: ${it.banco}, Cuenta: ${it.numeroCuenta}, " +
+                                        "Titular: ${it.nombreTitular}, Referencia: ${it.referencia}"
+                            } ?: ""
+                        } else {
+                            ""
                         }
-                    ) {
-                        Text("Realizar pago")
-                    }
-                }
-            }*/
-                /* Button(
-                        onClick = { goBack() },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFED0A0A),
-                            contentColor = Color.White
+
+                        reservaViewModel.guardarReserva(
+                            rutaId = rutaId,
+                            tipoVueloId = tipoVueloId,
+                            aeronaveId = aeronaveId,
+                            tarifaBase = tarifaBase,
+                            impuesto = impuesto,
+                            precioTotal = precioTotal,
+                            tipoCliente = tipoCliente,
+                            pasajero = pasajero,
+                            metodoPago = metodoPagoSeleccionado?.name,
+                            comprobante = comprobante
                         )
-                    ) {
-                        Text("Cancelar Pago")
-                    }*/
 
+                        goBack()
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF0A80ED),
+                        contentColor = Color.White
+                    ),
+                    enabled = when (metodoPagoSeleccionado) {
+                        MetodoPago.TRANSFERENCIA_BANCARIA -> datosTransferencia != null
+                        else -> true
                     }
-
+                ) {
+                    Text("Realizar pago")
                 }
             }
+        }*/
+            /* Button(
+                    onClick = { goBack() },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFED0A0A),
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("Cancelar Pago")
+                }*/
+
+        }
+
+    }
+}
 
 
 @Composable
@@ -675,9 +681,88 @@ fun FormularioTarjetaCredito(
     var cvv by remember { mutableStateOf("") }
     var tipoTarjetaSeleccionada by remember { mutableStateOf("Visa") }
     var mostrarErrorMonto by remember { mutableStateOf(false) }
+    var mostrarDialogoConfirmacion by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
     val tiposTarjeta = listOf("Visa", "MasterCard", "American Express", "Discover")
+
+    fun realizarPago() {
+        coroutineScope.launch {
+            // Verificar autenticación antes de guardar
+            val userId = viewModel.auth.currentUser?.uid
+                ?: viewModel.sessionManager.getCurrentUserId()
+
+            if (userId == null) {
+                // Mostrar error o redirigir a login
+                return@launch
+            }
+
+            val datosTarjeta = DatosTarjetaCredito(
+                numeroTarjeta = numeroTarjeta,
+                nombreTitular = nombreTitular,
+                fechaExpiracion = fechaExpiracion,
+                cvv = cvv,
+                tipoTarjeta = tipoTarjetaSeleccionada
+            )
+
+            val comprobante = "Tarjeta: ${datosTarjeta.tipoTarjeta}, " +
+                    "Últimos 4 dígitos: ${datosTarjeta.numeroTarjeta.takeLast(4)}, " +
+                    "Expira: ${datosTarjeta.fechaExpiracion}"
+
+            viewModel.guardarReserva(
+                rutaId = rutaId,
+                tipoVueloId = tipoVueloId,
+                aeronaveId = aeronaveId,
+                tarifaBase = precioTotal / 1.1,
+                impuesto = precioTotal * 0.1,
+                precioTotal = precioTotal,
+                tipoCliente = tipoCliente,
+                pasajero = pasajeros,
+                metodoPago = "TARJETA_CREDITO",
+                comprobante = comprobante,
+                formularioId = formularioId
+            )
+
+            onConfirmarPago(datosTarjeta)
+            goBack()
+        }
+    }
+
+    if (mostrarDialogoConfirmacion) {
+        AlertDialog(
+            onDismissRequest = { mostrarDialogoConfirmacion = false },
+            title = { Text("Confirmar Pago") },
+            text = {
+                Column {
+                    Text("¿Está seguro que desea realizar el pago de esta reserva?")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Importante:", fontWeight = FontWeight.Bold)
+                    Text("- Una vez confirmado, no podrá modificar ciertos datos de la reserva")
+                    Text("- El monto a pagar es de RD$${"%.2f".format(precioTotal)}")
+                    Text("- Verifique que todos los datos sean correctos antes de confirmar")
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        mostrarDialogoConfirmacion = false
+                        realizarPago()
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0AEDA9))
+                ) {
+                    Text("Confirmar")
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = { mostrarDialogoConfirmacion = false },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                ) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
 
     Card(
         modifier = Modifier
@@ -722,7 +807,6 @@ fun FormularioTarjetaCredito(
             OutlinedTextField(
                 value = numeroTarjeta,
                 onValueChange = {
-                    // Solo permite dígitos y limita a 16 caracteres (19 con espacios)
                     if (it.length <= 19 && it.all { c -> c.isDigit() || c == ' ' }) {
                         numeroTarjeta = it
                     }
@@ -732,6 +816,7 @@ fun FormularioTarjetaCredito(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 visualTransformation = CreditCardFilter()
             )
+
             OutlinedTextField(
                 value = fechaExpiracion,
                 onValueChange = { newValue ->
@@ -747,7 +832,6 @@ fun FormularioTarjetaCredito(
                 modifier = Modifier.fillMaxWidth()
             )
 
-
             // Nombre del titular
             OutlinedTextField(
                 value = nombreTitular,
@@ -762,7 +846,7 @@ fun FormularioTarjetaCredito(
             OutlinedTextField(
                 value = cvv,
                 onValueChange = {
-                    if (it.length <= 4) { // 3 o 4 dígitos
+                    if (it.length <= 4) {
                         cvv = it
                     }
                 },
@@ -807,19 +891,6 @@ fun FormularioTarjetaCredito(
 
                 Button(
                     onClick = {
-
-                        coroutineScope.launch {
-                            // Verificar autenticación antes de guardar
-                            val userId = viewModel.auth.currentUser?.uid
-                                ?: viewModel.sessionManager.getCurrentUserId()
-
-                            if (userId == null) {
-                                // Mostrar error o redirigir a login
-                                return@launch
-                            }
-                        }
-
-
                         val montoValido = montoIngresado.toDoubleOrNull()?.let {
                             it == precioTotal
                         } ?: false
@@ -835,36 +906,7 @@ fun FormularioTarjetaCredito(
                                 fechaExpiracion,
                                 cvv
                             )) {
-
-                            val datosTarjeta = DatosTarjetaCredito(
-                                numeroTarjeta = numeroTarjeta,
-                                nombreTitular = nombreTitular,
-                                fechaExpiracion = fechaExpiracion,
-                                cvv = cvv,
-                                tipoTarjeta = tipoTarjetaSeleccionada
-                            )
-
-                            // Crear el comprobante como string
-                            val comprobante = "Tarjeta: ${datosTarjeta.tipoTarjeta}, " +
-                                    "Últimos 4 dígitos: ${datosTarjeta.numeroTarjeta.takeLast(4)}, " +
-                                    "Expira: ${datosTarjeta.fechaExpiracion}"
-
-                            viewModel.guardarReserva(
-                                rutaId = rutaId,
-                                tipoVueloId = tipoVueloId,
-                                aeronaveId = aeronaveId,
-                                tarifaBase = precioTotal / 1.1,
-                                impuesto = precioTotal * 0.1,
-                                precioTotal = precioTotal,
-                                tipoCliente = tipoCliente,
-                                pasajero = pasajeros,
-                                metodoPago = "TARJETA_CREDITO",
-                                comprobante = comprobante,
-                                formularioId = formularioId
-                            )
-
-                            onConfirmarPago(datosTarjeta)
-                            goBack()
+                            mostrarDialogoConfirmacion = true
                         }
                     },
                     colors = ButtonDefaults.buttonColors(
@@ -910,11 +952,10 @@ fun FormularioTransferenciaBancaria(
     rutaId: Int,
     tipoVueloId: Int,
     aeronaveId: Int,
-    formularioId:Int,
+    formularioId: Int,
     tipoCliente: Boolean,
     pasajeros: Int,
-    goBack:()->Unit
-
+    goBack: () -> Unit
 ) {
     var montoIngresado by remember { mutableStateOf("") }
     var bancoSeleccionado by remember { mutableStateOf("") }
@@ -922,6 +963,7 @@ fun FormularioTransferenciaBancaria(
     var nombreTitular by remember { mutableStateOf("") }
     var referencia by remember { mutableStateOf("") }
     var mostrarErrorMonto by remember { mutableStateOf(false) }
+    var mostrarDialogoConfirmacion by remember { mutableStateOf(false) }
 
     val bancos = listOf(
         "Banco Popular",
@@ -930,6 +972,74 @@ fun FormularioTransferenciaBancaria(
         "Banco Santa Cruz",
         "Otro banco"
     )
+
+    fun realizarTransferencia() {
+        val datosTransferencia = DatosTransferencia(
+            banco = bancoSeleccionado,
+            numeroCuenta = numeroCuenta,
+            nombreTitular = nombreTitular,
+            referencia = referencia,
+            monto = precioTotal
+        )
+
+        val comprobante = "Banco: ${datosTransferencia.banco}, " +
+                "Cuenta: ${datosTransferencia.numeroCuenta}, " +
+                "Titular: ${datosTransferencia.nombreTitular}, " +
+                "Referencia: ${datosTransferencia.referencia}"
+
+        viewModel.guardarReserva(
+            rutaId = rutaId,
+            tipoVueloId = tipoVueloId,
+            aeronaveId = aeronaveId,
+            tarifaBase = precioTotal / 1.1,
+            impuesto = precioTotal * 0.1,
+            precioTotal = precioTotal,
+            tipoCliente = tipoCliente,
+            pasajero = pasajeros,
+            metodoPago = "TRANSFERENCIA_BANCARIA",
+            comprobante = comprobante,
+            formularioId = formularioId
+        )
+
+        onConfirmarTransferencia(datosTransferencia)
+        goBack()
+    }
+
+    if (mostrarDialogoConfirmacion) {
+        AlertDialog(
+            onDismissRequest = { mostrarDialogoConfirmacion = false },
+            title = { Text("Confirmar Transferencia") },
+            text = {
+                Column {
+                    Text("¿Está seguro que desea realizar la transferencia para esta reserva?")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("Importante:", fontWeight = FontWeight.Bold)
+                    Text("- Una vez confirmado, no podrá modificar ciertos datos de la reserva")
+                    Text("- El monto a transferir es de RD$${"%.2f".format(precioTotal)}")
+                    Text("- Verifique que todos los datos bancarios sean correctos")
+                }
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        mostrarDialogoConfirmacion = false
+                        realizarTransferencia()
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0AEDA9))
+                ) {
+                    Text("Confirmar")
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = { mostrarDialogoConfirmacion = false },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                ) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
 
     Card(
         modifier = Modifier
@@ -1024,14 +1134,12 @@ fun FormularioTransferenciaBancaria(
                 }
             )
 
-
             // Instrucciones
             Text(
                 text = "Por favor realice la transferencia a la cuenta indicada y proporcione el número de referencia.",
                 style = MaterialTheme.typography.bodySmall,
                 modifier = Modifier.padding(vertical = 16.dp)
             )
-
 
             // Botones
             Row(
@@ -1050,7 +1158,6 @@ fun FormularioTransferenciaBancaria(
 
                 Button(
                     onClick = {
-
                         val montoValido = montoIngresado.toDoubleOrNull()?.let {
                             it == precioTotal
                         } ?: false
@@ -1064,42 +1171,8 @@ fun FormularioTransferenciaBancaria(
                             numeroCuenta.isNotEmpty() &&
                             nombreTitular.isNotEmpty() &&
                             referencia.isNotEmpty()) {
-
-                            val datosTransferencia = DatosTransferencia(
-                                banco = bancoSeleccionado,
-                                numeroCuenta = numeroCuenta,
-                                nombreTitular = nombreTitular,
-                                referencia = referencia,
-                                monto = precioTotal
-                            )
-
-                            // Crear el comprobante como string
-                            val comprobante = "Banco: ${datosTransferencia.banco}, " +
-                                    "Cuenta: ${datosTransferencia.numeroCuenta}, " +
-                                    "Titular: ${datosTransferencia.nombreTitular}, " +
-                                    "Referencia: ${datosTransferencia.referencia}"
-
-                            // Llamar al ViewModel para guardar la reserva
-                            viewModel.guardarReserva(
-                                rutaId =  rutaId,
-                                tipoVueloId = tipoVueloId,
-                                aeronaveId = aeronaveId,
-                                tarifaBase = precioTotal / 1.1, // Asumiendo 10% de impuesto
-                                impuesto = precioTotal * 0.1,
-                                precioTotal = precioTotal,
-                                tipoCliente = tipoCliente,
-                                pasajero = pasajeros,
-                                metodoPago = "TRANSFERENCIA_BANCARIA",
-                                comprobante = comprobante,
-                                formularioId = formularioId
-
-                            )
-
-                            // Notificar que la transferencia fue confirmada
-                            onConfirmarTransferencia(datosTransferencia)
-                            goBack()
+                            mostrarDialogoConfirmacion = true
                         }
-
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color(0xFF0A80ED),
@@ -1117,5 +1190,3 @@ fun FormularioTransferenciaBancaria(
         }
     }
 }
-
-

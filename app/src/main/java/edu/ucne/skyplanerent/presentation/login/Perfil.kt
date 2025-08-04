@@ -220,7 +220,7 @@ fun PerfilClientScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Cake,
-                        contentDescription = "Cumpleanos",
+                        contentDescription = "Cumpleanos"?:"No disponible",
                         modifier = Modifier.size(24.dp),
                         tint = MaterialTheme.colorScheme.onSurface
                     )

@@ -15,20 +15,26 @@ class SessionManager @Inject constructor(
 
     companion object {
         private const val KEY_USER_ID = "user_id"
+        private const val KEY_USER_EMAIL = "user_email"
         private const val KEY_IS_LOGGED_IN = "is_logged_in"
+        private const val KEY_FIREBASE_UID = "firebase_uid"
     }
 
     fun saveAuthState(user: FirebaseUser) {
         sharedPreferences.edit().apply {
             putString(KEY_USER_ID, user.uid)
+            putString(KEY_USER_EMAIL, user.email)
             putBoolean(KEY_IS_LOGGED_IN, true)
-            apply()
+            putString(KEY_FIREBASE_UID, user.uid)
+            commit()
         }
     }
 
     fun isLoggedIn(): Boolean = sharedPreferences.getBoolean(KEY_IS_LOGGED_IN, false)
 
     fun getCurrentUserId(): String? = sharedPreferences.getString(KEY_USER_ID, null)
+
+    fun getFirebaseUid(): String? = sharedPreferences.getString(KEY_FIREBASE_UID, null)
 
     fun clearSession() {
         sharedPreferences.edit().clear().apply()
