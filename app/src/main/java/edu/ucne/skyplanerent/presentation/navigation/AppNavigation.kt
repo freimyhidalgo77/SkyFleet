@@ -325,13 +325,15 @@ fun AppNavigation(context: Context) {
 
         composable<Screen.Formulario> { backStackEntry ->
             val args = backStackEntry.toRoute<Screen.Formulario>()
+            val currentUserEmail = auth.currentUser?.email ?: sessionManager.getCurrentUserId()
             FormularioScreen(
                 formularioId = args.formularioId,
                 aeronaveSeleccionadaId = args.aeronaveId,
                 goBack = { navController.popBackStack() },
                 goToPago = { pagoId ->
                     navController.navigate(Screen.PagoReserva(pagoId))
-                }
+                },
+                currentUserEmail = currentUserEmail
             )
         }
 

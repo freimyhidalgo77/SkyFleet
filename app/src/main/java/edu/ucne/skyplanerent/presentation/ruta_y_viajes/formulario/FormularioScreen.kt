@@ -29,6 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -62,6 +63,7 @@ fun FormularioScreen (
     aeronaveSeleccionadaId: Int?,
     goBack: (Int) -> Unit,
     goToPago: (Int) -> Unit,
+    currentUserEmail: String?
 
 
     ) {
@@ -96,10 +98,8 @@ fun FormularioScreen (
         goBack = goBack,
         goToPago = goToPago,
         aeronaveUiState = aeronaveUiState.value,
-        capacidadMaxima = capacidadMaxima
-
-
-
+        capacidadMaxima = capacidadMaxima,
+        currentUserEmail = currentUserEmail
 
     )
 }
@@ -110,6 +110,7 @@ fun FormularioBodyScreen(
     aeronaveUiState: AeronaveUiState,
     aeronaveViewModel: AeronaveViewModel = hiltViewModel(),
     reservaViewModel: ReservaViewModel = hiltViewModel(),
+    viewModel: FormularioViewModel =  hiltViewModel(),
     onChangeNombre:(String)->Unit,
     onChangeApellido: KFunction1<String, Unit>,
     onChangeCorreo: KFunction1<String, Unit>,
@@ -123,9 +124,10 @@ fun FormularioBodyScreen(
     goToPago:(Int)->Unit,
     selectedAeronave: AeronaveDTO?,
     capacidadMaxima: Int,
+    currentUserEmail: String?
 
 
-    ) {
+) {
 
     val scrollState = rememberScrollState()
 
@@ -135,6 +137,10 @@ fun FormularioBodyScreen(
 
     val capacidadMostrar = capacidadMaxima
     val showCapacityAlert = remember { mutableStateOf(false) }
+
+    LaunchedEffect(currentUserEmail) {
+        viewModel.loadUserData(currentUserEmail)
+    }
 
 
     if (showCapacityAlert.value) {
