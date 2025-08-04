@@ -97,20 +97,6 @@ fun FirstScreen(navController: NavHostController) {
                 Text("Registrarse", style = MaterialTheme.typography.labelLarge)
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Button(
-                onClick = {
-                    navController.navigate(Screen.AdminPanel(1))
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF0A80ED),
-                    contentColor = Color.White
-                )
-            ) {
-                Text("Ir a Panel de Administrador", style = MaterialTheme.typography.labelLarge)
-            }
         }
     }
 }

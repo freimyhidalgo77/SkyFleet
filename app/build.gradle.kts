@@ -60,16 +60,17 @@ dependencies {
     // O la última versión estable para imagen asyn
     implementation("io.coil-kt:coil-compose:2.5.0")
 
+    //UI
+    implementation("androidx.compose.material:material-icons-extended:1.6.1")
+    implementation("io.coil-kt:coil-compose:2.5.0")
+    implementation("androidx.compose.foundation:foundation:1.5.0")
+    implementation("androidx.compose.material3:material3:1.2.1")
+    implementation("androidx.compose.material:material:1.5.4")
+
 
     //room
     implementation("androidx.room:room-runtime:2.6.1")
-    implementation(libs.androidx.junit.ktx)
-    implementation(libs.androidx.activity.ktx)
-    implementation(libs.androidx.benchmark.common)
-    implementation(libs.androidx.benchmark.macro)
-    implementation(libs.androidx.navigation.runtime.android)
-    implementation(libs.places)
-    annotationProcessor("androidx.room:room-compiler:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
     ksp("androidx.room:room-compiler:2.6.1")
 
 
@@ -82,6 +83,12 @@ dependencies {
     implementation("androidx.compose.material:material:1.3.1") // Usa la última versión
 
 
+    // Firebase (BOM debe declararse primero)
+    implementation(platform("com.google.firebase:firebase-bom:32.7.1"))
+    implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation("com.google.firebase:firebase-analytics-ktx")
+
     //Hilt
     implementation("com.google.dagger:hilt-android:2.51")
     ksp("com.google.dagger:hilt-android-compiler:2.51")
@@ -93,16 +100,7 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
-    //Firebase
-    implementation("com.google.firebase:firebase-auth-ktx:22.3.1")
-    implementation ("androidx.compose.material3:material3:1.2.1")
-    implementation ("androidx.navigation:navigation-compose:2.7.7")
-    implementation ("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
-    implementation(platform("com.google.firebase:firebase-bom:33.16.0"))
-    implementation(platform("com.google.firebase:firebase-analytics"))
-
-
-
+    //AndroidX
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

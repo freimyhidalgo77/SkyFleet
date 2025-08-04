@@ -58,6 +58,8 @@ import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaViewModel
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloUiState
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloViewModel
 import kotlinx.coroutines.CoroutineScope
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 @Composable
 fun ReservaDetailsScreen(
@@ -235,7 +237,7 @@ fun ReservaDetailsRow(
         InfoRow("Origen", ruta?.origen ?: "No disponible")
         InfoRow("Destino", ruta?.destino ?: "No disponible")
         InfoRow("Pasajeros", reserva.pasajeros.toString())
-        InfoRow("Fecha", fecha ?: "No seleccionada")
+        InfoRow("Fecha", formatDate(fecha) ?: "No seleccionada")
         InfoRow("Piloto", when (tipoCliente) {
 
             true -> "Sí"
@@ -307,5 +309,23 @@ fun ReservaDetailsRow(
                 Text("Cancelar reserva")
             }
         }
+    }
+}
+
+
+fun formatDate(dateString: String?): String {
+    if (dateString.isNullOrEmpty()) return "No disponible"
+
+    return try {
+        // Primero parseamos la fecha original (asumiendo que viene como String)
+        val inputFormat = SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.ENGLISH)
+        val date = inputFormat.parse(dateString)
+
+        // Luego la formateamos como queremos mostrarla
+        val outputFormat = SimpleDateFormat("EEE MMM dd yyyy", Locale.getDefault())
+        outputFormat.format(date)
+    } catch (e: Exception) {
+        // Si hay algún error al parsear, devolvemos el string original
+        dateString
     }
 }

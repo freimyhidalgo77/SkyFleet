@@ -54,10 +54,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import edu.ucne.skyplanerent.R
 import edu.ucne.skyplanerent.data.local.entity.UserRegisterAccount
 import edu.ucne.skyplanerent.data.repository.UserRepository
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -71,16 +76,46 @@ fun PerfilClientScreen(
     userRepository: UserRepository,
     currentUserEmail: String?
 ) {
-    var user = remember { mutableStateOf<UserRegisterAccount?>(null) }
+    var user by remember { mutableStateOf<UserRegisterAccount?>(null) }
     var showLogoutDialog by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
+    var isLoading by remember { mutableStateOf(false) }
 
     LaunchedEffect(currentUserEmail) {
         if (currentUserEmail != null) {
-            user.value = userRepository.getUserByEmail(currentUserEmail)
+            isLoading = true
+            user = userRepository.getUserByEmail(currentUserEmail)
+
+            if (user == null) {
+                val db = FirebaseFirestore.getInstance()
+                db.collection("users")
+                    .whereEqualTo("correo", currentUserEmail)
+                    .get()
+                    .addOnSuccessListener { documents ->
+                        if (!documents.isEmpty) {
+                            val doc = documents.documents[0]
+                            user = UserRegisterAccount(
+                                nombre = doc.getString("nombre") ?: "",
+                                apellido = doc.getString("apellido") ?: "",
+                                correo = doc.getString("correo") ?: currentUserEmail,
+                                telefono = doc.getString("telefono") ?: "",
+                                contrasena = "",
+                                direcccion = doc.getString("direccion") ?: "",
+                                fecha = doc.getLong("fechaNacimiento")?.let { Date(it) } ?: Date()
+                            )
+
+                            coroutineScope.launch {
+                                user?.let { userRepository.insertUser(it) }
+                            }
+                        }
+                        isLoading = false
+                    }
+                    .addOnFailureListener { isLoading = false }
+            } else {
+                isLoading = false
+            }
         }
     }
-
 
     if (showLogoutDialog) {
         AlertDialog(
@@ -153,7 +188,7 @@ fun PerfilClientScreen(
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "${user.value?.nombre ?: "Nombre"} ${user.value?.apellido ?: "Apellido"}",
+                text = "${user?.nombre ?: "Nombre"} ${user?.apellido ?: "Apellido"}",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -179,10 +214,17 @@ fun PerfilClientScreen(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Email: ${user.value?.correo ?: "email@ejemplo.com"}",
+                    text = "Correo:",
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = user?.correo ?: "email@ejemplo.com",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
+
             }
             Divider(color = Color.Gray.copy(alpha = 0.2f))
 
@@ -202,10 +244,17 @@ fun PerfilClientScreen(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = user.value?.telefono?.let { formatPhoneNumber(it) } ?: "Teléfono no disponible",
+                    text = "Teléfono:",
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = user?.telefono?.let { formatPhoneNumber(it) } ?: "No disponible",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
+
             }
 
             Row(
@@ -223,10 +272,17 @@ fun PerfilClientScreen(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = user.value?.direcccion?: "No disponible",
+                    text = "Dirección:",
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = user?.direcccion ?: "No disponible",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
+
             }
 
             Row(
@@ -237,22 +293,30 @@ fun PerfilClientScreen(
                     .clickable { }
             ) {
                 Icon(
+
                     imageVector = Icons.Default.Cake,
-                    contentDescription = "Cumpleanos",
+                    contentDescription = "Cumpleaños",
                     modifier = Modifier.size(24.dp),
                     tint = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.width(8.dp))
+
                 Text(
-                    text = user.value?.fecha.toString()?: "No disponible",
+                    text = "Fecha de nacimiento:",
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = user?.fecha?.let { formatDate(it) } ?: "No disponible",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
+
             }
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Botón de cerrar sesión modificado para mostrar el diálogo
             Button(
                 onClick = { showLogoutDialog = true },
                 modifier = Modifier
@@ -275,4 +339,12 @@ fun PerfilClientScreen(
             }
         }
     }
+}
+
+
+fun formatDate(date: Date?): String {
+    if (date == null) return "No disponible"
+
+    val format = SimpleDateFormat("EEE MMM dd yyyy", Locale("es", "ES"))
+    return format.format(date)
 }

@@ -34,10 +34,19 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.util.Date
 import android.app.DatePickerDialog
+import android.content.Context
+import android.view.View
+import android.widget.CalendarView
+import android.widget.DatePicker
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.KeyboardType
+import com.google.firebase.ktx.Firebase
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+import com.google.firebase.firestore.ktx.firestore
+
 
 
 
@@ -136,6 +145,8 @@ fun RegisterScreen(
                 telefono = formatPhoneNumber(it)
             },
             label = { Text("Teléfono") },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp)
         )
@@ -156,16 +167,11 @@ fun RegisterScreen(
 
         Button(
             onClick = {
-                DatePickerDialog(
-                    context,
-                    { _, year, month, dayOfMonth ->
-                        calendar.set(year, month, dayOfMonth)
-                        selectedDate = calendar.time
-                    },
-                    calendar.get(Calendar.YEAR),
-                    calendar.get(Calendar.MONTH),
-                    calendar.get(Calendar.DAY_OF_MONTH)
-                ).show()
+                showSpinnerDatePicker(
+                    context = context,
+                    initialDate = selectedDate ?: Calendar.getInstance().time,
+                    onDateSelected = { date -> selectedDate = date }
+                )
             },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
@@ -175,28 +181,52 @@ fun RegisterScreen(
         ) {
             Text(text = formattedDate)
         }
+
         Spacer(modifier = Modifier.height(25.dp))
+
 
         Button(
             onClick = {
                 auth.createUserWithEmailAndPassword(correo, contrasena)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
-                            // Guardar en Room
+                            // Crear objeto de usuario
                             val user = UserRegisterAccount(
                                 nombre = nombre,
                                 apellido = apellido,
                                 correo = correo,
                                 telefono = telefono,
-                                contrasena = contrasena,
+                                contrasena = contrasena, // Nota: No deberías guardar contraseñas en texto plano
                                 direcccion = direccion,
                                 fecha = selectedDate ?: Date()
                             )
 
+                            // Guardar en Room (local)
                             coroutineScope.launch {
                                 try {
                                     userRepository.insertUser(user)
-                                    onRegisterSuccess()
+
+                                    // Guardar en Firestore (nube)
+                                    val db = Firebase.firestore
+                                    val userData = hashMapOf(
+                                        "nombre" to nombre,
+                                        "apellido" to apellido,
+                                        "correo" to correo,
+                                        "telefono" to telefono,
+                                        "direccion" to direccion,
+                                        "fechaNacimiento" to selectedDate?.time // Guardamos el timestamp
+                                    )
+
+                                    db.collection("users")
+                                        .document(auth.currentUser?.uid ?: "")
+                                        .set(userData)
+                                        .addOnSuccessListener {
+                                            onRegisterSuccess()
+                                        }
+                                        .addOnFailureListener { e ->
+                                            error = "Error al guardar en la nube: ${e.message}"
+                                        }
+
                                 } catch (e: Exception) {
                                     error = "Error al guardar datos localmente: ${e.message}"
                                 }
@@ -221,6 +251,58 @@ fun RegisterScreen(
             Text(text = it, color = Color.Red)
         }
     }
+}
+
+
+
+private fun showSpinnerDatePicker(
+    context: Context,
+    initialDate: Date,
+    onDateSelected: (Date) -> Unit
+) {
+    val calendar = Calendar.getInstance().apply { time = initialDate }
+    val year = calendar.get(Calendar.YEAR)
+    val month = calendar.get(Calendar.MONTH)
+    val day = calendar.get(Calendar.DAY_OF_MONTH)
+
+    // Crear el DatePickerDialog con estilo spinner
+    val datePickerDialog = DatePickerDialog(
+        context,
+        android.R.style.Theme_Holo_Light_Dialog_NoActionBar,
+        { _, selectedYear, selectedMonth, selectedDay ->
+            val newDate = Calendar.getInstance().apply {
+                set(selectedYear, selectedMonth, selectedDay)
+            }.time
+            onDateSelected(newDate)
+        },
+        year,
+        month,
+        day
+    )
+
+
+    try {
+        // Para Android 5.0+ (API 21+)
+        val datePickerField = datePickerDialog.javaClass.getDeclaredField("mDatePicker")
+        datePickerField.isAccessible = true
+        val datePicker = datePickerField.get(datePickerDialog)
+
+        val method = datePicker.javaClass.getMethod("setCalendarViewShown", Boolean::class.java)
+        method.invoke(datePicker, false)
+    } catch (e: Exception) {
+        // Si falla, intentamos otro enfoque
+        try {
+            datePickerDialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+            // Enfoque alternativo para versiones más recientes
+            val datePicker = datePickerDialog.findViewById<DatePicker>(android.R.id.button1)
+            datePicker?.calendarViewShown = false
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    datePickerDialog.show()
 }
 
 fun formatPhoneNumber(number: String): String {

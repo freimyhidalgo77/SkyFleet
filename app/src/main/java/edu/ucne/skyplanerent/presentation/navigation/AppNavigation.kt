@@ -207,6 +207,7 @@ fun AppNavigation(context: Context) {
         }
 
         composable<Screen.Rutas_y_viajes> { backStackEntry ->
+            val aeronaveViewModel: AeronaveViewModel = hiltViewModel(backStackEntry)
             val reservaViewModel: ReservaViewModel = hiltViewModel(backStackEntry)
             Rutas_Viajes_Screen(
                 goToRuta = { id ->
@@ -220,10 +221,11 @@ fun AppNavigation(context: Context) {
                 },
                 scope = scope,
                 reservaViewModel = reservaViewModel,
+                aeronaveViewModel = aeronaveViewModel,
                 goBack = {
                     navController.navigate(Screen.Home)
                 },
-                navController = navController
+                //navController = navController
             )
         }
 
@@ -514,11 +516,9 @@ fun AppNavigation(context: Context) {
                 goBack = { navController.popBackStack() },
                 onReservar = {
                     navController.navigate(Screen.Rutas_y_viajes)
-                },
-                navController = navController
+                }
             )
         }
-
 
             composable<Screen.CategoriaAeronave> { backStack ->
                 val args = backStack.toRoute<Screen.CategoriaAeronave>()

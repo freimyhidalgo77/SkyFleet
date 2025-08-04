@@ -37,13 +37,7 @@ import edu.ucne.skyplanerent.data.remote.dto.AeronaveDTO
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveUiState
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveViewModel
 import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
-import androidx.navigation.NavController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.firebase.auth.FirebaseAuth
-import edu.ucne.skyplanerent.presentation.navigation.BottomNavItem
-import edu.ucne.skyplanerent.presentation.navigation.Screen
 import edu.ucne.skyplanerent.presentation.reserva.ReservaEvent
 import edu.ucne.skyplanerent.presentation.reserva.UiState
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoLicencia
@@ -63,8 +57,7 @@ fun Rutas_Viajes_Screen(
     goBackDetails: (Int) -> Unit,
     goTopreReserva: (Int)-> Unit,
     goToRuta: (Int) -> Unit,
-    goBack: () -> Unit,
-    navController: NavController
+    goBack: () -> Unit
 
 ) {
 
@@ -135,7 +128,6 @@ fun Rutas_Viajes_Screen(
         reservaViewModel = reservaViewModel,
         reservaUiState = reservaUiState,
         goBack = goBack,
-        navController = navController
 
         )
 }
@@ -157,8 +149,7 @@ fun Vuelos_RutasBodyListScreen(
     goToRuta: (Int) -> Unit,
     goBack:()-> Unit,
     goTopreReserva: (Int)-> Unit,
-    reservaUiState:UiState,
-    navController: NavController
+    reservaUiState:UiState
 
 
 ) {
@@ -209,14 +200,6 @@ fun Vuelos_RutasBodyListScreen(
     val isLoading = uiState.rutas.isEmpty() || vueloUiState.tipovuelo.isEmpty()
 
 
-    val items = listOf(
-        BottomNavItem("Inicio", Icons.Default.Home, Screen.Home),
-        BottomNavItem("Perfil", Icons.Default.Person, Screen.Perfil),
-    )
-
-    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
-
-
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
@@ -238,24 +221,6 @@ fun Vuelos_RutasBodyListScreen(
                     containerColor = Color.White
                 )
             )
-        },
-        bottomBar = {
-            NavigationBar {
-                items.forEach { item ->
-                    NavigationBarItem(
-                        icon = { Icon(item.icon, contentDescription = item.title) },
-                        label = { Text(item.title) },
-                        selected = currentRoute == item.route.toString(),
-                        onClick = {
-                            if (currentRoute != item.route.toString()) {
-                                navController.navigate(item.route) {
-                                    popUpTo(Screen.Home) { inclusive = false }
-                                }
-                            }
-                        }
-                    )
-                }
-            }
         }
     ) { innerPadding ->
         LazyColumn(

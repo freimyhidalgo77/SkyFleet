@@ -1,11 +1,14 @@
 package edu.ucne.skyplanerent.presentation.reserva
 
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.ucne.skyplanerent.data.local.entity.ReservaEntity
+import edu.ucne.skyplanerent.data.remote.dto.AeronaveDTO
 import edu.ucne.skyplanerent.data.remote.dto.TipoVueloDTO
 import edu.ucne.skyplanerent.data.repository.ReservaRepository
 import edu.ucne.skyplanerent.data.repository.RutaRepository
@@ -308,9 +311,9 @@ class ReservaViewModel @Inject constructor(
                     impuesto = uiState.value.impuesto ?: reservaSeleccionada.impuesto ?: 0.0,
                     tarifa = uiState.value.tarifa ?: reservaSeleccionada.tarifa ?: 0.0,
                     precioTotal = precioFinal,
-                    formularioId = formularioId, // Preservar el formularioId existente
-                    metodoPago = metodoPago, // Preservar método de pago
-                    comprobante = comprobante // Preservar comprobante
+                    formularioId = formularioId,
+                    metodoPago = metodoPago,
+                    comprobante = comprobante
                 )
 
                 reservaRepository.saveReserva(reservaActualizada)

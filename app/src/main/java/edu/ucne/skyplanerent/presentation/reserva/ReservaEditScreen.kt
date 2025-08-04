@@ -43,10 +43,37 @@ import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaUiState
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaViewModel
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloUiState
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloViewModel
+import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
+import java.util.Locale
 
 
+fun formatDateToDMY(dateString: String?): String {
+    if (dateString.isNullOrEmpty()) return "No disponible"
+
+    return try {
+        // Primero intentamos parsear el formato con hora
+        val inputFormat = SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.ENGLISH)
+        val date = inputFormat.parse(dateString)
+
+        // Formateamos a día/mes/año (sin ceros a la izquierda)
+        val outputFormat = SimpleDateFormat("d/M/yyyy", Locale.getDefault())
+        outputFormat.format(date)
+    } catch (e: Exception) {
+        try {
+            // Si falla, intentamos con formato YYYY-MM-DD
+            val parts = dateString.split("-")
+            if (parts.size == 3) {
+                "${parts[2].toInt()}/${parts[1].toInt()}/${parts[0]}"
+            } else {
+                dateString
+            }
+        } catch (e2: Exception) {
+            dateString
+        }
+    }
+}
 
 @Composable
 fun ReservaEditScreen(
@@ -338,7 +365,7 @@ fun ReservaEditBodyScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text("Fecha", fontWeight = FontWeight.Bold)
-            Text(fecha?.toString() ?: "No seleccionada", fontSize = 16.sp, color = Color.Gray)
+            Text(formatDateToDMY(fecha.toString()) ?: "No seleccionada", fontSize = 16.sp, color = Color.Gray)
             Spacer(modifier = Modifier.height(8.dp))
 
             Text("Piloto", fontWeight = FontWeight.Bold)
@@ -507,6 +534,7 @@ fun ReservaEditBodyScreen(
 }
 
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AeronavesDropdown(
@@ -667,7 +695,6 @@ fun TipoVueloDropdown(
     }
 }
 
-
 @Composable
 fun FechaPickerField(
     selectedDate: String?,
@@ -692,6 +719,7 @@ fun FechaPickerField(
     val datePickerDialog = android.app.DatePickerDialog(
         context,
         { _, year, month, dayOfMonth ->
+            // Guardar en formato YYYY-MM-DD internamente
             val formattedDate = String.format("%04d-%02d-%02d", year, month + 1, dayOfMonth)
             onDateSelected(formattedDate)
         },
@@ -703,7 +731,7 @@ fun FechaPickerField(
     }
 
     OutlinedTextField(
-        value = selectedDate ?: "Seleccionar fecha",
+        value = formatDateToDMY(selectedDate),
         onValueChange = {},
         readOnly = true,
         label = { Text("Fecha del vuelo") },
@@ -716,10 +744,9 @@ fun FechaPickerField(
                 contentDescription = "Seleccionar fecha",
                 modifier = Modifier.clickable(onClick = { datePickerDialog.show() }))
         },
-        shape = RoundedCornerShape(16.dp) // Mismo estilo que los otros campos
+        shape = RoundedCornerShape(16.dp)
     )
 }
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -781,6 +808,8 @@ fun InfoRow(
         Spacer(modifier = Modifier.height(8.dp))
     }
 }
+
+
 
 
 @Composable
