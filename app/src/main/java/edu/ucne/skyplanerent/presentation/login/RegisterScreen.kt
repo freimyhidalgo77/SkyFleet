@@ -75,6 +75,8 @@ fun RegisterScreen(
 // Mostrar string formateado para la UI
     val formattedDate = selectedDate?.let { dateFormat.format(it) } ?: "Seleccionar fecha"
 
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
     val context = LocalContext.current
 
 
@@ -187,6 +189,22 @@ fun RegisterScreen(
 
         Button(
             onClick = {
+
+                if (!android.util.Patterns.EMAIL_ADDRESS.matcher(correo).matches()) {
+                    errorMessage = "Por favor ingresa un correo electrónico válido"
+                    return@Button
+                }
+
+                if (contrasena.length < 6) {
+                    errorMessage = "La contraseña debe tener al menos 6 caracteres"
+                    return@Button
+                }
+
+                if (!isNetworkAvailable(context)) {
+                    errorMessage = "Error de conexión. Por favor conéctate a una red"
+                    return@Button
+                }
+
                 auth.createUserWithEmailAndPassword(correo, contrasena)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
@@ -196,7 +214,7 @@ fun RegisterScreen(
                                 apellido = apellido,
                                 correo = correo,
                                 telefono = telefono,
-                                contrasena = contrasena, // Nota: No deberías guardar contraseñas en texto plano
+                                contrasena = contrasena,
                                 direcccion = direccion,
                                 fecha = selectedDate ?: Date()
                             )
@@ -236,7 +254,8 @@ fun RegisterScreen(
                         }
                     }
             },
-            enabled = correo.isNotBlank() && contrasena.isNotBlank(),
+            enabled = correo.isNotBlank() && contrasena.isNotBlank() && nombre.isNotBlank() && apellido.isNotBlank()
+                    && telefono.isNotBlank() && direccion.isNotBlank() && formattedDate != null,
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFF0A80ED),
@@ -252,7 +271,6 @@ fun RegisterScreen(
         }
     }
 }
-
 
 
 private fun showSpinnerDatePicker(

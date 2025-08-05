@@ -137,7 +137,7 @@ fun Rutas_Viajes_Screen(
         goBack = goBack,
         navController = navController
 
-        )
+    )
 }
 
 
@@ -265,7 +265,7 @@ fun Vuelos_RutasBodyListScreen(
                 .padding(innerPadding)
                 .fillMaxSize()
                 .padding(8.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
 
 
@@ -287,7 +287,7 @@ fun Vuelos_RutasBodyListScreen(
                         text = "Tipos de vuelo",
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                     )
                 }
 
@@ -346,7 +346,7 @@ fun Vuelos_RutasBodyListScreen(
                         if (tipoVueloSeleccionado != null) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(horizontal = 16.dp)
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                             ) {
                                 Text(
                                     text = "Tipo Vuelo Seleccionado: ${tipoVueloSeleccionado.descripcionTipoVuelo}",
@@ -698,7 +698,10 @@ fun FechaSelector(
         calendario.get(Calendar.YEAR),
         calendario.get(Calendar.MONTH),
         calendario.get(Calendar.DAY_OF_MONTH)
-    )
+    ).apply {
+        // Establecer la fecha mínima como el día actual
+        datePicker.minDate = calendario.timeInMillis
+    }
 
     OutlinedTextField(
         value = fechaTexto,
@@ -715,5 +718,4 @@ fun FechaSelector(
             .padding(horizontal = 16.dp)
             .clickable { datePickerDialog.show() }
     )
-
 }

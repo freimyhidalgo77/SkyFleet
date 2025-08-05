@@ -29,8 +29,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.google.firebase.FirebaseNetworkException
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import edu.ucne.skyplanerent.R
 import edu.ucne.skyplanerent.data.remote.Resource
 import edu.ucne.skyplanerent.data.remote.dto.AdminDTO
@@ -40,6 +43,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,6 +62,8 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -97,6 +106,22 @@ fun LoginScreen(
 
         Button(
             onClick = {
+
+                if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                    errorMessage = "Por favor ingresa un correo electrónico válido"
+                    return@Button
+                }
+
+                if (password.length < 6) {
+                    errorMessage = "La contraseña debe tener al menos 6 caracteres"
+                    return@Button
+                }
+
+                if (!isNetworkAvailable(context)) {
+                    errorMessage = "Error de conexión. Por favor conéctate a una red"
+                    return@Button
+                }
+
                 isLoading = true
                 errorMessage = null
                 adminRepository.getAdminByEmail(email, password).onEach { resource ->
@@ -136,7 +161,7 @@ fun LoginScreen(
                                             onLoginSuccess(user.email ?: "")
                                         }
                                     } else {
-                                        errorMessage = task.exception?.message ?: "Error de autenticación"
+                                        errorMessage = getErrorMessage(task.exception)
                                     }
                                 }
                         }
@@ -178,3 +203,32 @@ fun LoginScreen(
     }
 }
 
+
+fun getErrorMessage(exception: Exception?): String {
+    return when {
+        exception == null -> "Error desconocido"
+        exception is FirebaseAuthInvalidUserException -> "Cuenta no encontrada. Verifica tu correo."
+        exception is FirebaseAuthInvalidCredentialsException -> {
+            when {
+                exception.message?.contains("email address is badly formatted", ignoreCase = true) == true ->
+                    "Formato de correo electrónico inválido"
+                exception.message?.contains("password is invalid", ignoreCase = true) == true ->
+                    "Contraseña incorrecta"
+                else -> "Credenciales inválidas"
+            }
+        }
+        exception is FirebaseNetworkException -> "Sin conexión a internet. Verifica tu red."
+        exception.message?.contains("network error", ignoreCase = true) == true ->
+            "Problemas de conexión. Verifica tu internet."
+        else -> "Error al autenticar: ${exception.localizedMessage ?: "Intenta nuevamente"}"
+    }
+}
+
+fun isNetworkAvailable(context: Context): Boolean {
+    val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    val network = connectivityManager.activeNetwork ?: return false
+    val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
+
+    return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+            capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+}

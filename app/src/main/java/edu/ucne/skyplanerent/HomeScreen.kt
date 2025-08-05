@@ -4,12 +4,16 @@ import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -46,10 +50,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.room.util.copy
 import edu.ucne.skyplanerent.data.local.entity.UserRegisterAccount
 import edu.ucne.skyplanerent.data.repository.UserRepository
 import edu.ucne.skyplanerent.presentation.navigation.BottomNavItem
@@ -61,7 +67,7 @@ fun HomeScreen(
     onLogout: () -> Unit,
     onNavigateToReserva: () -> Unit,
     onNavigateToRutas_Viajes: () -> Unit,
-    onNavigateToPeril:()->Unit,
+    onNavigateToPeril: () -> Unit,
     navController: NavController,
     userRepository: UserRepository,
     currentUserEmail: String?
@@ -71,17 +77,14 @@ fun HomeScreen(
         BottomNavItem("Aronaves", Icons.Default.AirplanemodeActive, Screen.CategoriaAeronaveReservaList),
         BottomNavItem("Rutas y Viajes", Icons.Default.Map, Screen.Rutas_y_viajes),
         BottomNavItem("Perfil", Icons.Default.Person, Screen.Perfil),
-        //BottomNavItem("Inicio", Icons.Default.Home, Screen.Home),
     )
 
     var user = remember { mutableStateOf<UserRegisterAccount?>(null) }
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
-    val bitmap = remember { mutableStateOf<Bitmap?>(null) }
 
     LaunchedEffect(currentUserEmail) {
         if (currentUserEmail != null) {
             user.value = userRepository.getUserByEmail(currentUserEmail)
-
         }
     }
 
@@ -108,62 +111,61 @@ fun HomeScreen(
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            horizontalAlignment = Alignment.CenterHorizontally
+            .fillMaxSize()
+            .padding(
+                PaddingValues(
+                    top = 0.dp,  // Cero padding superior
+                    bottom = innerPadding.calculateBottomPadding(),
+                    start = innerPadding.calculateStartPadding(LocalLayoutDirection.current),
+                    end = innerPadding.calculateEndPadding(LocalLayoutDirection.current)
+                )
+            ),
+        verticalArrangement = Arrangement.Top,
+        contentPadding = PaddingValues(0.dp)
         ) {
             item {
-                Image(
-                    painter = painterResource(id = R.drawable.logoskyfleet),
-                    contentDescription = "Logo SkyFleet",
-                    modifier = Modifier
-                        .size(150.dp)
-                        //.padding(top = 16.dp)
-                )
-            }
-            item {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                        //.padding(horizontal = 16.dp),
-                    elevation = CardDefaults.cardElevation(8.dp)
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    // Logo
                     Image(
-                        painter = painterResource(id = R.drawable.c172welcome),
-                        contentDescription = "Promoción",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.height(200.dp)
+                        painter = painterResource(id = R.drawable.logoskyfleet),
+                        contentDescription = "Logo SkyFleet",
+                        modifier = Modifier
+                            .width(150.dp)
+                            .padding(top = 1.dp)
                     )
+                    // Card con imagen C172
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        elevation = CardDefaults.cardElevation(8.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.c172welcome),
+                            contentDescription = "Promoción",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.height(200.dp)
+                        )
+                    }
+
+                    // Texto de bienvenida
+                    Text(
+                        text = "¡Bienvenido ${user.value?.nombre ?: "Freimy"}!",
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.headlineSmall,
+                        modifier = Modifier
+                            .padding(all = 16.dp)  // Cambiado a padding(all) para evitar ambigüedad
+                            .fillMaxWidth()
+                    )
+
                 }
-            }
 
-            item {
-                Text(
-                    "¡Bienvenido ${user.value?.nombre?:"Freimy"}!",
-                    fontWeight = FontWeight.Bold,
-                    style = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth()
-                )
-            }
-
-            item {
-                Text(
-                    "¿Qué deseas hacer hoy?",
-                    style = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth()
-                )
-            }
-
-            item {
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(280.dp) // Fixed height to prevent infinite constraints
+                        .height(280.dp)
                         .padding(horizontal = 16.dp),
                     content = {
                         item {
@@ -223,8 +225,6 @@ fun ActionCard(icon: ImageVector, title: String, onClick: () -> Unit) {
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(text = title)
-        }//Mejoras
+        }
     }
 }
-
-
