@@ -91,6 +91,11 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics-ktx")
 
 
+//Cargar imagenes
+    implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation("androidx.activity:activity-compose:1.8.0")
+
+
     //Hilt
     implementation("com.google.dagger:hilt-android:2.51")
     ksp("com.google.dagger:hilt-android-compiler:2.51")

@@ -1,5 +1,10 @@
 package edu.ucne.skyplanerent.presentation.login
 
+import android.content.Context
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,6 +29,7 @@ import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.RestoreFromTrash
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -50,10 +56,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import coil.compose.rememberImagePainter
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import edu.ucne.skyplanerent.R
@@ -63,6 +72,8 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import java.io.File
+import java.io.FileOutputStream
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -80,6 +91,27 @@ fun PerfilClientScreen(
     var showLogoutDialog by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     var isLoading by remember { mutableStateOf(false) }
+
+
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    var showImagePicker by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri ->
+            uri?.let {
+                saveImageToStorage(context, it, currentUserEmail)
+                selectedImageUri = loadImageFromStorage(context, currentUserEmail)
+            }
+        }
+    )
+
+
+    // Cargar imagen guardada al iniciar
+    LaunchedEffect(Unit) {
+        selectedImageUri = loadImageFromStorage(context, currentUserEmail)
+    }
 
     LaunchedEffect(currentUserEmail) {
         if (currentUserEmail != null) {
@@ -178,14 +210,48 @@ fun PerfilClientScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(16.dp))
-            Icon(
-                imageVector = Icons.Default.Person,
-                contentDescription = "Foto de perfil",
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(CircleShape),
-                tint = Color.Black
-            )
+
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.clickable {
+                    imagePickerLauncher.launch("image/*")
+                }
+            ) {
+                if (selectedImageUri != null) {
+                    Image(
+                        painter = rememberImagePainter(selectedImageUri),
+                        contentDescription = "Foto de perfil",
+                        modifier = Modifier
+                            .size(120.dp)
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Foto de perfil",
+                        modifier = Modifier
+                            .size(80.dp)
+                            .clip(CircleShape),
+                        tint = Color.Black
+                    )
+                }
+
+                if (selectedImageUri != null) {
+                    Icon(
+                        imageVector = Icons.Default.RestoreFromTrash,
+                        contentDescription = "Eliminar foto",
+                        modifier = Modifier
+                            .size(24.dp)
+                            .align(Alignment.BottomEnd)
+                            .clickable {
+                                deleteImageFromStorage(context, currentUserEmail)
+                                selectedImageUri = null
+                            },
+                        tint = Color.Red
+                    )
+                }
+            }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "${user?.nombre ?: "Nombre"} ${user?.apellido ?: "Apellido"}",
@@ -340,6 +406,65 @@ fun PerfilClientScreen(
         }
     }
 }
+
+
+@Composable
+fun ImagePicker(onImageSelected: (Uri?) -> Unit) {
+    val context = LocalContext.current
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        onImageSelected(uri)
+    }
+
+    LaunchedEffect(Unit) {
+        launcher.launch("image/*")
+    }
+}
+
+fun saveImageToStorage(context: Context, imageUri: Uri, userId: String?) {
+    userId ?: return
+
+    try {
+        val inputStream = context.contentResolver.openInputStream(imageUri)
+        val file = File(context.filesDir, "profile_$userId.jpg")
+        FileOutputStream(file).use { output ->
+            inputStream?.copyTo(output)
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+}
+
+fun loadImageFromStorage(context: Context, userId: String?): Uri? {
+    userId ?: return null
+
+    return try {
+        val file = File(context.filesDir, "profile_$userId.jpg")
+        if (file.exists()) {
+            Uri.fromFile(file)
+        } else {
+            null
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
+}
+
+fun deleteImageFromStorage(context: Context, userId: String?) {
+    userId ?: return
+
+    try {
+        val file = File(context.filesDir, "profile_$userId.jpg")
+        if (file.exists()) {
+            file.delete()
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+}
+
 
 
 fun formatDate(date: Date?): String {
