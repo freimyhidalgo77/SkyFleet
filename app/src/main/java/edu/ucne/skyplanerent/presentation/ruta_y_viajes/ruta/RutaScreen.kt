@@ -51,6 +51,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edu.ucne.skyplanerent.presentation.UiEvent
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,11 +63,13 @@ fun RutaScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(rutaId) {
-        if (rutaId != null && rutaId > 0) {
-            viewModel.onEvent(RutaEvent.GetRuta(rutaId))
-        } else {
-            viewModel.onEvent(RutaEvent.New) // Inicializar para nueva ruta
+    LaunchedEffect(Unit) { // Cambiado de rutaId a Unit
+        if (uiState.rutaId == null && uiState.origen.isNullOrBlank() && uiState.destino.isNullOrBlank()) {
+            if (rutaId != null && rutaId > 0) {
+                viewModel.onEvent(RutaEvent.GetRuta(rutaId))
+            } else {
+                viewModel.onEvent(RutaEvent.New)
+            }
         }
     }
 
@@ -99,7 +103,10 @@ fun RutaBodyScreen(
     // Diálogo de éxito
     if (showDialog.value) {
         AlertDialog(
-            onDismissRequest = { showDialog.value = false },
+            onDismissRequest = {
+                showDialog.value = false
+                onEvent(RutaEvent.New) // Reiniciar el estado después de cerrar el diálogo
+            },
             title = {
                 Text(
                     text = "Ruta Guardada Correctamente",
@@ -122,7 +129,10 @@ fun RutaBodyScreen(
             },
             confirmButton = {
                 Button(
-                    onClick = { showDialog.value = false },
+                    onClick = {
+                        showDialog.value = false
+                        onEvent(RutaEvent.New) // Reiniciar el estado después de cerrar el diálogo
+                    },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color.Blue,
                         contentColor = Color.White
@@ -170,7 +180,7 @@ fun RutaBodyScreen(
             SnackbarHost(snackbarHostState) { data ->
                 Snackbar(
                     snackbarData = data,
-                    containerColor = Color.Red.copy(alpha = 0.8f) // Solo para errores
+                    containerColor = Color.Red.copy(alpha = 0.8f)
                 )
             }
         },
@@ -202,6 +212,7 @@ fun RutaBodyScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .verticalScroll(rememberScrollState()) // Agregado para desplazamiento
                 .padding(8.dp)
         ) {
             ElevatedCard(
@@ -265,7 +276,13 @@ fun RutaBodyScreen(
 
                     OutlinedTextField(
                         value = uiState.distancia.toString(),
-                        onValueChange = { onEvent(RutaEvent.DistanciaChange(it.toDoubleOrNull() ?: 0.0)) },
+                        onValueChange = {
+                            onEvent(
+                                RutaEvent.DistanciaChange(
+                                    it.toDoubleOrNull() ?: 0.0
+                                )
+                            )
+                        },
                         label = { Text("Distancia") },
                         modifier = Modifier.fillMaxWidth(),
                         isError = distanciaError,
@@ -290,7 +307,13 @@ fun RutaBodyScreen(
 
                     OutlinedTextField(
                         value = uiState.duracionEstimada.toString(),
-                        onValueChange = { onEvent(RutaEvent.DuracionEstimadaChange(it.toIntOrNull() ?: 0)) },
+                        onValueChange = {
+                            onEvent(
+                                RutaEvent.DuracionEstimadaChange(
+                                    it.toIntOrNull() ?: 0
+                                )
+                            )
+                        },
                         label = { Text("Duración Estimada") },
                         modifier = Modifier.fillMaxWidth(),
                         isError = duracionError,
@@ -342,9 +365,9 @@ fun RutaBodyScreen(
                             onClick = {
                                 if (isFormValid) {
                                     if (uiState.rutaId == null) {
-                                        onEvent(RutaEvent.PostRuta) // Crear nueva ruta
+                                        onEvent(RutaEvent.PostRuta)
                                     } else {
-                                        onEvent(RutaEvent.Save) // Editar ruta existente
+                                        onEvent(RutaEvent.Save)
                                     }
                                 }
                             },
@@ -353,7 +376,10 @@ fun RutaBodyScreen(
                                 contentColor = if (isFormValid) Color.Blue else Color.Gray,
                                 disabledContentColor = Color.Gray
                             ),
-                            border = BorderStroke(1.dp, if (isFormValid) Color.Blue else Color.Gray),
+                            border = BorderStroke(
+                                1.dp,
+                                if (isFormValid) Color.Blue else Color.Gray
+                            ),
                             modifier = Modifier.padding(horizontal = 8.dp)
                         ) {
                             Text(text = if (uiState.rutaId == null) "Guardar" else "Actualizar")
