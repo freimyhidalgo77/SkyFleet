@@ -2,28 +2,23 @@ package edu.ucne.skyplanerent.presentation.categoriaaeronave
 
 import android.Manifest
 import android.os.Build
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AirplanemodeActive
@@ -56,7 +51,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -75,15 +69,16 @@ fun CategoriaAeronaveScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(categoriaId) {
-        println("id $categoriaId")
-        categoriaId?.let {
-            if (it > 0) {
-                viewModel.selectedCategoria(it) // Cargar datos para modificación
-            } else {
-                viewModel.onEvent(CategoriaAeronaveEvent.New) // Reiniciar para creación nueva
-            }
-        } ?: viewModel.onEvent(CategoriaAeronaveEvent.New) // Si es null, creación nueva
+    LaunchedEffect(Unit) { // Cambiado de categoriaId a Unit
+        if (uiState.categoriaId == null && uiState.descripcionCategoria.isNullOrBlank() && uiState.imageUri == null) {
+            categoriaId?.let {
+                if (it > 0) {
+                    viewModel.selectedCategoria(it) // Cargar datos para modificación
+                } else {
+                    viewModel.onEvent(CategoriaAeronaveEvent.New) // Reiniciar para creación nueva
+                }
+            } ?: viewModel.onEvent(CategoriaAeronaveEvent.New) // Si es null, creación nueva
+        }
     }
 
     CategoriaAeronaveBodyScreen(
@@ -124,7 +119,8 @@ fun CategoriaAeronaveBodyScreen(
         AlertDialog(
             onDismissRequest = {
                 showDialog.value = false
-                onEvent(CategoriaAeronaveEvent.ResetSuccess) // Reiniciar estado de éxito al cerrar
+                onEvent(CategoriaAeronaveEvent.New) // Reiniciar el estado del formulario
+                onEvent(CategoriaAeronaveEvent.ResetSuccess) // Reiniciar estado de éxito
             },
             title = {
                 Text(
@@ -150,7 +146,8 @@ fun CategoriaAeronaveBodyScreen(
                 Button(
                     onClick = {
                         showDialog.value = false
-                        onEvent(CategoriaAeronaveEvent.ResetSuccess) // Reiniciar estado de éxito al confirmar
+                        onEvent(CategoriaAeronaveEvent.New) // Reiniciar el estado del formulario
+                        onEvent(CategoriaAeronaveEvent.ResetSuccess) // Reiniciar estado de éxito
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Color.Blue,
@@ -198,6 +195,7 @@ fun CategoriaAeronaveBodyScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .verticalScroll(rememberScrollState()) // Agregado para desplazamiento
                 .padding(8.dp)
         ) {
             Row(
@@ -223,7 +221,7 @@ fun CategoriaAeronaveBodyScreen(
                     Text("Registro de categorías de aeronaves")
 
                     OutlinedTextField(
-                        value = uiState.descripcionCategoria,
+                        value = uiState.descripcionCategoria ?: "",
                         onValueChange = { onEvent(CategoriaAeronaveEvent.DescripcionCategoriaChange(it)) },
                         label = { Text("Descripción de la categoría") },
                         modifier = Modifier.fillMaxWidth(),
