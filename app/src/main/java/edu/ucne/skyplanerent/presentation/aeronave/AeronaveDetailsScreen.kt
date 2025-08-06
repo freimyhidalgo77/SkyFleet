@@ -143,23 +143,41 @@ fun AeronaveDetailsBodyScreen(
             ) {
                 item {
                     // Imagen principal
-                    uiState.imageUri?.let { path ->
-                        AsyncImage(
-                            model = path,
-                            contentDescription = "Imagen de ${uiState.ModeloAvion}",
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(200.dp)
-                                .clip(RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp)),
-                            contentScale = ContentScale.Crop,
-                            placeholder = painterResource(id = android.R.drawable.ic_menu_gallery),
-                            error = painterResource(id = android.R.drawable.ic_menu_gallery)
-                        )
-                    } ?: Spacer(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp)
-                    )
+                    when {
+                        uiState.imageUrl != null -> {
+                            AsyncImage(
+                                model = uiState.imageUrl,
+                                contentDescription = "Imagen de ${uiState.ModeloAvion}",
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(200.dp)
+                                    .clip(RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp)),
+                                contentScale = ContentScale.Crop,
+                                placeholder = painterResource(id = android.R.drawable.ic_menu_gallery),
+                                error = painterResource(id = android.R.drawable.ic_menu_gallery)
+                            )
+                        }
+                        uiState.imageUri != null -> {
+                            AsyncImage(
+                                model = uiState.imageUri,
+                                contentDescription = "Imagen de ${uiState.ModeloAvion}",
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(200.dp)
+                                    .clip(RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp)),
+                                contentScale = ContentScale.Crop,
+                                placeholder = painterResource(id = android.R.drawable.ic_menu_gallery),
+                                error = painterResource(id = android.R.drawable.ic_menu_gallery)
+                            )
+                        }
+                        else -> {
+                            Spacer(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(200.dp)
+                            )
+                        }
+                    }
                 }
 
                 item {

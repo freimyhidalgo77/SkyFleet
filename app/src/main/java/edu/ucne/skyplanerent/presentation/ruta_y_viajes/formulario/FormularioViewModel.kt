@@ -5,8 +5,10 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.ucne.skyplanerent.data.local.entity.FormularioEntity
 import edu.ucne.skyplanerent.data.local.entity.RutaEntity
+import edu.ucne.skyplanerent.data.local.entity.UserRegisterAccount
 import edu.ucne.skyplanerent.data.repository.FormularioRepository
 import edu.ucne.skyplanerent.data.repository.RutaRepository
+import edu.ucne.skyplanerent.data.repository.UserRepository
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaEvent
 import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaUiState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +20,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FormularioViewModel @Inject constructor(
-    private val formularioRepository: FormularioRepository
+    private val formularioRepository: FormularioRepository,
+    private val userRepository: UserRepository
 
 ): ViewModel() {
     private val _uiState = MutableStateFlow(FormularioUiState())
@@ -40,33 +43,66 @@ class FormularioViewModel @Inject constructor(
         }
     }
 
+
+    fun loadUserData(email: String?) {
+        if (email != null) {
+            viewModelScope.launch {
+                userRepository.getUserByEmail(email)?.let { user ->
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            nombre = user.nombre,
+                            apellido = user.apellido,
+                            correo = user.correo,
+                            telefono = user.telefono,
+                            ciudadResidencia = user.direcccion
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+
+
     init {
         getFormulario()
     }
 
-    fun saveAndReturnId(onSaved: (Int) -> Unit) {
+    // En tu ViewModel
+    fun saveAndReturnId(onSuccess: (Int) -> Unit) {
         viewModelScope.launch {
-            val state = _uiState.value
+            try {
+                val formulario = FormularioEntity(
+                    nombre = _uiState.value.nombre,
+                    apellido = _uiState.value.apellido,
+                    correo = _uiState.value.correo,
+                    telefono = _uiState.value.telefono,
+                    pasaporte = _uiState.value.pasaporte,
+                    ciudadResidencia = _uiState.value.ciudadResidencia,
+                    cantidadPasajeros = _uiState.value.cantidadPasajeros
+                )
 
-            if (state.nombre.isBlank() || state.apellido.isBlank() ||
-                state.telefono.isBlank() || state.correo.isBlank() ||
-                state.pasaporte.isBlank() || state.ciudadResidencia.isBlank()
-            ) {
-                _uiState.update {
-                    it.copy(errorMessage = "Todos los campos deben ser rellenados")
-                }
-                return@launch
+                val id = formularioRepository.saveFormulario(formulario)
+                onSuccess(id)
+
+                // Actualiza también los datos del usuario si es necesario
+                userRepository.insertUser(
+                    UserRegisterAccount(
+                        nombre = _uiState.value.nombre,
+                        apellido = _uiState.value.apellido,
+                        correo = _uiState.value.correo,
+                        telefono = _uiState.value.telefono,
+                        direcccion = _uiState.value.ciudadResidencia,
+                        fecha = _uiState.value.nacimiento
+
+                    )
+                )
+
+            } catch (e: Exception) {
+                _uiState.update { it.copy(errorMessage = e.message) }
             }
-
-            val id = formularioRepository.saveFormulario(state.toEntity())
-            _uiState.update {
-                it.copy(errorMessage = null)
-            }
-
-            onSaved(id)
         }
     }
-
 
 
     fun nuevoFormulario() {
@@ -104,13 +140,47 @@ class FormularioViewModel @Inject constructor(
         }
     }
 
-     fun deleteFormulario() {
+    fun upedateFormulario() {
         viewModelScope.launch {
-            formularioRepository.deleteFormulario(_uiState.value.toEntity())
+            try {
+                val formulario = FormularioEntity(
+                    formularioId = uiState.value.formularioId,
+                    nombre = uiState.value.nombre,
+                    apellido = uiState.value.apellido,
+                    correo = uiState.value.correo,
+                    telefono = uiState.value.telefono,
+                    pasaporte = uiState.value.pasaporte,
+                    ciudadResidencia = uiState.value.ciudadResidencia
+                )
+                formularioRepository.saveFormulario(formulario)
+                _uiState.update {
+                    it.copy(
+                        successMessage = "Reserva actualizada correctamente",
+                        errorMessage = null
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        successMessage = "Hubo un error al guardar la reserva",
+                        errorMessage = null
+                    )
+                }
+            }
         }
     }
 
-     fun getFormulario() {
+
+
+
+    fun deleteFormulario() {
+        viewModelScope.launch {
+            formularioRepository.deleteFormulario(_uiState.value.toEntity())
+        }
+
+    }
+
+    fun getFormulario() {
         viewModelScope.launch {
             formularioRepository.getAll().collect { formulario ->
                 _uiState.update {
@@ -120,43 +190,43 @@ class FormularioViewModel @Inject constructor(
         }
     }
 
-     fun onFormularioChange(formularioId: Int) {
+    fun onFormularioChange(formularioId: Int) {
         _uiState.update {
             it.copy(formularioId = formularioId)
         }
     }
 
-     fun onNombreChange(nombre: String) {
-        _uiState.update {
-            it.copy(nombre = nombre)
+    fun onNombreChange(nombre: String) {
+        _uiState.update { currentState ->
+            currentState.copy(nombre = nombre)
         }
     }
 
     fun onApellidoChange(apellido: String) {
-        _uiState.update {
-            it.copy(apellido = apellido)
+        _uiState.update { currentState ->
+            currentState.copy(apellido = apellido)
         }
     }
 
-     fun onCorreoChange(correo: String) {
-        _uiState.update {
-            it.copy(correo = correo)
+    fun onCorreoChange(correo: String) {
+        _uiState.update { currentState ->
+            currentState.copy(correo = correo)
         }
     }
 
-      fun onTelefonoChange(telefono: String) {
-        _uiState.update {
-            it.copy(telefono = telefono)
+    fun onTelefonoChange(telefono: String) {
+        _uiState.update { currentState ->
+            currentState.copy(telefono = telefono)
         }
     }
 
-      fun onPasaporteChange(pasaporte: String) {
+    fun onPasaporteChange(pasaporte: String) {
         _uiState.update {
             it.copy(pasaporte = pasaporte)
         }
     }
 
-      fun onCiudadResidenciaChange(ciudad: String) {
+    fun onCiudadResidenciaChange(ciudad: String) {
         _uiState.update {
             it.copy(ciudadResidencia = ciudad)
         }
@@ -167,6 +237,7 @@ class FormularioViewModel @Inject constructor(
             it.copy(cantidadPasajeros = pasajero)
         }
     }
+
 
     fun FormularioUiState.toEntity() = FormularioEntity(
         formularioId = formularioId,

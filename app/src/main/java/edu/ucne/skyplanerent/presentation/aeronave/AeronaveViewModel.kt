@@ -103,6 +103,7 @@ class AeronaveViewModel @Inject constructor(
             AeronaveEvent.Save -> saveAeronave()
             AeronaveEvent.Delete -> deleteAeronave()
             is AeronaveEvent.ImageSelected -> onImageSelected(event.uri)
+            is AeronaveEvent.ImageUrlChange -> imageUrlChange(event.url) // Nuevo evento para URL
             is AeronaveEvent.FilterByCategoria -> filterAeronavesByCategoria(event.categoriaId)
         }
     }
@@ -161,7 +162,11 @@ class AeronaveViewModel @Inject constructor(
     }
 
     private fun onImageSelected(uri: Uri) {
-        _uiState.update { it.copy(imageUri = uri) }
+        _uiState.update { it.copy(imageUri = uri, imageUrl = null) } // Limpiar imageUrl si se selecciona una imagen local
+    }
+
+    private fun imageUrlChange(url: String) {
+        _uiState.update { it.copy(imageUrl = url, imageUri = null) } // Limpiar imageUri si se ingresa una URL
     }
 
     private fun saveImage(context: Context, uri: Uri): String? {
@@ -387,6 +392,7 @@ class AeronaveViewModel @Inject constructor(
                     AltitudMaxima = 0,
                     Licencia = "",
                     imageUri = null,
+                    imageUrl = null, // Limpiar imageUrl
                     errorEstadoId = null,
                     errorModeloAvion = null,
                     errorDescripcionCategoria = null,
@@ -475,20 +481,23 @@ class AeronaveViewModel @Inject constructor(
             if (error) return@launch
 
             try {
-                val imagePath = _uiState.value.imageUri?.let { uri -> saveImage(context, uri) }
+                val imagePath = if (_uiState.value.imageUrl != null) {
+                    _uiState.value.imageUrl // Usar URL si está presente
+                } else {
+                    _uiState.value.imageUri?.let { uri -> saveImage(context, uri) }
+                }
                 aeronaveRepository.saveAeronave(_uiState.value.toEntity(imagePath))
                 _uiState.update {
                     it.copy(
                         isSuccess = true,
                         successMessage = "Aeronave guardada correctamente",
                         errorMessage = null,
-                        imageUri = null
+                        imageUri = null,
+                        imageUrl = null
                     )
                 }
                 getAeronaves()
                 nuevo()
-                delay(2000)
-                _uiEvent.send(UiEvent.NavigateUp)
             } catch (e: retrofit2.HttpException) {
                 if (e.code() == 500) {
                     _uiState.update {
@@ -498,6 +507,8 @@ class AeronaveViewModel @Inject constructor(
                             errorMessage = null
                         )
                     }
+                    getAeronaves()
+                    nuevo()
                 } else {
                     _uiState.update {
                         it.copy(
@@ -505,7 +516,6 @@ class AeronaveViewModel @Inject constructor(
                             isSuccess = false
                         )
                     }
-                    return@launch
                 }
             } catch (e: Exception) {
                 _uiState.update {
@@ -515,27 +525,29 @@ class AeronaveViewModel @Inject constructor(
                     )
                 }
             }
-            _uiEvent.send(UiEvent.NavigateUp)
         }
     }
 
     private fun saveAeronave() {
         viewModelScope.launch {
             try {
-                val imagePath = _uiState.value.imageUri?.let { uri -> saveImage(context, uri) }
+                val imagePath = if (_uiState.value.imageUrl != null) {
+                    _uiState.value.imageUrl // Usar URL si está presente
+                } else {
+                    _uiState.value.imageUri?.let { uri -> saveImage(context, uri) }
+                }
                 aeronaveRepository.saveAeronave(_uiState.value.toEntity(imagePath))
                 _uiState.update {
                     it.copy(
                         isSuccess = true,
                         successMessage = "Aeronave guardada correctamente",
                         errorMessage = null,
-                        imageUri = null
+                        imageUri = null,
+                        imageUrl = null
                     )
                 }
                 getAeronaves()
                 nuevo()
-                delay(2000)
-                _uiEvent.send(UiEvent.NavigateUp)
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
@@ -563,7 +575,8 @@ class AeronaveViewModel @Inject constructor(
                             isSuccess = true,
                             successMessage = "Aeronave eliminada correctamente",
                             errorMessage = null,
-                            imageUri = null
+                            imageUri = null,
+                            imageUrl = null
                         )
                     }
                     getAeronaves()
@@ -615,7 +628,16 @@ class AeronaveViewModel @Inject constructor(
                                         CapacidadPasajeros = aeronave.capacidadPasajeros ?: 0,
                                         AltitudMaxima = aeronave.altitudMaxima ?: 0,
                                         Licencia = aeronave.licencia ?: "",
-                                        imageUri = aeronave.imagePath?.let { path -> Uri.fromFile(File(path)) }
+                                        imageUri = if (aeronave.imagePath?.startsWith("http") == false) {
+                                            aeronave.imagePath?.let { path -> Uri.fromFile(File(path)) }
+                                        } else {
+                                            null
+                                        },
+                                        imageUrl = if (aeronave.imagePath?.startsWith("http") == true) {
+                                            aeronave.imagePath
+                                        } else {
+                                            null
+                                        }
                                     )
                                 }
                             } ?: run {
@@ -686,5 +708,5 @@ fun AeronaveUiState.toEntity(imagePath: String? = null) = AeronaveDTO(
     capacidadPasajeros = CapacidadPasajeros ?: 0,
     altitudMaxima = AltitudMaxima ?: 0,
     licencia = Licencia ?: "",
-    imagePath = imagePath ?: imageUri?.path
+    imagePath = imagePath ?: imageUrl ?: imageUri?.path // Priorizar imageUrl, luego imageUri
 )

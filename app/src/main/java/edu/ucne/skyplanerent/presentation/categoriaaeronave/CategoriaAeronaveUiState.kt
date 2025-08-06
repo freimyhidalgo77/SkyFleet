@@ -8,5 +8,6 @@ data class CategoriaAeronaveUiState(
     val descripcionCategoria: String = "",
     val errorMessage: String? = null,
     val categorias: List<CategoriaAeronaveEntity> = emptyList(),
-    val imageUri: Uri? = null // Nuevo campo para la imagen
+    val imageUri: Uri? = null,
+    val isSuccess: Boolean = false // Campo añadido para manejar el estado de éxito
 )

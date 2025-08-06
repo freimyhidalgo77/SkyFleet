@@ -93,7 +93,6 @@ class RutaViewModel @Inject constructor(
         }
     }
 
-
     private fun limpiarErrorMessageOrigen() {
         viewModelScope.launch {
             _uiState.update { it.copy(errorOrigen = "") }
@@ -108,7 +107,7 @@ class RutaViewModel @Inject constructor(
 
     private fun limpiarErrorMessageDistancia() {
         viewModelScope.launch {
-            _uiState.update { it.copy(errorDistancia = "") } // Corregido a errorDistancia
+            _uiState.update { it.copy(errorDistancia = "") }
         }
     }
 
@@ -195,16 +194,13 @@ class RutaViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         isSuccess = true,
-                        successMessage = "Ruta guardada correctamente", // Corregido mensaje
+                        successMessage = "Ruta guardada correctamente",
                         errorMessage = null
                     )
                 }
 
                 getRutas()
                 nuevo()
-
-                delay(2000)
-                _uiEvent.send(UiEvent.NavigateUp)
             } catch (e: retrofit2.HttpException) {
                 if (e.code() == 500) {
                     _uiState.update {
@@ -231,8 +227,6 @@ class RutaViewModel @Inject constructor(
                     )
                 }
             }
-
-            _uiEvent.send(UiEvent.NavigateUp)
         }
     }
 
@@ -249,8 +243,6 @@ class RutaViewModel @Inject constructor(
                 }
                 getRutas()
                 nuevo()
-                delay(2000)
-                _uiEvent.send(UiEvent.NavigateUp)
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
@@ -326,7 +318,7 @@ class RutaViewModel @Inject constructor(
         }
     }
 
-     fun getRutas() {
+    fun getRutas() {
         viewModelScope.launch {
             rutaRepository.getRutas().collectLatest { result ->
                 when (result) {

@@ -2,7 +2,8 @@ package edu.ucne.skyplanerent.presentation.categoriaaeronave
 
 import android.content.Context
 import android.net.Uri
-import androidx.benchmark.json.BenchmarkData
+import android.util.Log
+//import androidx.benchmark.json.BenchmarkData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,7 +17,6 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
 import javax.inject.Inject
-
 
 @HiltViewModel
 class CategoriaAeronaveViewModel @Inject constructor(
@@ -34,6 +34,9 @@ class CategoriaAeronaveViewModel @Inject constructor(
             CategoriaAeronaveEvent.Save -> save()
             is CategoriaAeronaveEvent.CategoriaIdChange -> onCategoriaIdChange(event.categoriaId)
             is CategoriaAeronaveEvent.ImageSelected -> onImageSelected(event.uri)
+            CategoriaAeronaveEvent.ResetSuccess -> {
+                _uiState.update { it.copy(isSuccess = false) }
+            }
         }
     }
 
@@ -42,23 +45,29 @@ class CategoriaAeronaveViewModel @Inject constructor(
     }
 
     private fun onImageSelected(uri: Uri) {
-        _uiState.update { it.copy(imageUri = uri) }
+        _uiState.update { it.copy(imageUri = uri, isSuccess = false) }
     }
 
     private fun save() {
         viewModelScope.launch {
             if (_uiState.value.descripcionCategoria.isNullOrBlank()) {
-                _uiState.update {
-                    it.copy(errorMessage = "La descripción de la categoría es obligatoria")
-                }
+                _uiState.update { it.copy(errorMessage = "La descripción de la categoría es obligatoria") }
             } else {
-                // Procesar la imagen si existe
-                val imagePath = _uiState.value.imageUri?.let { uri ->
-                    saveImage(context, uri)
+                try {
+                    val imagePath = _uiState.value.imageUri?.let { uri -> saveImage(context, uri) }
+                    categoriaAeronaveRepository.saveCategoriaAeronave(_uiState.value.toEntity(imagePath.toString()))
+                    _uiState.update {
+                        it.copy(
+                            errorMessage = null,
+                            imageUri = null,
+                            isSuccess = true,
+                            descripcionCategoria = "",
+                            categoriaId = null
+                        )
+                    }
+                } catch (e: Exception) {
+                    _uiState.update { it.copy(errorMessage = "Error al guardar: ${e.localizedMessage}") }
                 }
-                // Guardar en el repositorio
-                categoriaAeronaveRepository.saveCategoriaAeronave(_uiState.value.toEntity(imagePath.toString()))
-                _uiState.update { it.copy(errorMessage = null, imageUri = null) } // Limpiar error e imagen tras éxito
             }
         }
     }
@@ -85,8 +94,9 @@ class CategoriaAeronaveViewModel @Inject constructor(
                 categoriaId = null,
                 descripcionCategoria = "",
                 errorMessage = null,
-                imageUri = null, // Reiniciar la imagen
-                categorias = emptyList()
+                imageUri = null,
+                categorias = emptyList(),
+                isSuccess = false
             )
         }
     }
@@ -99,7 +109,8 @@ class CategoriaAeronaveViewModel @Inject constructor(
                     it.copy(
                         categoriaId = categoria?.categoriaId,
                         descripcionCategoria = categoria?.descripcionCategoria ?: "",
-                        imageUri = categoria?.imagePath?.let { path -> Uri.fromFile(File(path)) }
+                        imageUri = categoria?.imagePath?.let { path -> Uri.fromFile(File(path)) },
+                        isSuccess = false
                     )
                 }
             }
@@ -111,34 +122,28 @@ class CategoriaAeronaveViewModel @Inject constructor(
             _uiState.value.imageUri?.let { uri ->
                 val file = File(uri.path ?: "")
                 if (file.exists()) {
-                    file.delete() // Eliminar la imagen asociada si existe
+                    file.delete()
                 }
             }
             categoriaAeronaveRepository.deleteCategoriaAeronave(_uiState.value.toEntity())
-            _uiState.update { it.copy(imageUri = null) } // Limpiar la imagen tras eliminar
+            _uiState.update { it.copy(imageUri = null, isSuccess = false) }
         }
     }
 
     private fun getCategoria() {
         viewModelScope.launch {
             categoriaAeronaveRepository.getAll().collect { categorias ->
-                _uiState.update {
-                    it.copy(categorias = categorias)
-                }
+                _uiState.update { it.copy(categorias = categorias, isSuccess = false) }
             }
         }
     }
 
     private fun onDescripcionCategoriaChange(descripcionCategoria: String) {
-        _uiState.update {
-            it.copy(descripcionCategoria = descripcionCategoria)
-        }
+        _uiState.update { it.copy(descripcionCategoria = descripcionCategoria, isSuccess = false) }
     }
 
     private fun onCategoriaIdChange(categoriaId: Int) {
-        _uiState.update {
-            it.copy(categoriaId = categoriaId)
-        }
+        _uiState.update { it.copy(categoriaId = categoriaId, isSuccess = false) }
     }
 }
 
