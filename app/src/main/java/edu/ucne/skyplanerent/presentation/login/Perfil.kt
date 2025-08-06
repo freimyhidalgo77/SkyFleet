@@ -1,5 +1,10 @@
 package edu.ucne.skyplanerent.presentation.login
 
+import android.content.Context
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,6 +29,8 @@ import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.RestoreFromTrash
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -49,14 +56,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import coil.compose.rememberImagePainter
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import edu.ucne.skyplanerent.R
 import edu.ucne.skyplanerent.data.local.entity.UserRegisterAccount
 import edu.ucne.skyplanerent.data.repository.UserRepository
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.io.File
+import java.io.FileOutputStream
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -70,193 +87,389 @@ fun PerfilClientScreen(
     userRepository: UserRepository,
     currentUserEmail: String?
 ) {
-
-    var user = remember { mutableStateOf<UserRegisterAccount?>(null) }
+    var user by remember { mutableStateOf<UserRegisterAccount?>(null) }
+    var showLogoutDialog by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
+    var isLoading by remember { mutableStateOf(false) }
 
-    //var isLoading by remember { mutableStateOf(true) }
+
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    var showImagePicker by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
+    val imagePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri ->
+            uri?.let {
+                saveImageToStorage(context, it, currentUserEmail)
+                selectedImageUri = loadImageFromStorage(context, currentUserEmail)
+            }
+        }
+    )
+
+
+    // Cargar imagen guardada al iniciar
+    LaunchedEffect(Unit) {
+        selectedImageUri = loadImageFromStorage(context, currentUserEmail)
+    }
 
     LaunchedEffect(currentUserEmail) {
         if (currentUserEmail != null) {
-            user.value = userRepository.getUserByEmail(currentUserEmail)
-            //isLoading = false
+            isLoading = true
+            user = userRepository.getUserByEmail(currentUserEmail)
+
+            if (user == null) {
+                val db = FirebaseFirestore.getInstance()
+                db.collection("users")
+                    .whereEqualTo("correo", currentUserEmail)
+                    .get()
+                    .addOnSuccessListener { documents ->
+                        if (!documents.isEmpty) {
+                            val doc = documents.documents[0]
+                            user = UserRegisterAccount(
+                                nombre = doc.getString("nombre") ?: "",
+                                apellido = doc.getString("apellido") ?: "",
+                                correo = doc.getString("correo") ?: currentUserEmail,
+                                telefono = doc.getString("telefono") ?: "",
+                                contrasena = "",
+                                direcccion = doc.getString("direccion") ?: "",
+                                fecha = doc.getLong("fechaNacimiento")?.let { Date(it) } ?: Date()
+                            )
+
+                            coroutineScope.launch {
+                                user?.let { userRepository.insertUser(it) }
+                            }
+                        }
+                        isLoading = false
+                    }
+                    .addOnFailureListener { isLoading = false }
+            } else {
+                isLoading = false
+            }
         }
     }
 
-    /*if (isLoading) {
-        CircularProgressIndicator()
-    } else {*/
-
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            topBar = {
-                CenterAlignedTopAppBar(
-                    title = {
-                        Text(
-                            text = "Perfil",
-                            style = MaterialTheme.typography.titleLarge.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        )
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = goBack) {
-                            Icon(
-                                imageVector = Icons.Default.ArrowBack,
-                                contentDescription = "Volver",
-                                tint = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                    }
-                )
-            },
-
-            ) { padding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Icon(
-                    imageVector = Icons.Default.Person,
-                    contentDescription = "Foto de perfil",
-                    modifier = Modifier
-                        .size(80.dp)
-                        .clip(CircleShape),
-                    tint = Color.Black
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                // Usa user.value aquí
-                Text(
-                    text = "${user.value?.nombre ?: "Nombre"} ${user.value?.apellido ?: "Apellido"}",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = "Cliente",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Sección de Email
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Email,
-                        contentDescription = "Email",
-                        modifier = Modifier.size(24.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Email: ${user.value?.correo ?: "email@ejemplo.com"}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-                Divider(color = Color.Gray.copy(alpha = 0.2f))
-
-                // Informacion del usuario.
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                        .clickable { }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Phone,
-                        contentDescription = "Numero de telefono",
-                        modifier = Modifier.size(24.dp),
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = user.value?.telefono?.let { formatPhoneNumber(it) } ?: "Teléfono no disponible",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-
-                }
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                        .clickable { }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.House,
-                        contentDescription = "Direccion",
-                        modifier = Modifier.size(24.dp),
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = user.value?.direcccion?: "No disponible",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-
-                }
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp)
-                        .clickable { }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Cake,
-                        contentDescription = "Cumpleanos",
-                        modifier = Modifier.size(24.dp),
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = user.value?.fecha.toString()?: "No disponible",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-
-                }
-
-                Spacer(modifier = Modifier.weight(1f))
-
+    if (showLogoutDialog) {
+        AlertDialog(
+            onDismissRequest = { showLogoutDialog = false },
+            title = { Text("Confirmar cierre de sesión") },
+            text = { Text("¿Está seguro que desea cerrar su sesión?") },
+            confirmButton = {
                 Button(
-                    onClick = onLogout,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onSurface)
+                    onClick = {
+                        showLogoutDialog = false
+                        onLogout()
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.ExitToApp,
-                        contentDescription = "Cerrar sesión",
-                        modifier = Modifier.size(24.dp),
-                        tint = Color.White
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Confirmar")
+                }
+            },
+            dismissButton = {
+                Button(
+                    onClick = { showLogoutDialog = false },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+                ) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
+
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
                     Text(
-                        text = "Cerrar sesión",
-                        color = Color.White,
-                        style = MaterialTheme.typography.bodyMedium
+                        text = "Perfil",
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = goBack) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Volver",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+            )
+        }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier.clickable {
+                    imagePickerLauncher.launch("image/*")
+                }
+            ) {
+                if (selectedImageUri != null) {
+                    Image(
+                        painter = rememberImagePainter(selectedImageUri),
+                        contentDescription = "Foto de perfil",
+                        modifier = Modifier
+                            .size(120.dp)
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Foto de perfil",
+                        modifier = Modifier
+                            .size(80.dp)
+                            .clip(CircleShape),
+                        tint = Color.Black
+                    )
+                }
+
+                if (selectedImageUri != null) {
+                    Icon(
+                        imageVector = Icons.Default.RestoreFromTrash,
+                        contentDescription = "Eliminar foto",
+                        modifier = Modifier
+                            .size(24.dp)
+                            .align(Alignment.BottomEnd)
+                            .clickable {
+                                deleteImageFromStorage(context, currentUserEmail)
+                                selectedImageUri = null
+                            },
+                        tint = Color.Red
                     )
                 }
             }
-        }
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "${user?.nombre ?: "Nombre"} ${user?.apellido ?: "Apellido"}",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = "Cliente",
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.Gray
+            )
+            Spacer(modifier = Modifier.height(24.dp))
 
+            // Sección de Email
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Email,
+                    contentDescription = "Email",
+                    modifier = Modifier.size(24.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Correo:",
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = user?.correo ?: "email@ejemplo.com",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+            }
+            Divider(color = Color.Gray.copy(alpha = 0.2f))
+
+            // Informacion del usuario.
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+                    .clickable { }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Phone,
+                    contentDescription = "Numero de telefono",
+                    modifier = Modifier.size(24.dp),
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Teléfono:",
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = user?.telefono?.let { formatPhoneNumber(it) } ?: "No disponible",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+            }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+                    .clickable { }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.House,
+                    contentDescription = "Direccion",
+                    modifier = Modifier.size(24.dp),
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Dirección:",
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = user?.direcccion ?: "No disponible",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+            }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+                    .clickable { }
+            ) {
+                Icon(
+
+                    imageVector = Icons.Default.Cake,
+                    contentDescription = "Cumpleaños",
+                    modifier = Modifier.size(24.dp),
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Text(
+                    text = "Fecha de nacimiento:",
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = user?.fecha?.let { formatDate(it) } ?: "No disponible",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+            }
+
+            Spacer(modifier = Modifier.weight(1f))
+
+            Button(
+                onClick = { showLogoutDialog = true },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.onSurface)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ExitToApp,
+                    contentDescription = "Cerrar sesión",
+                    modifier = Modifier.size(24.dp),
+                    tint = Color.White
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Cerrar sesión",
+                    color = Color.White,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
+    }
+}
+
+
+@Composable
+fun ImagePicker(onImageSelected: (Uri?) -> Unit) {
+    val context = LocalContext.current
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        onImageSelected(uri)
     }
 
+    LaunchedEffect(Unit) {
+        launcher.launch("image/*")
+    }
+}
+
+fun saveImageToStorage(context: Context, imageUri: Uri, userId: String?) {
+    userId ?: return
+
+    try {
+        val inputStream = context.contentResolver.openInputStream(imageUri)
+        val file = File(context.filesDir, "profile_$userId.jpg")
+        FileOutputStream(file).use { output ->
+            inputStream?.copyTo(output)
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+}
+
+fun loadImageFromStorage(context: Context, userId: String?): Uri? {
+    userId ?: return null
+
+    return try {
+        val file = File(context.filesDir, "profile_$userId.jpg")
+        if (file.exists()) {
+            Uri.fromFile(file)
+        } else {
+            null
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
+}
+
+fun deleteImageFromStorage(context: Context, userId: String?) {
+    userId ?: return
+
+    try {
+        val file = File(context.filesDir, "profile_$userId.jpg")
+        if (file.exists()) {
+            file.delete()
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+}
+
+
+
+fun formatDate(date: Date?): String {
+    if (date == null) return "No disponible"
+
+    val format = SimpleDateFormat("EEE MMM dd yyyy", Locale("es", "ES"))
+    return format.format(date)
+}

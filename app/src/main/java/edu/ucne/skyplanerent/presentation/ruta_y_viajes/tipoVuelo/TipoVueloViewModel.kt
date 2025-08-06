@@ -30,8 +30,6 @@ class TipoVueloViewModel @Inject constructor(
 
     private val _rutaSeleccionadaId = MutableStateFlow<Int?>(null)
 
-
-
     init {
         getTipoVuelos()
     }
@@ -139,9 +137,6 @@ class TipoVueloViewModel @Inject constructor(
 
                 getTipoVuelos()
                 nuevo()
-
-                delay(2000)
-                _uiEvent.send(UiEvent.NavigateUp)
             } catch (e: retrofit2.HttpException) {
                 if (e.code() == 500) {
                     _uiState.update {
@@ -168,8 +163,6 @@ class TipoVueloViewModel @Inject constructor(
                     )
                 }
             }
-
-            _uiEvent.send(UiEvent.NavigateUp)
         }
     }
 
@@ -186,8 +179,6 @@ class TipoVueloViewModel @Inject constructor(
                 }
                 getTipoVuelos()
                 nuevo()
-                delay(2000)
-                _uiEvent.send(UiEvent.NavigateUp)
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
@@ -245,7 +236,7 @@ class TipoVueloViewModel @Inject constructor(
                                 it.copy(
                                     tipoVueloId = tipoVuelo?.tipoVueloId,
                                     nombreVuelo = tipoVuelo?.nombreVuelo ?: "",
-                                    descripcionTipoVuelo = tipoVuelo?.descripcionTipoVuelo ?: "",
+                                    descripcionTipoVuelo = tipoVuelo?.descripcionTipoVuelo ?: ""
                                 )
                             }
                         }
@@ -297,5 +288,5 @@ class TipoVueloViewModel @Inject constructor(
 fun TipoVueloUiState.toEntity() = TipoVueloDTO(
     tipoVueloId = tipoVueloId,
     nombreVuelo = nombreVuelo ?: "",
-    descripcionTipoVuelo = descripcionTipoVuelo ?: "",
+    descripcionTipoVuelo = descripcionTipoVuelo ?: ""
 )

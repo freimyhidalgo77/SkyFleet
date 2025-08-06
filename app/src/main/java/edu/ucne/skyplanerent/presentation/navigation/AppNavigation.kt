@@ -194,20 +194,21 @@ fun AppNavigation(context: Context) {
         }
 
 
+
         composable<Screen.Reserva> {
             ReservaListScreen(
                 scope = scope,
                 onCreate = { /* navController.navigate(...) */ },
                 onDetails = {reserva-> navController.navigate(Screen.ReservaDetails(reserva)) },
-                onEdit = { navController.navigate(Screen.ReservaEdit(0)) },
+                onEdit = {id-> navController.navigate(Screen.ReservaEdit(id, id)) },
                 onDelete = { navController.navigate(Screen.ReservaDelete(0)) },
                 navController = navController
             )
         }
 
         composable<Screen.Rutas_y_viajes> { backStackEntry ->
+            val aeronaveViewModel: AeronaveViewModel = hiltViewModel(backStackEntry)
             val reservaViewModel: ReservaViewModel = hiltViewModel(backStackEntry)
-
             Rutas_Viajes_Screen(
                 goToRuta = { id ->
                     navController.navigate(Screen.ReservaRutaDetails(id))
@@ -215,16 +216,19 @@ fun AppNavigation(context: Context) {
                 goBackDetails = {
                     navController.navigate(Screen.RutaDetails(0))
                 },
-                goTopreReserva = {
-                    navController.navigate(Screen.PreReserva(0))
+                goTopreReserva = {id->
+                    navController.navigate(Screen.PreReserva(id))
                 },
                 scope = scope,
                 reservaViewModel = reservaViewModel,
+                aeronaveViewModel = aeronaveViewModel,
                 goBack = {
                     navController.navigate(Screen.Home)
-                }
+                },
+                navController = navController
             )
         }
+
 
         /* composable<Screen.ReservaRutaDetails> { backStackEntry ->
             val args = backStackEntry.toRoute<Screen.ReservaRutaDetails>()
@@ -244,7 +248,6 @@ fun AppNavigation(context: Context) {
                 }
             )
         }*/
-
 
 
         composable<Screen.RutaDetails> {
@@ -297,7 +300,6 @@ fun AppNavigation(context: Context) {
 
         }*/
 
-
         composable<Screen.PreReserva> { backStackEntry ->
             val parentEntry = remember(backStackEntry) {
                 navController.getBackStackEntry(Screen.Rutas_y_viajes)
@@ -309,10 +311,10 @@ fun AppNavigation(context: Context) {
             PreReservaListScreen(
                 preReservaId = args.prereservaId,
                 goBack = {
-                    navController.navigate(Screen.PreReserva(0))
+                    navController.navigate(Screen.Rutas_y_viajes)
                 },
-                goToFormulario = {
-                    navController.navigate(Screen.Formulario(0))
+                goToFormulario = {id->
+                    navController.navigate(Screen.Formulario(0,id))
                 },
                 tipoVueloList = tipoList,
                 rutaList = rutaList,
@@ -321,20 +323,19 @@ fun AppNavigation(context: Context) {
             )
         }
 
-
-        composable<Screen.Formulario> {
-            val args = it.toRoute<Screen.Formulario>()
+        composable<Screen.Formulario> { backStackEntry ->
+            val args = backStackEntry.toRoute<Screen.Formulario>()
+            val currentUserEmail = auth.currentUser?.email ?: sessionManager.getCurrentUserId()
             FormularioScreen(
                 formularioId = args.formularioId,
-                goBack = {
-                    navController.navigate(Screen.Formulario(0))
-                },
+                aeronaveSeleccionadaId = args.aeronaveId,
+                goBack = { navController.popBackStack() },
                 goToPago = { pagoId ->
                     navController.navigate(Screen.PagoReserva(pagoId))
-                }
+                },
+                currentUserEmail = currentUserEmail
             )
         }
-
 
         composable<Screen.ReservaDetails> {
             val args = it.toRoute<Screen.ReservaDetails>()
@@ -345,15 +346,13 @@ fun AppNavigation(context: Context) {
                 },
                 scope = scope,
                 goToEdit = {reservaId->
-                    navController.navigate(Screen.ReservaEdit(reservaId))
+                    navController.navigate(Screen.ReservaEdit(reservaId,reservaId))
                 },
 
                 goToDelete = {reservaId->
                     navController.navigate(Screen.ReservaDelete(reservaId))
                 }
-
             )
-
         }
 
 
@@ -363,11 +362,11 @@ fun AppNavigation(context: Context) {
                 reservaId = args.reservaId,
                 goBack = {reservaId->
                     navController.navigate(Screen.ReservaDetails(reservaId))
-                }
+                },
+                aeronaveSeleccionadaId = args.reservaId
 
             )
         }
-
 
 
         composable<Screen.ReservaDelete> {
@@ -378,7 +377,6 @@ fun AppNavigation(context: Context) {
                     navController.navigate(Screen.Reserva)
                 },
             )
-
         }
 
         composable<Screen.PagoReserva> { backStackEntry ->
@@ -504,7 +502,8 @@ fun AppNavigation(context: Context) {
                 goToAeronave = {aeronaveId->
                     navController.navigate(Screen.TipoAeronaveDetails(aeronaveId))
                 },
-                goBack = { navController.popBackStack() }
+                goBack = { navController.popBackStack() },
+                navController = navController
             )
         }
 
@@ -519,10 +518,10 @@ fun AppNavigation(context: Context) {
                 goBack = { navController.popBackStack() },
                 onReservar = {
                     navController.navigate(Screen.Rutas_y_viajes)
-                }
+                },
+                navController = navController
             )
         }
-
 
             composable<Screen.CategoriaAeronave> { backStack ->
                 val args = backStack.toRoute<Screen.CategoriaAeronave>()
@@ -541,8 +540,6 @@ fun AppNavigation(context: Context) {
                 goToPerfil = { adminId ->
                     navController.navigate(Screen.PerfilAdmin(adminId))
                 },
-                aeronaveViewModel = hiltViewModel(),
-                reservaViewModel = hiltViewModel()
             )
         }
 
