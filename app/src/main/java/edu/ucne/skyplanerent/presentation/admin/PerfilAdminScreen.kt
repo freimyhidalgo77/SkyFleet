@@ -55,6 +55,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import edu.ucne.skyplanerent.R
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -183,6 +185,7 @@ fun PerfilAdminScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
+                .verticalScroll(rememberScrollState()) // Hacer la columna desplazable
                 .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
@@ -306,7 +309,7 @@ fun PerfilAdminScreen(
             Spacer(modifier = Modifier.weight(1f))
 
             Button(
-                onClick = { showDialog = true }, // Mostrar el diálogo en lugar de ejecutar goToFirstScreen directamente
+                onClick = { showDialog = true },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 16.dp),
