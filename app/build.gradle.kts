@@ -95,6 +95,12 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.4.0")
     implementation("androidx.activity:activity-compose:1.8.0")
 
+    implementation("com.google.accompanist:accompanist-pager:0.28.0")
+    implementation("com.google.accompanist:accompanist-pager-indicators:0.28.0")
+
+// Para animaciones
+    implementation("androidx.compose.animation:animation:1.5.4")
+
 
     //Hilt
     implementation("com.google.dagger:hilt-android:2.51")
