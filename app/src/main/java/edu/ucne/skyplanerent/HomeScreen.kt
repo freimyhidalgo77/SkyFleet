@@ -173,7 +173,7 @@ fun HomeScreen(
                 )
 
                 Spacer(modifier = Modifier.height(15.dp))
-                
+
             }
         }
     }
@@ -191,10 +191,10 @@ fun AnimatedAircraftCarousel(navController: NavController) {
     )
 
     val aircraftTitles = listOf(
-        "Reservar Vuelo",
+        "Mis reservas",
         "Explorar Rutas",
-        "Mis Reservas",
-        "Ofertas Especiales"
+        "Reservar vuelo",
+        "Nuestra flota de aviones"
     )
 
     val pagerState = rememberPagerState(pageCount = { aircraftImages.size })
@@ -227,8 +227,8 @@ fun AnimatedAircraftCarousel(navController: NavController) {
                     when (page) {
                         0 -> navController.navigate(Screen.Reserva)
                         1 -> navController.navigate(Screen.Rutas_y_viajes)
-                        2 -> navController.navigate("mis_reservas")
-                        3 -> navController.navigate("ofertas")
+                        2 -> navController.navigate(Screen.Reserva)
+                        3 -> navController.navigate(Screen.CategoriaAeronaveReservaList)
                     }
                 },
                 modifier = Modifier.fillMaxSize()
