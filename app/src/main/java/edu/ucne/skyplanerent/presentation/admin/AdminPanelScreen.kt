@@ -22,6 +22,10 @@ import androidx.navigation.NavController
 import edu.ucne.skyplanerent.R
 import androidx.compose.ui.geometry.Size
 import edu.ucne.skyplanerent.presentation.navigation.Screen
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.ColorFilter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,11 +52,14 @@ fun AdminPanelScreen(
             ) {
                 NavigationBarItem(
                     icon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.admin),
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(R.drawable.admin)
+                                .size(24)
+                                .build(),
                             contentDescription = "Admin Panel (Activo)",
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(24.dp),
+                            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
                         )
                     },
                     label = { Text("Admin Panel", fontSize = 12.sp) },
@@ -323,7 +330,7 @@ fun AdminPanelScreen(
                                     drawText(
                                         month,
                                         index * barWidth + barWidth / 2,
-                                        size.height + 20f, // Mover las etiquetas 20 píxeles debajo del Canvas
+                                        size.height + 20f,
                                         android.graphics.Paint().apply {
                                             color = android.graphics.Color.GRAY
                                             textSize = 24f
@@ -360,11 +367,14 @@ fun AdminPanelScreen(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier.padding(24.dp)
                         ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.aeronave),
+                            AsyncImage(
+                                model = ImageRequest.Builder(LocalContext.current)
+                                    .data(R.drawable.aeronave)
+                                    .size(24)
+                                    .build(),
                                 contentDescription = "Aeronaves",
                                 modifier = Modifier.size(24.dp),
-                                tint = MaterialTheme.colorScheme.primary
+                                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
                             )
                             Text(text = "Gestionar aeronaves", fontSize = 16.sp)
                         }
@@ -379,11 +389,14 @@ fun AdminPanelScreen(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier.padding(24.dp)
                         ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ruta),
+                            AsyncImage(
+                                model = ImageRequest.Builder(LocalContext.current)
+                                    .data(R.drawable.ruta)
+                                    .size(24)
+                                    .build(),
                                 contentDescription = "Rutas",
                                 modifier = Modifier.size(24.dp),
-                                tint = MaterialTheme.colorScheme.primary
+                                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
                             )
                             Text(text = "Gestionar rutas", fontSize = 16.sp)
                         }
@@ -402,11 +415,14 @@ fun AdminPanelScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.padding(24.dp)
                     ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.tipovuelo),
+                        AsyncImage(
+                            model = ImageRequest.Builder(LocalContext.current)
+                                .data(R.drawable.tipovuelo)
+                                .size(32)
+                                .build(),
                             contentDescription = "Tipos de Vuelo",
                             modifier = Modifier.size(32.dp),
-                            tint = MaterialTheme.colorScheme.primary
+                            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
                         )
                         Text(text = "Gestionar tipos de vuelo", fontSize = 16.sp)
                     }
