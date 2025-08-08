@@ -1,4 +1,4 @@
-package edu.ucne.skyplanerent.presentation.ruta_y_viajes.formulario
+package edu.ucne.skyplanerent.presentation.rutayviajes.formulario
 
 sealed interface FormularioEvent{
 

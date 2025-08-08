@@ -1,6 +1,5 @@
 package edu.ucne.skyplanerent.presentation.login
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel

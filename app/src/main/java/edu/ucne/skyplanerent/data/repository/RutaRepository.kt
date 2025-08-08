@@ -9,7 +9,6 @@ import edu.ucne.skyplanerent.data.remote.rutas.RutasDataSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import retrofit2.HttpException
-import java.io.IOException
 import javax.inject.Inject
 
 class RutaRepository @Inject constructor(

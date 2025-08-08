@@ -4,7 +4,7 @@ import edu.ucne.skyplanerent.data.local.entity.ReservaEntity
 import edu.ucne.skyplanerent.data.remote.dto.AeronaveDTO
 import edu.ucne.skyplanerent.data.remote.dto.RutaDTO
 import edu.ucne.skyplanerent.data.remote.dto.TipoVueloDTO
-import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoLicencia
+import edu.ucne.skyplanerent.presentation.rutayviajes.tipoVuelo.TipoLicencia
 import java.util.Date
 
 data class UiState (

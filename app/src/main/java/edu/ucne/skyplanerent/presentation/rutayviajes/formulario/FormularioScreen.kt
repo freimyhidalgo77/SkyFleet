@@ -1,4 +1,4 @@
-package edu.ucne.skyplanerent.presentation.ruta_y_viajes.formulario
+package edu.ucne.skyplanerent.presentation.rutayviajes.formulario
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -22,7 +22,6 @@ import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -40,18 +39,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.ucne.skyplanerent.data.remote.dto.AeronaveDTO
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveUiState
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveViewModel
 import edu.ucne.skyplanerent.presentation.reserva.ReservaViewModel
-import edu.ucne.skyplanerent.presentation.reserva.UiState
 import kotlin.reflect.KFunction1
 
 

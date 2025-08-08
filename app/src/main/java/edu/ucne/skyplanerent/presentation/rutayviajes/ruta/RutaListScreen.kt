@@ -1,4 +1,4 @@
-package edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta
+package edu.ucne.skyplanerent.presentation.rutayviajes.ruta
 
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -20,7 +20,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
@@ -56,10 +55,8 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import edu.ucne.skyplanerent.R
 import edu.ucne.skyplanerent.data.remote.dto.RutaDTO
-import edu.ucne.skyplanerent.presentation.navigation.Screen
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)

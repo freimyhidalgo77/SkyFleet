@@ -1,7 +1,6 @@
-package edu.ucne.skyplanerent.presentation.ruta_y_viajes.formulario
+package edu.ucne.skyplanerent.presentation.rutayviajes.formulario
 
 import edu.ucne.skyplanerent.data.local.entity.FormularioEntity
-import edu.ucne.skyplanerent.data.local.entity.ReservaEntity
 import java.util.Date
 
 data class FormularioUiState (

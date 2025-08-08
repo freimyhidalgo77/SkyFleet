@@ -1,6 +1,5 @@
 package edu.ucne.skyplanerent.presentation.reserva
 
-//import androidx.benchmark.macro.collect
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -33,7 +32,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,12 +40,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.OffsetMapping
-import androidx.compose.ui.text.input.TransformedText
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -58,17 +52,16 @@ import edu.ucne.skyplanerent.data.local.entity.TipoVueloEntity
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveUiState
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveViewModel
 import edu.ucne.skyplanerent.presentation.pago.CreditCardFilter
-import edu.ucne.skyplanerent.presentation.pago.DateFilter
 
 import edu.ucne.skyplanerent.presentation.pago.DatosTarjetaCredito
 import edu.ucne.skyplanerent.presentation.pago.DatosTransferencia
 import edu.ucne.skyplanerent.presentation.pago.MetodoPago
-import edu.ucne.skyplanerent.presentation.ruta_y_viajes.formulario.FormularioUiState
-import edu.ucne.skyplanerent.presentation.ruta_y_viajes.formulario.FormularioViewModel
-import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaUiState
-import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaViewModel
-import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloUiState
-import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloViewModel
+import edu.ucne.skyplanerent.presentation.rutayviajes.formulario.FormularioUiState
+import edu.ucne.skyplanerent.presentation.rutayviajes.formulario.FormularioViewModel
+import edu.ucne.skyplanerent.presentation.rutayviajes.ruta.RutaUiState
+import edu.ucne.skyplanerent.presentation.rutayviajes.ruta.RutaViewModel
+import edu.ucne.skyplanerent.presentation.rutayviajes.tipoVuelo.TipoVueloUiState
+import edu.ucne.skyplanerent.presentation.rutayviajes.tipoVuelo.TipoVueloViewModel
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale

@@ -1,4 +1,4 @@
-package edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta
+package edu.ucne.skyplanerent.presentation.rutayviajes.ruta
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -116,12 +116,14 @@ fun ReservaRutaDetailsBodyScreen(
                         fontSize = 14.sp,
                         color = Color(0xFF5A6B87)
                     )
-                    Text(
-                        text = uiState.origen,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
+                    uiState.origen?.let {
+                        Text(
+                            text = it,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+                    }
 
                     Text(
                         text = "Distancia",
@@ -142,12 +144,14 @@ fun ReservaRutaDetailsBodyScreen(
                         fontSize = 14.sp,
                         color = Color(0xFF5A6B87)
                     )
-                    Text(
-                        text = uiState.destino,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
+                    uiState.destino?.let {
+                        Text(
+                            text = it,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+                    }
 
                     Text(
                         text = "Duración estimada",

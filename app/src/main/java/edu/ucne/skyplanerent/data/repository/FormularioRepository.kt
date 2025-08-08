@@ -1,7 +1,6 @@
 package edu.ucne.skyplanerent.data.repository
 
 import edu.ucne.skyplanerent.data.local.dao.FormularioDao
-import edu.ucne.skyplanerent.data.local.dao.RutaDao
 import edu.ucne.skyplanerent.data.local.entity.FormularioEntity
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject

@@ -2,8 +2,6 @@ package edu.ucne.skyplanerent.presentation.categoriaaeronave
 
 import android.content.Context
 import android.net.Uri
-import android.util.Log
-//import androidx.benchmark.json.BenchmarkData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel

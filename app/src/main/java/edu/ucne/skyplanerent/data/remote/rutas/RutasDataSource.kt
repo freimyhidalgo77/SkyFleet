@@ -1,7 +1,5 @@
 package edu.ucne.skyplanerent.data.remote.rutas
 
-import edu.ucne.skyplanerent.data.remote.aeronaves.AeronavesManagerApi
-import edu.ucne.skyplanerent.data.remote.dto.AeronaveDTO
 import edu.ucne.skyplanerent.data.remote.dto.RutaDTO
 import javax.inject.Inject
 

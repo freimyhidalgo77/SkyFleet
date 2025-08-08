@@ -1,4 +1,4 @@
-package edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo
+package edu.ucne.skyplanerent.presentation.rutayviajes.tipoVuelo
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
@@ -48,9 +48,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edu.ucne.skyplanerent.presentation.UiEvent
 import kotlinx.coroutines.launch
-import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 

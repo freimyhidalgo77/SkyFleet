@@ -3,9 +3,7 @@ package edu.ucne.skyplanerent.presentation.admin
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import edu.ucne.skyplanerent.data.local.entity.AeronaveEntity
 import edu.ucne.skyplanerent.data.local.entity.ReservaEntity
-import edu.ucne.skyplanerent.data.local.entity.RutaEntity
 import edu.ucne.skyplanerent.data.local.entity.UserRegisterAccount
 import edu.ucne.skyplanerent.data.remote.Resource
 import edu.ucne.skyplanerent.data.remote.dto.AeronaveDTO
@@ -14,13 +12,6 @@ import edu.ucne.skyplanerent.data.repository.AeronaveRepository
 import edu.ucne.skyplanerent.data.repository.ReservaRepository
 import edu.ucne.skyplanerent.data.repository.RutaRepository
 import edu.ucne.skyplanerent.data.repository.UserRepository
-import edu.ucne.skyplanerent.presentation.aeronave.AeronaveUiState
-import edu.ucne.skyplanerent.presentation.aeronave.AeronaveViewModel
-import edu.ucne.skyplanerent.presentation.reserva.ReservaViewModel
-import edu.ucne.skyplanerent.presentation.reserva.UiState
-import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaUiState
-import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaViewModel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

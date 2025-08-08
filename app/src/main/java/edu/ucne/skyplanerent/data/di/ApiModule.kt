@@ -8,13 +8,11 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import edu.ucne.skyplanerent.data.remote.admins.AdminManagerApi
 import edu.ucne.skyplanerent.data.remote.aeronaves.AeronavesManagerApi
-import edu.ucne.skyplanerent.data.remote.dto.TipoVueloDTO
 import edu.ucne.skyplanerent.data.remote.rutas.RutaManagerApi
 import edu.ucne.skyplanerent.data.remote.tiposVuelos.TipoVueloManagerApi
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 import javax.inject.Singleton
-
 
 
 @Module

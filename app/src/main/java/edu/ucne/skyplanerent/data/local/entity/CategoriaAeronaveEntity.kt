@@ -1,6 +1,5 @@
 package edu.ucne.skyplanerent.data.local.entity
 
-import android.net.Uri
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 

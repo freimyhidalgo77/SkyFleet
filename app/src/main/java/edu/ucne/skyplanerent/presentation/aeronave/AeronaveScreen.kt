@@ -66,7 +66,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import edu.ucne.skyplanerent.presentation.UiEvent
 import edu.ucne.skyplanerent.presentation.categoriaaeronave.CategoriaAeronaveViewModel
 import kotlinx.coroutines.launch
 

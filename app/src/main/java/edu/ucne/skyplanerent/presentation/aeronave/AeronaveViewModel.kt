@@ -10,22 +10,21 @@ import edu.ucne.skyplanerent.data.remote.Resource
 import edu.ucne.skyplanerent.data.remote.dto.AeronaveDTO
 import edu.ucne.skyplanerent.data.repository.AeronaveRepository
 import edu.ucne.skyplanerent.presentation.UiEvent
-import edu.ucne.skyplanerent.presentation.categoriaaeronave.CategoriaAeronaveEvent
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
 import javax.inject.Inject
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.mapLatest
 
 @HiltViewModel
 class AeronaveViewModel @Inject constructor(

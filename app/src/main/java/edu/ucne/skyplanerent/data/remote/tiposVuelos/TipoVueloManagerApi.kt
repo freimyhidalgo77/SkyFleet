@@ -1,8 +1,6 @@
 package edu.ucne.skyplanerent.data.remote.tiposVuelos
 
-import edu.ucne.skyplanerent.data.remote.dto.RutaDTO
 import edu.ucne.skyplanerent.data.remote.dto.TipoVueloDTO
-import okhttp3.ResponseBody
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
