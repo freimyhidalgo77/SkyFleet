@@ -1,5 +1,7 @@
 package edu.ucne.skyplanerent.presentation.rutayviajes.ruta
 
+import android.util.Log
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,6 +20,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 
 import javax.inject.Inject
@@ -32,7 +35,6 @@ class RutaViewModel @Inject constructor(
     private val _uiEvent = Channel<UiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
 
-    // Variables para búsqueda
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
@@ -52,6 +54,40 @@ class RutaViewModel @Inject constructor(
                     _searchResults.value = filtered
                 }
         }
+
+        viewModelScope.launch {
+            _uiState
+                .map { it.isSuccess to it.successMessage }
+                .distinctUntilChanged()
+                .collect { (isSuccess, successMessage) ->
+                    if (isSuccess && !successMessage.isNullOrBlank()) {
+                        _uiState.update { it.copy(showDialog = true) }
+                    }
+                }
+        }
+
+        viewModelScope.launch {
+            _uiState
+                .map { it.errorMessage }
+                .distinctUntilChanged()
+                .collect { errorMessage ->
+                    if (!errorMessage.isNullOrBlank()) {
+                        _uiEvent.send(UiEvent.ShowSnackbar(errorMessage))
+                    }
+                }
+        }
+    }
+
+    fun initialize(rutaId: Int?) {
+        viewModelScope.launch {
+            if (_uiState.value.rutaId == null && _uiState.value.origen.isNullOrBlank() && _uiState.value.destino.isNullOrBlank()) {
+                if (rutaId != null && rutaId > 0) {
+                    onEvent(RutaEvent.GetRuta(rutaId))
+                } else {
+                    onEvent(RutaEvent.New)
+                }
+            }
+        }
     }
 
     fun onEvent(event: RutaEvent) {
@@ -63,15 +99,17 @@ class RutaViewModel @Inject constructor(
             RutaEvent.LimpiarErrorMessageDuracionEstimadaChange -> limpiarErrorMessageDuracionEstimada()
             is RutaEvent.OrigenChange -> origenChange(event.origen)
             RutaEvent.New -> nuevo()
-            RutaEvent.PostRuta -> addRuta()
+            RutaEvent.SubmitRuta -> submitRuta()
             is RutaEvent.RutaChange -> rutaIdChange(event.rutaId)
             RutaEvent.ResetSuccessMessage -> _uiState.update { it.copy(isSuccess = false, successMessage = null) }
             is RutaEvent.GetRuta -> findRuta(event.id)
             RutaEvent.Delete -> deleteRuta()
             is RutaEvent.DestinoChange -> destinoChange(event.destino)
             is RutaEvent.DuracionEstimadaChange -> duracionEstimadaChange(event.duracionEstimada)
-            RutaEvent.Save -> saveRuta()
             is RutaEvent.DistanciaChange -> distanciaChange(event.distancia)
+            RutaEvent.CloseDialog -> closeDialog()
+            RutaEvent.PostRuta -> addRuta()
+            RutaEvent.Save -> saveRuta()
         }
     }
 
@@ -110,38 +148,90 @@ class RutaViewModel @Inject constructor(
 
     private fun limpiarErrorMessageDuracionEstimada() {
         viewModelScope.launch {
-            _uiState.update { it.copy(errorDuracionEstimada = "") }
+            _uiState.update { it.copy(errorDuracion = "") }
         }
     }
 
     private fun origenChange(origen: String) {
         viewModelScope.launch {
-            _uiState.update { it.copy(origen = origen) }
+            val error = if (origen.isBlank()) "El origen no puede estar vacío" else ""
+            _uiState.update {
+                it.copy(
+                    origen = origen,
+                    errorOrigen = error,
+                    isFormValid = isFormValid(),
+                    submitButtonContentColor = if (isFormValid()) Color.Blue else Color.Gray,
+                    submitButtonBorderColor = if (isFormValid()) Color.Blue else Color.Gray
+                )
+            }
         }
     }
 
     private fun rutaIdChange(id: Int) {
         viewModelScope.launch {
-            _uiState.update { it.copy(rutaId = id) }
+            _uiState.update {
+                it.copy(
+                    rutaId = id,
+                    title = "Editar Ruta",
+                    submitButtonText = "Actualizar",
+                    isFormValid = isFormValid(),
+                    submitButtonContentColor = if (isFormValid()) Color.Blue else Color.Gray,
+                    submitButtonBorderColor = if (isFormValid()) Color.Blue else Color.Gray
+                )
+            }
         }
     }
 
     private fun destinoChange(destino: String) {
         viewModelScope.launch {
-            _uiState.update { it.copy(destino = destino) }
+            val error = if (destino.isBlank()) "El destino no puede estar vacío" else ""
+            _uiState.update {
+                it.copy(
+                    destino = destino,
+                    errorDestino = error,
+                    isFormValid = isFormValid(),
+                    submitButtonContentColor = if (isFormValid()) Color.Blue else Color.Gray,
+                    submitButtonBorderColor = if (isFormValid()) Color.Blue else Color.Gray
+                )
+            }
         }
     }
 
     private fun duracionEstimadaChange(duracion: Int) {
         viewModelScope.launch {
-            _uiState.update { it.copy(duracionEstimada = duracion) }
+            val error = if (duracion <= 0) "La duración debe ser mayor a 0" else ""
+            _uiState.update {
+                it.copy(
+                    duracionEstimada = duracion,
+                    errorDuracion = error,
+                    isFormValid = isFormValid(),
+                    submitButtonContentColor = if (isFormValid()) Color.Blue else Color.Gray,
+                    submitButtonBorderColor = if (isFormValid()) Color.Blue else Color.Gray
+                )
+            }
         }
     }
 
     private fun distanciaChange(distancia: Double) {
         viewModelScope.launch {
-            _uiState.update { it.copy(distancia = distancia) }
+            val error = if (distancia <= 0.0) "La distancia debe ser mayor a 0" else ""
+            _uiState.update {
+                it.copy(
+                    distancia = distancia,
+                    errorDistancia = error,
+                    isFormValid = isFormValid(),
+                    submitButtonContentColor = if (isFormValid()) Color.Blue else Color.Gray,
+                    submitButtonBorderColor = if (isFormValid()) Color.Blue else Color.Gray
+                )
+            }
         }
+    }
+
+    private fun isFormValid(): Boolean {
+        return _uiState.value.origen?.isNotBlank() == true &&
+                _uiState.value.destino?.isNotBlank() == true &&
+                _uiState.value.distancia > 0.0 &&
+                _uiState.value.duracionEstimada > 0
     }
 
     private fun nuevo() {
@@ -156,46 +246,54 @@ class RutaViewModel @Inject constructor(
                     errorOrigen = "",
                     errorDestino = "",
                     errorDistancia = "",
-                    errorDuracionEstimada = "",
-                    errorMessage = ""
+                    errorDuracion = "",
+                    errorMessage = "",
+                    showDialog = false,
+                    isFormValid = false,
+                    title = "Nueva Ruta",
+                    submitButtonText = "Guardar",
+                    submitButtonContentColor = Color.Gray,
+                    submitButtonDisabledContentColor = Color.Gray,
+                    submitButtonBorderColor = Color.Gray
                 )
+            }
+        }
+    }
+
+    private fun submitRuta() {
+        viewModelScope.launch {
+            if (_uiState.value.isFormValid) {
+                if (_uiState.value.rutaId == null) {
+                    addRuta()
+                } else {
+                    saveRuta()
+                }
+            } else {
+                _uiState.update {
+                    it.copy(
+                        errorOrigen = if (_uiState.value.origen.isNullOrBlank()) "El origen es obligatorio *" else "",
+                        errorDestino = if (_uiState.value.destino.isNullOrBlank()) "El destino es obligatorio *" else "",
+                        errorDistancia = if (_uiState.value.distancia <= 0.0) "La distancia debe ser mayor que cero *" else "",
+                        errorDuracion = if (_uiState.value.duracionEstimada <= 0) "La duración debe ser mayor que cero *" else "",
+                        isFormValid = isFormValid()
+                    )
+                }
             }
         }
     }
 
     private fun addRuta() {
         viewModelScope.launch {
-            var error = false
-
-            if (_uiState.value.origen.isNullOrBlank()) {
-                _uiState.update { it.copy(errorOrigen = "El origen es obligatorio *") }
-                error = true
-            }
-            if (_uiState.value.destino.isNullOrBlank()) {
-                _uiState.update { it.copy(errorDestino = "El destino es obligatorio *") }
-                error = true
-            }
-            if (_uiState.value.distancia == null || _uiState.value.distancia <= 0.0) {
-                _uiState.update { it.copy(errorDistancia = "La distancia debe ser mayor que cero *") }
-                error = true
-            }
-            if (_uiState.value.duracionEstimada <= 0) {
-                _uiState.update { it.copy(errorDuracionEstimada = "La duración debe ser mayor que cero *") }
-                error = true
-            }
-            if (error) return@launch
-
             try {
                 rutaRepository.saveRuta(_uiState.value.toEntity())
-
                 _uiState.update {
                     it.copy(
                         isSuccess = true,
                         successMessage = "Ruta guardada correctamente",
-                        errorMessage = null
+                        errorMessage = null,
+                        showDialog = true
                     )
                 }
-
                 getRutas()
                 nuevo()
             } catch (e: retrofit2.HttpException) {
@@ -204,7 +302,8 @@ class RutaViewModel @Inject constructor(
                         it.copy(
                             isSuccess = true,
                             successMessage = "Ruta guardada. Falló sincronización con el servidor (500).",
-                            errorMessage = null
+                            errorMessage = null,
+                            showDialog = true
                         )
                     }
                 } else {
@@ -214,7 +313,6 @@ class RutaViewModel @Inject constructor(
                             isSuccess = false
                         )
                     }
-                    return@launch
                 }
             } catch (e: Exception) {
                 _uiState.update {
@@ -235,7 +333,8 @@ class RutaViewModel @Inject constructor(
                     it.copy(
                         isSuccess = true,
                         successMessage = "Ruta guardada correctamente",
-                        errorMessage = null
+                        errorMessage = null,
+                        showDialog = true
                     )
                 }
                 getRutas()
@@ -260,7 +359,8 @@ class RutaViewModel @Inject constructor(
                         it.copy(
                             isSuccess = true,
                             successMessage = "Ruta eliminada correctamente",
-                            errorMessage = null
+                            errorMessage = null,
+                            showDialog = true
                         )
                     }
                     getRutas()
@@ -286,6 +386,19 @@ class RutaViewModel @Inject constructor(
         }
     }
 
+    private fun closeDialog() {
+        viewModelScope.launch {
+            _uiState.update {
+                it.copy(
+                    showDialog = false,
+                    isSuccess = false,
+                    successMessage = null
+                )
+            }
+            onEvent(RutaEvent.New)
+        }
+    }
+
     fun findRuta(rutaId: Int) {
         viewModelScope.launch {
             if (rutaId > 0) {
@@ -299,7 +412,12 @@ class RutaViewModel @Inject constructor(
                                     origen = ruta?.origen ?: "",
                                     destino = ruta?.destino ?: "",
                                     distancia = ruta?.distancia ?: 0.0,
-                                    duracionEstimada = ruta?.duracion ?: 0
+                                    duracionEstimada = ruta?.duracion ?: 0,
+                                    isFormValid = isFormValid(),
+                                    title = "Editar Ruta",
+                                    submitButtonText = "Actualizar",
+                                    submitButtonContentColor = if (isFormValid()) Color.Blue else Color.Gray,
+                                    submitButtonBorderColor = if (isFormValid()) Color.Blue else Color.Gray
                                 )
                             }
                         }
@@ -348,6 +466,6 @@ fun RutaUiState.toEntity() = RutaDTO(
     rutaId = rutaId,
     origen = origen ?: "",
     destino = destino ?: "",
-    distancia = distancia ?: 0.0,
-    duracion = duracionEstimada ?: 0
+    distancia = distancia,
+    duracion = duracionEstimada
 )
