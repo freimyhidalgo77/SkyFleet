@@ -1,7 +1,6 @@
 package edu.ucne.skyplanerent.presentation.aeronave
 
 import android.net.Uri
-import edu.ucne.skyplanerent.presentation.categoriaaeronave.CategoriaAeronaveEvent
 
 
 sealed interface AeronaveEvent {

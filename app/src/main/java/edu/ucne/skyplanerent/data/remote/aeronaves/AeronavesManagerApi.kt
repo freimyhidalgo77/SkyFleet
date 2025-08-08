@@ -1,7 +1,6 @@
 package edu.ucne.skyplanerent.data.remote.aeronaves
 
 import edu.ucne.skyplanerent.data.remote.dto.AeronaveDTO
-import okhttp3.ResponseBody
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET

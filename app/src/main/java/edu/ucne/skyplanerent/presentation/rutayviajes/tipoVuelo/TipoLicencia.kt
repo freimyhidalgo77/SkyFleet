@@ -1,4 +1,4 @@
-package edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo
+package edu.ucne.skyplanerent.presentation.rutayviajes.tipoVuelo
 
 
 enum class TipoLicencia(val descripcion: String) {

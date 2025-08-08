@@ -1,6 +1,5 @@
-package edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo
+package edu.ucne.skyplanerent.presentation.rutayviajes.tipoVuelo
 
-import edu.ucne.skyplanerent.data.local.entity.TipoVueloEntity
 import edu.ucne.skyplanerent.data.remote.dto.TipoVueloDTO
 
 data class TipoVueloUiState(

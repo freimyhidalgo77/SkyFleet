@@ -1,4 +1,4 @@
-package edu.ucne.skyplanerent.presentation.ruta_y_viajes
+package edu.ucne.skyplanerent.presentation.rutayviajes
 
 import android.app.DatePickerDialog
 import androidx.compose.foundation.clickable
@@ -6,11 +6,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,14 +20,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.compose.rememberNavController
 import edu.ucne.skyplanerent.data.local.entity.ReservaEntity
 import edu.ucne.skyplanerent.data.remote.dto.RutaDTO
 import edu.ucne.skyplanerent.data.remote.dto.TipoVueloDTO
 import edu.ucne.skyplanerent.presentation.reserva.ReservaViewModel
-import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaUiState
-import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaViewModel
-import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloViewModel
+import edu.ucne.skyplanerent.presentation.rutayviajes.ruta.RutaUiState
+import edu.ucne.skyplanerent.presentation.rutayviajes.ruta.RutaViewModel
+import edu.ucne.skyplanerent.presentation.rutayviajes.tipoVuelo.TipoVueloViewModel
 import kotlinx.coroutines.CoroutineScope
 import java.text.SimpleDateFormat
 import java.util.*
@@ -46,10 +43,9 @@ import edu.ucne.skyplanerent.presentation.navigation.BottomNavItem
 import edu.ucne.skyplanerent.presentation.navigation.Screen
 import edu.ucne.skyplanerent.presentation.reserva.ReservaEvent
 import edu.ucne.skyplanerent.presentation.reserva.UiState
-import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoLicencia
-import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloUiState
-import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.tipoLicenciaFromDescripcion
-//import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.tipoLicenciaFromString
+import edu.ucne.skyplanerent.presentation.rutayviajes.tipoVuelo.TipoLicencia
+import edu.ucne.skyplanerent.presentation.rutayviajes.tipoVuelo.TipoVueloUiState
+import edu.ucne.skyplanerent.presentation.rutayviajes.tipoVuelo.tipoLicenciaFromDescripcion
 import kotlinx.coroutines.launch
 
 

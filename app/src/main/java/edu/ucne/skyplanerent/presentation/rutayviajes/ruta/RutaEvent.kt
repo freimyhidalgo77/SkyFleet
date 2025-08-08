@@ -1,4 +1,4 @@
-package edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta
+package edu.ucne.skyplanerent.presentation.rutayviajes.ruta
 
 sealed interface RutaEvent{
 

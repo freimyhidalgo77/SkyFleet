@@ -1,8 +1,6 @@
 package edu.ucne.skyplanerent.data.remote.rutas
 
-import edu.ucne.skyplanerent.data.remote.dto.AeronaveDTO
 import edu.ucne.skyplanerent.data.remote.dto.RutaDTO
-import okhttp3.ResponseBody
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET

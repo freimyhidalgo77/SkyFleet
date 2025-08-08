@@ -1,7 +1,5 @@
 package edu.ucne.skyplanerent.data.remote.tiposVuelos
 
-import edu.ucne.skyplanerent.data.remote.aeronaves.AeronavesManagerApi
-import edu.ucne.skyplanerent.data.remote.dto.AeronaveDTO
 import edu.ucne.skyplanerent.data.remote.dto.TipoVueloDTO
 import javax.inject.Inject
 

@@ -10,7 +10,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import edu.ucne.skyplanerent.SkyPlaneRent
 import edu.ucne.skyplanerent.data.local.database.SkyPlaneRentDB
 import edu.ucne.skyplanerent.presentation.login.SessionManager
 import javax.inject.Singleton

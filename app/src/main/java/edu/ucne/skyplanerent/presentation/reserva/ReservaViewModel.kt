@@ -1,35 +1,27 @@
 package edu.ucne.skyplanerent.presentation.reserva
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.ucne.skyplanerent.data.local.entity.ReservaEntity
-import edu.ucne.skyplanerent.data.remote.dto.AeronaveDTO
-import edu.ucne.skyplanerent.data.remote.dto.TipoVueloDTO
 import edu.ucne.skyplanerent.data.repository.ReservaRepository
 import edu.ucne.skyplanerent.data.repository.RutaRepository
 import edu.ucne.skyplanerent.data.repository.TipoVueloRepository
-import edu.ucne.skyplanerent.presentation.UiEvent
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveUiState
 import edu.ucne.skyplanerent.presentation.login.SessionManager
-import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaEvent
-import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.RutaUiState
-import edu.ucne.skyplanerent.presentation.ruta_y_viajes.ruta.toEntity
-import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoLicencia
-import edu.ucne.skyplanerent.presentation.ruta_y_viajes.tipoVuelo.TipoVueloUiState
+import edu.ucne.skyplanerent.presentation.rutayviajes.ruta.RutaUiState
+import edu.ucne.skyplanerent.presentation.rutayviajes.tipoVuelo.TipoLicencia
+import edu.ucne.skyplanerent.presentation.rutayviajes.tipoVuelo.TipoVueloUiState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.Date
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
