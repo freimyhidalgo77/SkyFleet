@@ -2,7 +2,6 @@ package edu.ucne.skyplanerent.presentation.login
 
 import android.content.Context
 import android.content.SharedPreferences
-import androidx.compose.runtime.Composable
 import com.google.firebase.auth.FirebaseUser
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
