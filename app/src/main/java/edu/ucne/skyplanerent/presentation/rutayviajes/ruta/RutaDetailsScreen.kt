@@ -197,18 +197,22 @@ fun RutaDetailsBodyScreen(
                         Row(
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text(
-                                text = uiState.origen,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color.Black
-                            )
+                            uiState.origen?.let {
+                                Text(
+                                    text = it,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Color.Black
+                                )
+                            }
                             Spacer(modifier = Modifier.weight(0.5f))
-                            Text(
-                                text = uiState.destino,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color.Black,
-                                modifier = Modifier.padding(bottom = 16.dp)
-                            )
+                            uiState.destino?.let {
+                                Text(
+                                    text = it,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = Color.Black,
+                                    modifier = Modifier.padding(bottom = 16.dp)
+                                )
+                            }
                         }
 
                         // Distancia y Duración
