@@ -1,8 +1,13 @@
 package edu.ucne.skyplanerent.presentation.rutayviajes.ruta
 
 
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,11 +16,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -39,20 +48,21 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edu.ucne.skyplanerent.presentation.UiEvent
 import kotlinx.coroutines.launch
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.rememberScrollState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,14 +72,18 @@ fun RutaScreen(
     goBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
-    LaunchedEffect(Unit) { // Cambiado de rutaId a Unit
-        if (uiState.rutaId == null && uiState.origen.isNullOrBlank() && uiState.destino.isNullOrBlank()) {
-            if (rutaId != null && rutaId > 0) {
-                viewModel.onEvent(RutaEvent.GetRuta(rutaId))
-            } else {
-                viewModel.onEvent(RutaEvent.New)
-            }
+    LaunchedEffect(Unit) {
+        viewModel.initialize(rutaId)
+    }
+
+    LaunchedEffect(uiState.successMessage) {
+        uiState.successMessage?.let { message ->
+            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+            // Restablecer el mensaje después de mostrar el Toast
+            viewModel.onEvent(RutaEvent.ResetSuccessMessage)
+            Log.d("RutaScreen", "Toast mostrado: $message")
         }
     }
 
@@ -90,87 +104,20 @@ fun RutaBodyScreen(
     viewModel: RutaViewModel
 ) {
     val scope = rememberCoroutineScope()
-    val showDialog = remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // Validaciones
-    val origenError = uiState.origen.isNullOrBlank()
-    val destinoError = uiState.destino.isNullOrBlank()
-    val distanciaError = uiState.distancia <= 0.0
-    val duracionError = uiState.duracionEstimada <= 0
-    val isFormValid = !origenError && !destinoError && !distanciaError && !duracionError
-
-    // Diálogo de éxito
-    if (showDialog.value) {
-        AlertDialog(
-            onDismissRequest = {
-                showDialog.value = false
-                onEvent(RutaEvent.New) // Reiniciar el estado después de cerrar el diálogo
-            },
-            title = {
-                Text(
-                    text = "Ruta Guardada Correctamente",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = Color.Black
-                )
-            },
-            text = {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Place,
-                        contentDescription = "Ruta Guardada Correctamente",
-                        tint = Color.Blue,
-                        modifier = Modifier.size(48.dp)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        showDialog.value = false
-                        onEvent(RutaEvent.New) // Reiniciar el estado después de cerrar el diálogo
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Blue,
-                        contentColor = Color.White
-                    )
-                ) {
-                    Text("OK")
-                }
-            },
-            containerColor = Color.White,
-            shape = RoundedCornerShape(16.dp)
-        )
-    }
-
-    // Manejo de eventos de UI
     LaunchedEffect(Unit) {
         viewModel.uiEvent.collect { event ->
             when (event) {
                 is UiEvent.NavigateUp -> goBack()
                 is UiEvent.ShowSnackbar -> {
                     scope.launch {
-                        // No mostramos Snackbar, pero mantenemos la lógica por compatibilidad
+                        snackbarHostState.showSnackbar(
+                            message = event.message,
+                            duration = SnackbarDuration.Short
+                        )
                     }
                 }
-            }
-        }
-    }
-
-    // Mostrar diálogo para éxito o Snackbar para error
-    LaunchedEffect(uiState.isSuccess, uiState.errorMessage) {
-        if (uiState.isSuccess && !uiState.successMessage.isNullOrBlank()) {
-            showDialog.value = true
-            onEvent(RutaEvent.ResetSuccessMessage)
-        } else if (!uiState.errorMessage.isNullOrBlank()) {
-            scope.launch {
-                snackbarHostState.showSnackbar(
-                    message = uiState.errorMessage,
-                    duration = SnackbarDuration.Short
-                )
             }
         }
     }
@@ -188,7 +135,7 @@ fun RutaBodyScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = if (uiState.rutaId == null) "Nueva Ruta" else "Editar Ruta",
+                        text = uiState.title,
                         style = MaterialTheme.typography.titleLarge,
                         color = Color.White
                     )
@@ -212,7 +159,7 @@ fun RutaBodyScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .verticalScroll(rememberScrollState()) // Agregado para desplazamiento
+                .verticalScroll(rememberScrollState())
                 .padding(8.dp)
         ) {
             ElevatedCard(
@@ -221,126 +168,71 @@ fun RutaBodyScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp)
+                        .padding(16.dp)
                 ) {
-                    Spacer(modifier = Modifier.height(32.dp))
-                    Text(if (uiState.rutaId == null) "Nueva Ruta" else "Editar Ruta")
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = uiState.title,
+                        style = MaterialTheme.typography.headlineSmall
+                    )
 
-                    OutlinedTextField(
-                        value = uiState.origen ?: "",
+                    RutaTextField(
+                        value = uiState.origen.orEmpty(),
                         onValueChange = { onEvent(RutaEvent.OrigenChange(it)) },
-                        label = { Text("Origen") },
-                        modifier = Modifier.fillMaxWidth(),
-                        isError = origenError,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color.Blue,
-                            unfocusedBorderColor = Color.Gray,
-                            focusedLabelColor = Color.Blue,
-                            errorBorderColor = Color.Red
-                        )
+                        label = "Origen",
+                        isError = uiState.errorOrigen.isNotBlank(),
+                        errorMessage = uiState.errorOrigen
                     )
-                    if (origenError) {
-                        Text(
-                            text = "El origen no puede estar vacío",
-                            color = Color.Red,
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(start = 16.dp, top = 4.dp)
-                        )
-                    }
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    OutlinedTextField(
-                        value = uiState.destino ?: "",
+                    RutaTextField(
+                        value = uiState.destino.orEmpty(),
                         onValueChange = { onEvent(RutaEvent.DestinoChange(it)) },
-                        label = { Text("Destino") },
-                        modifier = Modifier.fillMaxWidth(),
-                        isError = destinoError,
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color.Blue,
-                            unfocusedBorderColor = Color.Gray,
-                            focusedLabelColor = Color.Blue,
-                            errorBorderColor = Color.Red
-                        )
+                        label = "Destino",
+                        isError = uiState.errorDestino.isNotBlank(),
+                        errorMessage = uiState.errorDestino
                     )
-                    if (destinoError) {
-                        Text(
-                            text = "El destino no puede estar vacío",
-                            color = Color.Red,
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(start = 16.dp, top = 4.dp)
-                        )
-                    }
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    OutlinedTextField(
-                        value = uiState.distancia.toString(),
+                    RutaTextField(
+                        value = if (uiState.distancia == 0.0) "" else uiState.distancia.toString(),
                         onValueChange = {
-                            onEvent(
-                                RutaEvent.DistanciaChange(
-                                    it.toDoubleOrNull() ?: 0.0
-                                )
-                            )
+                            onEvent(RutaEvent.DistanciaChange(it.toDoubleOrNull() ?: 0.0))
                         },
-                        label = { Text("Distancia") },
-                        modifier = Modifier.fillMaxWidth(),
-                        isError = distanciaError,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color.Blue,
-                            unfocusedBorderColor = Color.Gray,
-                            focusedLabelColor = Color.Blue,
-                            errorBorderColor = Color.Red
-                        )
+                        label = "Distancia (km)",
+                        isError = uiState.errorDistancia.isNotBlank(),
+                        errorMessage = uiState.errorDistancia,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Decimal,
+                            imeAction = ImeAction.Next
+                        ),
+                        keyboardActions = KeyboardActions(onNext = { /* Focus next field */ })
                     )
-                    if (distanciaError) {
-                        Text(
-                            text = "La distancia debe ser mayor a 0",
-                            color = Color.Red,
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(start = 16.dp, top = 4.dp)
-                        )
-                    }
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    OutlinedTextField(
-                        value = uiState.duracionEstimada.toString(),
+                    RutaTextField(
+                        value = if (uiState.duracionEstimada == 0) "" else uiState.duracionEstimada.toString(),
                         onValueChange = {
-                            onEvent(
-                                RutaEvent.DuracionEstimadaChange(
-                                    it.toIntOrNull() ?: 0
-                                )
-                            )
+                            onEvent(RutaEvent.DuracionEstimadaChange(it.toIntOrNull() ?: 0))
                         },
-                        label = { Text("Duración Estimada") },
-                        modifier = Modifier.fillMaxWidth(),
-                        isError = duracionError,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = Color.Blue,
-                            unfocusedBorderColor = Color.Gray,
-                            focusedLabelColor = Color.Blue,
-                            errorBorderColor = Color.Red
-                        )
+                        label = "Duración Estimada (min)",
+                        isError = uiState.errorDuracion.isNotBlank(),
+                        errorMessage = uiState.errorDuracion,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number,
+                            imeAction = ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions(onDone = { /* Submit or hide keyboard */ })
                     )
-                    if (duracionError) {
-                        Text(
-                            text = "La duración estimada debe ser mayor a 0",
-                            color = Color.Red,
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(start = 16.dp, top = 4.dp)
-                        )
-                    }
 
                     Spacer(modifier = Modifier.height(8.dp))
 
-                    uiState.errorMessage?.let {
-                        Text(text = it, color = Color.Red)
-                    }
+                    ErrorMessageText(errorMessage = uiState.errorMessage.orEmpty())
 
-                    Spacer(modifier = Modifier.padding(2.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -357,36 +249,76 @@ fun RutaBodyScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Add,
-                                contentDescription = "new button"
+                                contentDescription = "Nuevo",
+                                tint = Color.Blue
                             )
                             Text("Nuevo")
                         }
                         OutlinedButton(
-                            onClick = {
-                                if (isFormValid) {
-                                    if (uiState.rutaId == null) {
-                                        onEvent(RutaEvent.PostRuta)
-                                    } else {
-                                        onEvent(RutaEvent.Save)
-                                    }
-                                }
-                            },
-                            enabled = isFormValid,
+                            onClick = { onEvent(RutaEvent.SubmitRuta) },
+                            enabled = uiState.isFormValid,
                             colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = if (isFormValid) Color.Blue else Color.Gray,
-                                disabledContentColor = Color.Gray
+                                contentColor = uiState.submitButtonContentColor,
+                                disabledContentColor = uiState.submitButtonDisabledContentColor
                             ),
-                            border = BorderStroke(
-                                1.dp,
-                                if (isFormValid) Color.Blue else Color.Gray
-                            ),
+                            border = BorderStroke(1.dp, uiState.submitButtonBorderColor),
                             modifier = Modifier.padding(horizontal = 8.dp)
                         ) {
-                            Text(text = if (uiState.rutaId == null) "Guardar" else "Actualizar")
+                            Text(text = uiState.submitButtonText)
                         }
                     }
                 }
             }
         }
     }
+}
+
+@Composable
+fun RutaTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    isError: Boolean,
+    errorMessage: String,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default
+) {
+    Column {
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            label = { Text(label) },
+            modifier = Modifier.fillMaxWidth(),
+            isError = isError,
+            keyboardOptions = keyboardOptions,
+            keyboardActions = keyboardActions,
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = Color.Blue,
+                unfocusedBorderColor = Color.Gray,
+                focusedLabelColor = Color.Blue,
+                errorBorderColor = Color.Red,
+                focusedTextColor = Color.Black,
+                unfocusedTextColor = Color.Black
+            )
+        )
+        ErrorMessageText(
+            errorMessage = errorMessage,
+            modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+        )
+    }
+}
+
+@Composable
+fun ErrorMessageText(
+    errorMessage: String,
+    modifier: Modifier = Modifier
+) {
+    Text(
+        text = errorMessage,
+        color = Color.Red,
+        style = MaterialTheme.typography.bodySmall,
+        modifier = modifier
+            .alpha(if (errorMessage.isNotBlank()) 1f else 0f)
+            .height(if (errorMessage.isNotBlank()) 16.dp else 0.dp)
+    )
 }
