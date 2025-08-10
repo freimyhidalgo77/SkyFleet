@@ -1,6 +1,5 @@
 package edu.ucne.skyplanerent.presentation.rutayviajes.ruta
 
-import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
