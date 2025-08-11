@@ -10,6 +10,6 @@ data class AdminEntity(
     val correo: String = "",
     val contrasena:String = "",
     val foto:String = "",
-    val isPendingSync: Boolean = false // Nuevo campo
+    val isPendingSync: Boolean = false
 )
 

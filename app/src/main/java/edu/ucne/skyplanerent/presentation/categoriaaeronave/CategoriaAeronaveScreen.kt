@@ -20,16 +20,15 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AirplanemodeActive
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -60,7 +59,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoriaAeronaveScreen(
     categoriaId: Int?,
@@ -70,7 +68,7 @@ fun CategoriaAeronaveScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) { // Cambiado de categoriaId a Unit
-        if (uiState.categoriaId == null && uiState.descripcionCategoria.isNullOrBlank() && uiState.imageUri == null) {
+        if (uiState.categoriaId == null && uiState.descripcionCategoria.isBlank() && uiState.imageUri == null) {
             categoriaId?.let {
                 if (it > 0) {
                     viewModel.selectedCategoria(it) // Cargar datos para modificación
@@ -88,7 +86,6 @@ fun CategoriaAeronaveScreen(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoriaAeronaveBodyScreen(
     uiState: CategoriaAeronaveUiState,
@@ -99,7 +96,7 @@ fun CategoriaAeronaveBodyScreen(
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         uri?.let { onEvent(CategoriaAeronaveEvent.ImageSelected(it)) }
     }
-    val descripcionCategoriaError = uiState.descripcionCategoria.isNullOrBlank()
+    val descripcionCategoriaError = uiState.descripcionCategoria.isBlank()
     val isFormValid = !descripcionCategoriaError
     val snackbarHostState = remember { SnackbarHostState() }
     val showDialog = remember { mutableStateOf(false) }
@@ -206,7 +203,7 @@ fun CategoriaAeronaveBodyScreen(
                     onClick = goBack,
                     modifier = Modifier.align(Alignment.CenterVertically)
                 ) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "volver")
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "volver")
                 }
             }
             ElevatedCard(
@@ -221,7 +218,7 @@ fun CategoriaAeronaveBodyScreen(
                     Text("Registro de categorías de aeronaves")
 
                     OutlinedTextField(
-                        value = uiState.descripcionCategoria ?: "",
+                        value = uiState.descripcionCategoria,
                         onValueChange = { onEvent(CategoriaAeronaveEvent.DescripcionCategoriaChange(it)) },
                         label = { Text("Descripción de la categoría") },
                         modifier = Modifier.fillMaxWidth(),

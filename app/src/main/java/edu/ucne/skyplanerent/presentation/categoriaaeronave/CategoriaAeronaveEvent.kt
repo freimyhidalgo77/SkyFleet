@@ -9,5 +9,5 @@ sealed interface CategoriaAeronaveEvent {
     data object Delete : CategoriaAeronaveEvent
     data object New : CategoriaAeronaveEvent
     data class ImageSelected(val uri: Uri) : CategoriaAeronaveEvent
-    data object ResetSuccess : CategoriaAeronaveEvent // Evento añadido para reiniciar el estado de éxito
+    data object ResetSuccess : CategoriaAeronaveEvent
 }

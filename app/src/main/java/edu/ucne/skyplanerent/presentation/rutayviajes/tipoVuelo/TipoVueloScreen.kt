@@ -10,10 +10,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Flight
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -48,10 +50,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edu.ucne.skyplanerent.presentation.UiEvent
 import kotlinx.coroutines.launch
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.rememberScrollState
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TipoVueloScreen(
     tipoVueloId: Int? = null,
@@ -191,7 +190,7 @@ fun TipoVueloBodyScreen(
                 navigationIcon = {
                     IconButton(onClick = goBack) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Volver",
                             tint = Color.White
                         )
@@ -300,7 +299,7 @@ fun TipoVueloBodyScreen(
                         onClick = {
                             if (isFormValid) {
                                 if (uiState.tipoVueloId == null) {
-                                    onEvent(TipoVueloEvent.postTipoVuelo)
+                                    onEvent(TipoVueloEvent.PostTipoVuelo)
                                 } else {
                                     onEvent(TipoVueloEvent.Save)
                                 }

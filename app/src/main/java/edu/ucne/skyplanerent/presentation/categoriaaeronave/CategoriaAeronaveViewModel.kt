@@ -48,7 +48,7 @@ class CategoriaAeronaveViewModel @Inject constructor(
 
     private fun save() {
         viewModelScope.launch {
-            if (_uiState.value.descripcionCategoria.isNullOrBlank()) {
+            if (_uiState.value.descripcionCategoria.isBlank()) {
                 _uiState.update { it.copy(errorMessage = "La descripción de la categoría es obligatoria") }
             } else {
                 try {
@@ -105,9 +105,9 @@ class CategoriaAeronaveViewModel @Inject constructor(
                 val categoria = categoriaAeronaveRepository.find(categoriaId)
                 _uiState.update {
                     it.copy(
-                        categoriaId = categoria?.categoriaId,
-                        descripcionCategoria = categoria?.descripcionCategoria ?: "",
-                        imageUri = categoria?.imagePath?.let { path -> Uri.fromFile(File(path)) },
+                        categoriaId = categoria.categoriaId,
+                        descripcionCategoria = categoria.descripcionCategoria,
+                        imageUri = categoria.imagePath?.let { path -> Uri.fromFile(File(path)) },
                         isSuccess = false
                     )
                 }
@@ -147,6 +147,6 @@ class CategoriaAeronaveViewModel @Inject constructor(
 
 fun CategoriaAeronaveUiState.toEntity(imagePath: String? = null) = CategoriaAeronaveEntity(
     categoriaId = categoriaId ?: 0,
-    descripcionCategoria = descripcionCategoria ?: "",
+    descripcionCategoria = descripcionCategoria,
     imagePath = imagePath ?: imageUri?.path
 )

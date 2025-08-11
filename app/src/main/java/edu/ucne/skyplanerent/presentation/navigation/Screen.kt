@@ -5,28 +5,25 @@ import kotlinx.serialization.Serializable
 @Serializable
 sealed class Screen {
     @Serializable
-    object Home : Screen()
+    data object Home : Screen()
 
     @Serializable
-    object FirstScreen : Screen()
+    data object FirstScreen : Screen()
 
     @Serializable
-    object Register : Screen()
+    data object Register : Screen()
 
     @Serializable
-    object Reserva : Screen()
+    data object Reserva : Screen()
 
     @Serializable
-    object Aeronaves : Screen()
+    data object Rutasyviajes : Screen()
 
     @Serializable
-    object Rutas_y_viajes : Screen()
+    data object Perfil : Screen()
 
     @Serializable
-    object Perfil : Screen()
-
-    @Serializable
-    object Login : Screen()
+    data object Login : Screen()
 
     @Serializable
     data class AdminPanel(val adminId: Int) : Screen()
@@ -45,9 +42,6 @@ sealed class Screen {
 
     @Serializable
     data class TipoVuelo(val tipovueloId: Int?) : Screen()
-
-    @Serializable
-    data object AeronaveList: Screen()
 
     @Serializable
     data class Aeronave(val aeronaveId: Int?) : Screen()
@@ -69,9 +63,6 @@ sealed class Screen {
 
     @Serializable
     data object CategoriaAeronaveReservaList : Screen()
-
-    @Serializable
-    data class TipoAeronaveScreenList(val aeronaveId: Int?) : Screen()
 
     @Serializable
     data class TipoAeronaveDetails(val aeronaveId: Int?) : Screen()

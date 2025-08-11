@@ -1,6 +1,5 @@
 package edu.ucne.skyplanerent.presentation.aeronave
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -18,11 +17,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AirplanemodeActive
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Dashboard
+import androidx.compose.material.icons.filled.Flight
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
@@ -57,25 +58,21 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import edu.ucne.skyplanerent.R
 import edu.ucne.skyplanerent.data.remote.dto.AeronaveDTO
 import edu.ucne.skyplanerent.presentation.categoriaaeronave.CategoriaAeronaveUiState
 import edu.ucne.skyplanerent.presentation.categoriaaeronave.CategoriaAeronaveViewModel
 import kotlinx.coroutines.delay
 
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AeronaveListScreen(
     viewModel: AeronaveViewModel = hiltViewModel(),
-    categoriaViewModel: CategoriaAeronaveViewModel = hiltViewModel(), // Inyectar CategoriaAeronaveViewModel
+    categoriaViewModel: CategoriaAeronaveViewModel = hiltViewModel(),
     goToAeronave: (Int) -> Unit,
     createAeronave: () -> Unit,
     goBack: () -> Unit,
-    goToAdminPanel: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val categoriaUiState by categoriaViewModel.uiState.collectAsStateWithLifecycle() // Obtener estado de categorías
+    val categoriaUiState by categoriaViewModel.uiState.collectAsStateWithLifecycle()
     val query by viewModel.searchQuery.collectAsStateWithLifecycle()
     val searchResults by viewModel.searchResults.collectAsStateWithLifecycle()
 
@@ -90,7 +87,7 @@ fun AeronaveListScreen(
 
     AeronaveListBodyScreen(
         uiState = uiState,
-        categoriaUiState = categoriaUiState, // Pasar estado de categorías
+        categoriaUiState = categoriaUiState,
         query = query,
         searchResults = searchResults,
         onSearchQueryChanged = viewModel::onSearchQueryChanged,
@@ -98,7 +95,6 @@ fun AeronaveListScreen(
         onEvent = viewModel::onEvent,
         createAeronave = createAeronave,
         goBack = goBack,
-        goToAdminPanel = goToAdminPanel
     )
 }
 
@@ -106,7 +102,7 @@ fun AeronaveListScreen(
 @Composable
 fun AeronaveListBodyScreen(
     uiState: AeronaveUiState,
-    categoriaUiState: CategoriaAeronaveUiState, // Añadir estado de categorías
+    categoriaUiState: CategoriaAeronaveUiState,
     query: String,
     searchResults: List<AeronaveDTO>,
     onSearchQueryChanged: (String) -> Unit,
@@ -114,20 +110,18 @@ fun AeronaveListBodyScreen(
     onEvent: (AeronaveEvent) -> Unit,
     createAeronave: () -> Unit,
     goBack: () -> Unit,
-    goToAdminPanel: () -> Unit,
 ) {
     val pullRefreshState = rememberPullRefreshState(
         refreshing = uiState.isLoading,
         onRefresh = {
             if (uiState.categoriaId != null) {
-                onEvent(AeronaveEvent.FilterByCategoria(uiState.categoriaId!!))
+                onEvent(AeronaveEvent.FilterByCategoria(uiState.categoriaId))
             } else {
                 onEvent(AeronaveEvent.GetAeronaves)
             }
         }
     )
 
-    // Obtener la descripción de la categoría basada en categoriaId
     val categoriaDescripcion = uiState.categoriaId?.let { id ->
         categoriaUiState.categorias.find { it.categoriaId == id }?.descripcionCategoria
     } ?: "Todas las Aeronaves"
@@ -155,7 +149,7 @@ fun AeronaveListBodyScreen(
                 navigationIcon = {
                     IconButton(onClick = goBack) {
                         Icon(
-                            Icons.Default.ArrowBack,
+                            Icons.Default.ArrowBackIosNew,
                             contentDescription = "Volver",
                             tint = MaterialTheme.colorScheme.onSurface
                         )
@@ -182,7 +176,7 @@ fun AeronaveListBodyScreen(
                 NavigationBarItem(
                     icon = {
                         Icon(
-                            painterResource(id = R.drawable.admin),
+                            imageVector = Icons.Default.Dashboard,
                             contentDescription = "Admin Panel",
                             modifier = Modifier.size(24.dp),
                             tint = MaterialTheme.colorScheme.onSurface
@@ -195,7 +189,7 @@ fun AeronaveListBodyScreen(
                 NavigationBarItem(
                     icon = {
                         Icon(
-                            painterResource(id = R.drawable.aeronave),
+                            imageVector = Icons.Default.Flight,
                             contentDescription = "Aeronave",
                             modifier = Modifier.size(24.dp),
                             tint = Color.Blue
@@ -272,7 +266,7 @@ fun AeronaveListBodyScreen(
             if (!uiState.errorMessage.isNullOrEmpty()) {
                 Box(
                     modifier = Modifier
-                        .align(Alignment.Center)
+                        .fillMaxWidth()
                         .padding(16.dp)
                 ) {
                     Text(
@@ -333,7 +327,6 @@ private fun AeronaveRow(
             .padding(horizontal = 16.dp, vertical = 12.dp)
             .clickable { goToAeronave(it.aeronaveId ?: 0) }
     ) {
-        // Imagen de la aeronave
         if (it.imagePath != null) {
             AsyncImage(
                 model = it.imagePath,
@@ -346,20 +339,20 @@ private fun AeronaveRow(
                 error = painterResource(id = android.R.drawable.ic_menu_gallery)
             )
         } else {
-            Image(
+            Icon(
                 imageVector = Icons.Default.AirplanemodeActive,
                 contentDescription = "Placeholder de ${it.modeloAvion}",
                 modifier = Modifier
                     .size(64.dp)
                     .clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Crop
+                tint = MaterialTheme.colorScheme.primary
             )
         }
         Spacer(modifier = Modifier.width(16.dp))
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = it.modeloAvion ?: "N/A",
+                text = it.modeloAvion,
                 style = MaterialTheme.typography.titleMedium.copy(
                     fontWeight = FontWeight.SemiBold
                 ),
@@ -371,7 +364,7 @@ private fun AeronaveRow(
                     withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color.Blue)) {
                         append("Registración: ")
                     }
-                    append(it.registracion ?: "N/A")
+                    append(it.registracion)
                 },
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.Gray,
@@ -383,7 +376,7 @@ private fun AeronaveRow(
                     withStyle(style = SpanStyle(fontWeight = FontWeight.Bold, color = Color.Blue)) {
                         append("Categoría: ")
                     }
-                    append(it.descripcionCategoria ?: "N/A")
+                    append(it.descripcionCategoria)
                 },
                 style = MaterialTheme.typography.bodySmall,
                 color = Color.Gray,
@@ -393,7 +386,7 @@ private fun AeronaveRow(
         }
         IconButton(onClick = { goToAeronave(it.aeronaveId ?: 0) }) {
             Icon(
-                Icons.Default.ArrowForward,
+                Icons.AutoMirrored.Filled.ArrowForward,
                 contentDescription = "Ver/Editar aeronave",
                 tint = MaterialTheme.colorScheme.primary
             )

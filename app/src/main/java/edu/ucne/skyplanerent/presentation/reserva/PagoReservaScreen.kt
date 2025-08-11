@@ -324,7 +324,7 @@ fun PagoReservaBodyListScreen(
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
                 Text(
-                    text = formularioUiState.nombre ?: "No seleccionado",
+                    text = formularioUiState.nombre,
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
@@ -338,7 +338,7 @@ fun PagoReservaBodyListScreen(
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
                 Text(
-                    text = formularioUiState.apellido ?: "No seleccionado",
+                    text = formularioUiState.apellido,
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
@@ -352,7 +352,7 @@ fun PagoReservaBodyListScreen(
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
                 Text(
-                    text = formularioUiState.pasaporte ?: "No seleccionado",
+                    text = formularioUiState.pasaporte,
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
@@ -416,7 +416,7 @@ fun PagoReservaBodyListScreen(
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
                 Text(
-                    text = "${tarifaBase}",
+                    text = "$tarifaBase",
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
@@ -430,7 +430,7 @@ fun PagoReservaBodyListScreen(
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
                 Text(
-                    text = "${impuesto}",
+                    text = "$impuesto",
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
@@ -444,7 +444,7 @@ fun PagoReservaBodyListScreen(
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
                 Text(
-                    text = "${precioTotal}",
+                    text = "$precioTotal",
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
@@ -565,7 +565,7 @@ fun PagoReservaBodyListScreen(
                         FormularioTarjetaCredito(
                             precioTotal = precioTotal,
                             viewModel = reservaViewModel,
-                            onConfirmarPago = { datos ->
+                            onConfirmarPago = {
                                 // Puedes hacer algo adicional aquí si lo necesitas
                             },
                             onCancelar = {

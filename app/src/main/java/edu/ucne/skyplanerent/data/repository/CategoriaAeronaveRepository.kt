@@ -9,7 +9,7 @@ class CategoriaAeronaveRepository @Inject constructor(
     private val dao: CategoriaAeronaveDao
 ) {
     suspend fun saveCategoriaAeronave(categoriaaeronave: CategoriaAeronaveEntity) = dao.saveCategoriaAeronave(categoriaaeronave)
-    suspend fun find(id: Int): CategoriaAeronaveEntity? = dao.find(id)
+    suspend fun find(id: Int): CategoriaAeronaveEntity = dao.find(id)
     suspend fun deleteCategoriaAeronave(categoriaaeronave: CategoriaAeronaveEntity) = dao.deleteCategoriaAeronave(categoriaaeronave)
     fun getAll(): Flow<List<CategoriaAeronaveEntity>> = dao.getAll()
 }

@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -32,8 +32,10 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,10 +45,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edu.ucne.skyplanerent.presentation.UiEvent
 import kotlinx.coroutines.launch
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RutaScreenDetails(
     rutaId: Int?,
@@ -104,7 +103,6 @@ fun RutaDetailsBodyScreen(
     onEdit: () -> Unit,
     snackbarHostState: SnackbarHostState
 ) {
-    val refreshing = uiState.isLoading // Usamos el estado de carga del UI
     var showDeleteDialog by remember { mutableStateOf(false) } // Estado para controlar el diálogo
 
     Scaffold(
@@ -129,7 +127,7 @@ fun RutaDetailsBodyScreen(
                 navigationIcon = {
                     IconButton(onClick = goBack) {
                         Icon(
-                            Icons.Default.ArrowBack,
+                            Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Volver",
                             tint = Color.Black
                         )
@@ -263,7 +261,7 @@ fun RutaDetailsBodyScreen(
                                 Text("Modificar Ruta", color = Color.White)
                             }
                             Button(
-                                onClick = { showDeleteDialog = true }, // Muestra el diálogo al hacer clic
+                                onClick = { showDeleteDialog = true }, // Muestra el diálogo al hacer click
                                 colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
                             ) {
                                 Text("Eliminar Ruta", color = Color.White)

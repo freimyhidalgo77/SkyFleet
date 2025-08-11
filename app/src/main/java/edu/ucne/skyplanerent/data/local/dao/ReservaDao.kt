@@ -31,7 +31,7 @@ interface ReservaDao {
     @Query("SELECT * FROM Reservas")
     fun getAll(): Flow<List<ReservaEntity>>
 
-    //Filtrar reserrva por id de usuario
+    //Filtrar reserva por id de usuario
     @Query("SELECT * FROM Reservas WHERE userId = :userId")
     fun getReservasByUserId(userId: String): Flow<List<ReservaEntity>>
 

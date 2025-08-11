@@ -22,7 +22,7 @@ interface AeronavesManagerApi {
 
     @PUT("api/Aeronave/{id}")
     suspend fun actualizarAeronave(
-        @Path("id") aeronaevId: Int,
+        @Path("id") aeronaveId: Int,
         @Body aeronaveDto: AeronaveDTO
     ): AeronaveDTO
 

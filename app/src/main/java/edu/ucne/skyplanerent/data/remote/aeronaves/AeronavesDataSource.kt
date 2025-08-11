@@ -5,16 +5,16 @@ import javax.inject.Inject
 
 
 class AeronavesDataSource @Inject constructor(
-    private val aeronaevManagerApi: AeronavesManagerApi
+    private val aeronaveManagerApi: AeronavesManagerApi
 ){
-    suspend fun getAeronaves() = aeronaevManagerApi.getAeronaves()
+    suspend fun getAeronaves() = aeronaveManagerApi.getAeronaves()
 
-    suspend fun getAeronave(id: Int) = aeronaevManagerApi.getAeronave(id)
+    suspend fun getAeronave(id: Int) = aeronaveManagerApi.getAeronave(id)
 
-    suspend fun PostAeronave(aeronaveDto: AeronaveDTO) = aeronaevManagerApi.saveAeronave(aeronaveDto)
+    suspend fun PostAeronave(aeronaveDto: AeronaveDTO) = aeronaveManagerApi.saveAeronave(aeronaveDto)
 
-    suspend fun putAeronave(id: Int, aeronaveDTO: AeronaveDTO) = aeronaevManagerApi.actualizarAeronave(id, aeronaveDTO)
+    suspend fun putAeronave(id: Int, aeronaveDTO: AeronaveDTO) = aeronaveManagerApi.actualizarAeronave(id, aeronaveDTO)
 
-    suspend fun deleteAeronave(id: Int) = aeronaevManagerApi.deleteAeronave(id)
+    suspend fun deleteAeronave(id: Int) = aeronaveManagerApi.deleteAeronave(id)
 
 }

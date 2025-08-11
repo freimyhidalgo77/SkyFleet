@@ -7,14 +7,14 @@ import javax.inject.Inject
 
 
 class FormularioRepository @Inject constructor(
-    val formularioDao: FormularioDao
+    private val formularioDao: FormularioDao
 
 ){
     suspend fun saveFormulario(formulario: FormularioEntity): Int {
         return formularioDao.save(formulario).toInt()
     }
 
-    suspend fun findFormulario(Id:Int): FormularioEntity = formularioDao.find(Id)
+    suspend fun findFormulario(id:Int): FormularioEntity = formularioDao.find(id)
 
     suspend fun deleteFormulario(formulario: FormularioEntity) = formularioDao.delete(formulario)
 

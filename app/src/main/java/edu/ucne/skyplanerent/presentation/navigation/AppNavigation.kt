@@ -116,7 +116,7 @@ fun AppNavigation(context: Context) {
                     navController.navigate(Screen.Reserva)
                 },
                 onNavigateToRutas_Viajes = {
-                    navController.navigate(Screen.Rutas_y_viajes)
+                    navController.navigate(Screen.Rutasyviajes)
                 },
                 onNavigateToPeril = {
                     navController.navigate(Screen.Perfil)
@@ -157,8 +157,8 @@ fun AppNavigation(context: Context) {
             )
         }
         composable<Screen.Login> {
-            val context = LocalContext.current
-            val sessionManager = remember { SessionManager(context) }
+            val contexto = LocalContext.current
+            val sessionmanager = remember { SessionManager(contexto) }
             val adminViewModel: AdminViewModel = hiltViewModel() // Inyecta el ViewModel para obtener adminRepository
             LoginScreen(
                 onLoginSuccess = {
@@ -172,7 +172,7 @@ fun AppNavigation(context: Context) {
                 goToAdminPanel = { adminId ->
                     navController.navigate(Screen.AdminPanel(adminId))
                 },
-                sessionManager = sessionManager,
+                sessionManager = sessionmanager,
                 adminRepository = adminViewModel.adminRepository // Pasa el repositorio desde el ViewModel
             )
         }
@@ -202,7 +202,7 @@ fun AppNavigation(context: Context) {
             )
         }
 
-        composable<Screen.Rutas_y_viajes> { backStackEntry ->
+        composable<Screen.Rutasyviajes> { backStackEntry ->
             val aeronaveViewModel: AeronaveViewModel = hiltViewModel(backStackEntry)
             val reservaViewModel: ReservaViewModel = hiltViewModel(backStackEntry)
             Rutas_Viajes_Screen(
@@ -268,9 +268,6 @@ fun AppNavigation(context: Context) {
                 createRuta = {
                     navController.navigate(Screen.Ruta(null))
                 },
-                goToAdminPanel = {
-                    navController.navigate(Screen.AdminPanel)
-                },
                 goBack = { navController.popBackStack() }
             )
         }
@@ -298,7 +295,7 @@ fun AppNavigation(context: Context) {
 
         composable<Screen.PreReserva> { backStackEntry ->
             val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry(Screen.Rutas_y_viajes)
+                navController.getBackStackEntry(Screen.Rutasyviajes)
             }
 
             val reservaViewModel: ReservaViewModel = hiltViewModel(parentEntry)
@@ -307,7 +304,7 @@ fun AppNavigation(context: Context) {
             PreReservaListScreen(
                 preReservaId = args.prereservaId,
                 goBack = {
-                    navController.navigate(Screen.Rutas_y_viajes)
+                    navController.navigate(Screen.Rutasyviajes)
                 },
                 goToFormulario = {id->
                     navController.navigate(Screen.Formulario(0,id))
@@ -377,7 +374,7 @@ fun AppNavigation(context: Context) {
 
         composable<Screen.PagoReserva> { backStackEntry ->
             val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry(Screen.Rutas_y_viajes)
+                navController.getBackStackEntry(Screen.Rutasyviajes)
             }
 
             val reservaViewModel: ReservaViewModel = hiltViewModel(parentEntry)
@@ -402,7 +399,7 @@ fun AppNavigation(context: Context) {
                 rutaId = args.rutaId,
                 viewModel = viewModel,
                 goBack = { navController.popBackStack() },
-                onDelete = { id ->
+                onDelete = {
                     viewModel.onEvent(RutaEvent.Delete)
                 },
                 onEdit = { id ->
@@ -418,9 +415,6 @@ fun AppNavigation(context: Context) {
                 },
                 createTipoVuelo = {
                     navController.navigate(Screen.TipoVuelo(null))
-                },
-                goToAdminPanel = {
-                    navController.navigate(Screen.AdminPanel)
                 },
                 goBack = { navController.popBackStack() }
             )
@@ -441,7 +435,7 @@ fun AppNavigation(context: Context) {
                 tipoVueloId = args.tipovueloId,
                 viewModel = viewModel,
                 goBack = { navController.popBackStack() },
-                onDelete = { id ->
+                onDelete = {
                     viewModel.onEvent(TipoVueloEvent.Delete)
                 },
                 onEdit = { id ->
@@ -457,9 +451,6 @@ fun AppNavigation(context: Context) {
                 },
                 createCategoria = {
                     navController.navigate(Screen.CategoriaAeronave(null))
-                },
-                goToAdminPanel = {
-                    navController.navigate(Screen.AdminPanel)
                 },
                 goBack = { navController.popBackStack() },
                 onEdit = { categoriaId ->
@@ -510,10 +501,10 @@ fun AppNavigation(context: Context) {
             val viewModel: AeronaveViewModel = hiltViewModel()
             TipoAeronaveDetailsScreen(
                 aeronaveId = args.aeronaveId,
-                ViewModel = viewModel,
+                viewModel = viewModel,
                 goBack = { navController.popBackStack() },
                 onReservar = {
-                    navController.navigate(Screen.Rutas_y_viajes)
+                    navController.navigate(Screen.Rutasyviajes)
                 },
                 navController = navController
             )
@@ -532,7 +523,6 @@ fun AppNavigation(context: Context) {
             AdminPanelScreen(
                 adminId = adminPanel.adminId,
                 navController = navController,
-                goBack = { navController.popBackStack() },
                 goToPerfil = { adminId ->
                     navController.navigate(Screen.PerfilAdmin(adminId))
                 },
@@ -543,7 +533,6 @@ fun AppNavigation(context: Context) {
             val perfilAdmin = backStackEntry.toRoute<Screen.PerfilAdmin>()
             PerfilAdminScreen(
                 adminId = perfilAdmin.adminId,
-                navController = navController,
                 goToAdminPanel = {
                     navController.navigate(
                         Screen.AdminPanel(
@@ -572,7 +561,6 @@ fun AppNavigation(context: Context) {
             )
         ) { backStackEntry ->
             val categoriaId = backStackEntry.arguments?.getInt("categoriaId") ?: -1
-            val adminId = backStackEntry.arguments?.getInt("adminId") ?: 1
             val viewModel: AeronaveViewModel = hiltViewModel()
             LaunchedEffect(categoriaId) {
                 if (categoriaId != -1) viewModel.filterAeronavesByCategoria(categoriaId)
@@ -583,9 +571,6 @@ fun AppNavigation(context: Context) {
                 },
                 createAeronave = {
                     navController.navigate(Screen.Aeronave(null))
-                },
-                goToAdminPanel = {
-                    navController.navigate(Screen.AdminPanel)
                 },
                 goBack = { navController.popBackStack() },
             )
@@ -606,7 +591,7 @@ fun AppNavigation(context: Context) {
                     aeronaveId = args.aeronaveId,
                     viewModel = viewModel,
                     goBack = { navController.popBackStack() },
-                    onDelete = { id ->
+                    onDelete = {
                         viewModel.onEvent(AeronaveEvent.Delete)
                     },
                     onEdit = { id ->

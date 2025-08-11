@@ -23,7 +23,7 @@ class AdminViewModel @Inject constructor(
 
     fun loadAdminData(adminId: Int) {
         viewModelScope.launch {
-            adminId?.let { id ->
+            adminId.let { id ->
                 adminRepository.getAdmin(id).collect { resource ->
                     when (resource) {
                         is Resource.Loading -> {
@@ -51,15 +51,6 @@ class AdminViewModel @Inject constructor(
                             }
                         }
                     }
-                }
-            } ?: run {
-                Log.w("AdminViewModel", "ID de administrador inválido")
-                _adminState.update {
-                    it.copy(
-                        isLoading = false,
-                        admin = null,
-                        errorMessage = "ID de administrador inválido"
-                    )
                 }
             }
         }

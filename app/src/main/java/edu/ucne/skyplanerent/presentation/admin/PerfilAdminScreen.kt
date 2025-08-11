@@ -13,20 +13,22 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.ExitToApp
 import androidx.compose.material.icons.filled.Flight
-import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.FormatListNumbered
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -52,17 +54,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import edu.ucne.skyplanerent.R
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.rememberScrollState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PerfilAdminScreen(
     adminId: Int,
-    navController: NavController,
     goBack: () -> Unit,
     goToAdminPanel: (Int) -> Unit,
     goToFirstScreen: () -> Unit,
@@ -140,7 +138,7 @@ fun PerfilAdminScreen(
                 navigationIcon = {
                     IconButton(onClick = goBack) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector = Icons.Default.ArrowBackIosNew,
                             contentDescription = "Volver",
                             tint = MaterialTheme.colorScheme.onSurface
                         )
@@ -233,7 +231,7 @@ fun PerfilAdminScreen(
                     color = MaterialTheme.colorScheme.onSurface
                 )
             }
-            Divider(color = Color.Gray.copy(alpha = 0.2f))
+            HorizontalDivider(color = Color.Gray.copy(alpha = 0.2f))
 
             Text(
                 text = "Permisos",
@@ -293,7 +291,7 @@ fun PerfilAdminScreen(
                     .clickable { }
             ) {
                 Icon(
-                    imageVector = Icons.Default.List,
+                    imageVector = Icons.Default.FormatListNumbered,
                     contentDescription = "Gestión de tipos de vuelo",
                     modifier = Modifier.size(24.dp),
                     tint = MaterialTheme.colorScheme.onSurface

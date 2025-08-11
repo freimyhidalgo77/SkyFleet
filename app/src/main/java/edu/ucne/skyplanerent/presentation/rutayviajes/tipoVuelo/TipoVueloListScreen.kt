@@ -16,9 +16,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.AirplaneTicket
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
@@ -37,19 +39,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import edu.ucne.skyplanerent.R
 import edu.ucne.skyplanerent.data.remote.dto.TipoVueloDTO
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TipoVueloListScreen(
     viewModel: TipoVueloViewModel = hiltViewModel(),
     createTipoVuelo: () -> Unit,
-    goToAdminPanel: () -> Unit, // Modified to accept adminId
     goToTipoVuelo: (Int) -> Unit,
     goBack: () -> Unit,
 ) {
@@ -60,7 +58,6 @@ fun TipoVueloListScreen(
         goToTipoVuelo = { id -> goToTipoVuelo(id) },
         onEvent = viewModel::onEvent,
         createTipoVuelo = createTipoVuelo,
-        goToAdminPanel = goToAdminPanel,
         goBack = goBack
     )
 }
@@ -72,7 +69,6 @@ fun TipoVueloListBodyScreen(
     goToTipoVuelo: (Int) -> Unit,
     onEvent: (TipoVueloEvent) -> Unit,
     createTipoVuelo: () -> Unit,
-    goToAdminPanel: () -> Unit, // Modified to lambda for passing adminId
     goBack: () -> Unit,
 ) {
     val refreshing = uiState.isLoading
@@ -96,7 +92,7 @@ fun TipoVueloListBodyScreen(
                 navigationIcon = {
                     IconButton(onClick = goBack) {
                         Icon(
-                            Icons.Default.ArrowBack,
+                            Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Volver",
                             tint = Color.Black
                         )
@@ -126,17 +122,17 @@ fun TipoVueloListBodyScreen(
             ) {
                 IconButton(onClick = goBack) {
                     Icon(
-                        painter = painterResource(id = R.drawable.admin),
+                        imageVector = Icons.Default.Dashboard,
                         contentDescription = "Admin Panel",
                         tint = Color.Black,
-                        modifier = Modifier.size(24.dp) // Tamaño ajustable
+                        modifier = Modifier.size(24.dp)
                     )
                 }
                 Icon(
-                    painter = painterResource(id = R.drawable.tipovuelo),
+                    imageVector = Icons.AutoMirrored.Filled.AirplaneTicket,
                     contentDescription = "Tipos de vuelo (Activo)",
                     modifier = Modifier.size(32.dp),
-                    tint = Color(0xFF1976D2) // Color destacado para indicar que estamos aquí
+                    tint = Color(0xFF1976D2)
                 )
             }
         }
@@ -222,28 +218,28 @@ private fun TipoVueloRow(
             .padding(vertical = 8.dp)
     ) {
         Icon(
-            painter = painterResource(id = R.drawable.tipovuelo),
+            imageVector = Icons.AutoMirrored.Filled.AirplaneTicket,
             contentDescription = "Tipo de vuelo",
             modifier = Modifier
                 .size(32.dp)
                 .padding(end = 8.dp),
-            tint = Color.Unspecified
+            tint = Color.Black
         )
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = it.nombreVuelo ?: "Sin nombre",
+                text = it.nombreVuelo,
                 style = MaterialTheme.typography.titleMedium,
                 color = Color.Black
             )
             Text(
-                text = it.descripcionTipoVuelo ?: "Sin descripción",
+                text = it.descripcionTipoVuelo,
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.Gray
             )
         }
         IconButton(onClick = goToTipoVuelo) {
             Icon(
-                Icons.Default.ArrowForward,
+                Icons.AutoMirrored.Filled.ArrowForward,
                 contentDescription = "Modificar/Eliminar",
                 tint = MaterialTheme.colorScheme.primary
             )

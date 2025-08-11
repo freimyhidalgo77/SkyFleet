@@ -150,10 +150,10 @@ class RutaRepository @Inject constructor(
 
     private fun RutaDTO.toEntity() = RutaEntity(
         rutaId = this.rutaId,
-        origen = this.origen ?: "",
-        destino = this.destino ?: "",
+        origen = this.origen,
+        destino = this.destino,
         distancia = this.distancia ?: 0.0,
-        duracion = this.duracion ?: 0,
+        duracion = this.duracion,
         isPendingSync = false
     )
 
