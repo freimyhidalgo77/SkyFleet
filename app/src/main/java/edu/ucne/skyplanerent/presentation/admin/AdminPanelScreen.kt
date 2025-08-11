@@ -12,11 +12,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.AirplaneTicket
+import androidx.compose.material.icons.filled.Dashboard
+import androidx.compose.material.icons.filled.Flight
+import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -31,34 +34,27 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
-import edu.ucne.skyplanerent.R
 import edu.ucne.skyplanerent.presentation.navigation.Screen
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdminPanelScreen(
     adminId: Int,
     navController: NavController,
-    goBack: () -> Unit,
     goToPerfil: (Int) -> Unit,
     viewModel: AdminPanelViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val primaryColor = MaterialTheme.colorScheme.primary
-    val errorColor = MaterialTheme.colorScheme.error // Rojo para baja actividad
-    val midRedColor = Color(0xFFFF5555) // Rojo claro para intermedio bajo
-    val neutralColor = Color(0xFFFFA500) // Amarillo para actividad estable
-    val midYellowColor = Color(0xFFFFD700) // Amarillo oscuro para intermedio alto
-    val successColor = Color(0xFF388E3C) // Verde oscuro para alta actividad
+    val errorColor = MaterialTheme.colorScheme.error
+    val midRedColor = Color(0xFFFF5555)
+    val neutralColor = Color(0xFFFFA500)
+    val midYellowColor = Color(0xFFFFD700)
+    val successColor = Color(0xFF388E3C)
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -68,14 +64,11 @@ fun AdminPanelScreen(
             ) {
                 NavigationBarItem(
                     icon = {
-                        AsyncImage(
-                            model = ImageRequest.Builder(LocalContext.current)
-                                .data(R.drawable.admin)
-                                .size(24)
-                                .build(),
+                        Icon(
+                            imageVector = Icons.Default.Dashboard,
                             contentDescription = "Admin Panel (Activo)",
                             modifier = Modifier.size(24.dp),
-                            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     },
                     label = { Text("Admin Panel", fontSize = 12.sp) },
@@ -259,7 +252,6 @@ fun AdminPanelScreen(
                                 Offset(x, y)
                             }
 
-                            // Dibujar líneas entre los puntos
                             for (i in 0 until points.size - 1) {
                                 drawLine(
                                     color = graphColor,
@@ -269,7 +261,6 @@ fun AdminPanelScreen(
                                 )
                             }
 
-                            // Dibujar puntos en cada valor
                             points.forEach { point ->
                                 drawCircle(
                                     color = graphColor,
@@ -278,7 +269,6 @@ fun AdminPanelScreen(
                                 )
                             }
 
-                            // Dibujar etiquetas de los meses
                             months.forEachIndexed { index, month ->
                                 drawContext.canvas.nativeCanvas.apply {
                                     drawText(
@@ -340,7 +330,6 @@ fun AdminPanelScreen(
                                 )
                             }
 
-                            // Dibujar etiquetas de los meses debajo del Canvas
                             months.forEachIndexed { index, month ->
                                 drawContext.canvas.nativeCanvas.apply {
                                     drawText(
@@ -383,14 +372,11 @@ fun AdminPanelScreen(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier.padding(24.dp)
                         ) {
-                            AsyncImage(
-                                model = ImageRequest.Builder(LocalContext.current)
-                                    .data(R.drawable.aeronave)
-                                    .size(24)
-                                    .build(),
+                            Icon(
+                                imageVector = Icons.Default.Flight,
                                 contentDescription = "Aeronaves",
                                 modifier = Modifier.size(24.dp),
-                                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
+                                tint = MaterialTheme.colorScheme.primary
                             )
                             Text(text = "Gestionar aeronaves", fontSize = 16.sp)
                         }
@@ -405,14 +391,11 @@ fun AdminPanelScreen(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier.padding(24.dp)
                         ) {
-                            AsyncImage(
-                                model = ImageRequest.Builder(LocalContext.current)
-                                    .data(R.drawable.ruta)
-                                    .size(24)
-                                    .build(),
+                            Icon(
+                                imageVector = Icons.Default.Map,
                                 contentDescription = "Rutas",
                                 modifier = Modifier.size(24.dp),
-                                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
+                                tint = MaterialTheme.colorScheme.primary
                             )
                             Text(text = "Gestionar rutas", fontSize = 16.sp)
                         }
@@ -431,14 +414,11 @@ fun AdminPanelScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.padding(24.dp)
                     ) {
-                        AsyncImage(
-                            model = ImageRequest.Builder(LocalContext.current)
-                                .data(R.drawable.tipovuelo)
-                                .size(32)
-                                .build(),
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.AirplaneTicket,
                             contentDescription = "Tipos de Vuelo",
                             modifier = Modifier.size(32.dp),
-                            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
+                            tint = MaterialTheme.colorScheme.primary
                         )
                         Text(text = "Gestionar tipos de vuelo", fontSize = 16.sp)
                     }
@@ -452,7 +432,6 @@ fun AdminPanelScreen(
     }
 }
 
-// Definición de Quad en el mismo archivo
 data class Quad(
     val percentage: String,
     val percentageText: String,

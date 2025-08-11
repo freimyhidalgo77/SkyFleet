@@ -15,8 +15,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AirplanemodeActive
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
@@ -65,7 +65,6 @@ fun TipoAeronaveListScreen (
         uiState = uiState,
         goToAeronave = { id -> goToAeronave(id) },
         onEvent = viewModel::onEvent,
-        //createAeronave = createAeronave,
         goBack = goBack,
         navController = navController
     )
@@ -77,7 +76,6 @@ fun TipoAeronaveBodyListScreen(
     uiState: AeronaveUiState,
     goToAeronave: (Int) -> Unit,
     onEvent: (AeronaveEvent) -> Unit,
-    //createAeronave: () -> Unit,
     goBack: () -> Unit,
     navController: NavController
 ) {
@@ -109,7 +107,7 @@ fun TipoAeronaveBodyListScreen(
                 navigationIcon = {
                     IconButton(onClick = goBack) {
                         Icon(
-                            Icons.Default.ArrowBack,
+                            Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Volver",
                             tint = Color.Black
                         )
@@ -253,7 +251,7 @@ private fun AeronaveRow(
             ) {
                 // Modelo de la aeronave (título principal)
                 Text(
-                    text = it.modeloAvion ?: "N/A",
+                    text = it.modeloAvion,
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.Bold
                     ),
@@ -263,7 +261,7 @@ private fun AeronaveRow(
 
                 // Primera línea de detalles
                 Text(
-                    text = "${it.capacidadPasajeros ?: 4} pasajeros · ${it.rango ?: 690} nm · monomotor",
+                    text = "${it.capacidadPasajeros} pasajeros · ${it.rango} nm · monomotor",
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.Gray,
                     modifier = Modifier.padding(bottom = 4.dp)

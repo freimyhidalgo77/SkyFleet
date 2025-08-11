@@ -16,10 +16,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Dashboard
+import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
@@ -39,14 +41,13 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -55,24 +56,21 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import edu.ucne.skyplanerent.R
 import edu.ucne.skyplanerent.data.remote.dto.RutaDTO
 import kotlinx.coroutines.delay
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RutaListScreen(
     viewModel: RutaViewModel = hiltViewModel(),
     createRuta: () -> Unit,
     goToRuta: (Int) -> Unit,
-    goBack: () -> Unit,
-    goToAdminPanel: () -> Unit
+    goBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val query by viewModel.searchQuery.collectAsStateWithLifecycle()
     val searchResults by viewModel.searchResults.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    var lastRetentionCount by remember { mutableStateOf(0) }
+    var lastRetentionCount by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(Unit) {
         delay(180000)
@@ -98,8 +96,7 @@ fun RutaListScreen(
         goToRuta = goToRuta,
         onEvent = viewModel::onEvent,
         createRuta = createRuta,
-        goBack = goBack,
-        goToAdminPanel = goToAdminPanel
+        goBack = goBack
     )
 }
 
@@ -113,8 +110,7 @@ fun RutaListBodyScreen(
     goToRuta: (Int) -> Unit,
     onEvent: (RutaEvent) -> Unit,
     createRuta: () -> Unit,
-    goBack: () -> Unit,
-    goToAdminPanel: () -> Unit,
+    goBack: () -> Unit
 ) {
     val pullRefreshState = rememberPullRefreshState(
         refreshing = uiState.isLoading,
@@ -144,7 +140,7 @@ fun RutaListBodyScreen(
                 navigationIcon = {
                     IconButton(onClick = goBack) {
                         Icon(
-                            Icons.Default.ArrowBack,
+                            Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Volver",
                             tint = MaterialTheme.colorScheme.onSurface
                         )
@@ -171,7 +167,7 @@ fun RutaListBodyScreen(
                 NavigationBarItem(
                     icon = {
                         Icon(
-                            painterResource(id = R.drawable.admin),
+                            imageVector = Icons.Default.Dashboard,
                             contentDescription = "Admin Panel",
                             modifier = Modifier.size(24.dp),
                             tint = MaterialTheme.colorScheme.onSurface
@@ -184,7 +180,7 @@ fun RutaListBodyScreen(
                 NavigationBarItem(
                     icon = {
                         Icon(
-                            painterResource(id = R.drawable.ruta),
+                            imageVector = Icons.Default.Map,
                             contentDescription = "Ruta",
                             modifier = Modifier.size(24.dp),
                             tint = Color.Blue
@@ -382,7 +378,7 @@ fun RutasRow(
         }
         IconButton(onClick = goToRuta) {
             Icon(
-                Icons.Default.ArrowForward,
+                Icons.AutoMirrored.Filled.ArrowForward,
                 contentDescription = "Ver/Editar ruta",
                 tint = MaterialTheme.colorScheme.primary
             )
