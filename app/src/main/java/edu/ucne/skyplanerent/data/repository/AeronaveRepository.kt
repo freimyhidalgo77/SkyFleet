@@ -16,13 +16,13 @@ class AeronaveRepository @Inject constructor(
     private val dao: AeronaveDao
 ) {
     // Separador único para embeber imagePath en descripcionAeronave
-    private val IMAGE_PATH_SEPARATOR = "|IMG_PATH:"
+    private val imageseparator = "|IMG_PATH:"
 
     // Extrae imagePath y descripción limpia de descripcionAeronave
     private fun extractImagePathAndDescription(descripcion: String?): Pair<String?, String?> {
         if (descripcion.isNullOrBlank()) return Pair(null, null)
-        return if (descripcion.contains(IMAGE_PATH_SEPARATOR)) {
-            val parts = descripcion.split(IMAGE_PATH_SEPARATOR)
+        return if (descripcion.contains(imageseparator)) {
+            val parts = descripcion.split(imageseparator)
             Pair(parts.last().takeIf { it.isNotBlank() }, parts.first().takeIf { it.isNotBlank() })
         } else {
             Pair(null, descripcion)
@@ -33,9 +33,9 @@ class AeronaveRepository @Inject constructor(
     private fun combineDescriptionAndImagePath(descripcion: String?, imagePath: String?): String? {
         return when {
             descripcion.isNullOrBlank() && imagePath.isNullOrBlank() -> null
-            descripcion.isNullOrBlank() -> "$IMAGE_PATH_SEPARATOR$imagePath"
+            descripcion.isNullOrBlank() -> "$imageseparator$imagePath"
             imagePath.isNullOrBlank() -> descripcion
-            else -> "$descripcion$IMAGE_PATH_SEPARATOR$imagePath"
+            else -> "$descripcion$imageseparator$imagePath"
         }
     }
 
@@ -243,13 +243,9 @@ class AeronaveRepository @Inject constructor(
         }
     }
 
-    suspend fun cleanInvalidAeronaves() {
-        dao.clearInvalidAeronaves()
-    }
-
     private fun AeronaveDTO.toEntity() = AeronaveEntity(
         AeronaveId = this.aeronaveId,
-        estadoId = this.estadoId ?: 0,
+        estadoId = this.estadoId,
         ModeloAvion = this.modeloAvion,
         DescripcionCategoria = this.descripcionCategoria,
         Registracion = this.registracion,

@@ -79,7 +79,7 @@ class AdminPanelViewModel @Inject constructor(
                     )
                 }
             }.collect { state ->
-                _uiState.update { currentState -> state!! } // Aseguramos que devuelva AdminPanelUiState
+                _uiState.update { state!! } // Aseguramos que devuelva AdminPanelUiState
             }
         }
     }

@@ -8,6 +8,8 @@ import edu.ucne.skyplanerent.data.remote.Resource
 import edu.ucne.skyplanerent.data.remote.dto.RutaDTO
 import edu.ucne.skyplanerent.data.repository.RutaRepository
 import edu.ucne.skyplanerent.presentation.UiEvent
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,6 +26,7 @@ import kotlinx.coroutines.flow.mapLatest
 
 import javax.inject.Inject
 
+@OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class RutaViewModel @Inject constructor(
     private val rutaRepository: RutaRepository
@@ -398,7 +401,7 @@ class RutaViewModel @Inject constructor(
         }
     }
 
-    fun findRuta(rutaId: Int) {
+    private fun findRuta(rutaId: Int) {
         viewModelScope.launch {
             if (rutaId > 0) {
                 rutaRepository.getRuta(rutaId).collect { resource ->
@@ -432,7 +435,7 @@ class RutaViewModel @Inject constructor(
         }
     }
 
-    fun getRutas() {
+    private fun getRutas() {
         viewModelScope.launch {
             rutaRepository.getRutas().collectLatest { result ->
                 when (result) {

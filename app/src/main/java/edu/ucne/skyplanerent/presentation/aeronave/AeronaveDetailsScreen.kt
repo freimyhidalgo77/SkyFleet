@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -50,8 +50,6 @@ import coil.compose.AsyncImage
 import edu.ucne.skyplanerent.presentation.UiEvent
 import kotlinx.coroutines.launch
 
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AeronaveDetailsScreen(
     aeronaveId: Int?,
@@ -125,7 +123,7 @@ fun AeronaveDetailsBodyScreen(
                 navigationIcon = {
                     IconButton(onClick = goBack) {
                         Icon(
-                            Icons.Default.ArrowBack,
+                            Icons.Default.ArrowBackIosNew,
                             contentDescription = "Volver",
                             tint = MaterialTheme.colorScheme.onSurface
                         )
@@ -161,7 +159,7 @@ fun AeronaveDetailsBodyScreen(
                         uiState.imageUrl != null -> {
                             AsyncImage(
                                 model = uiState.imageUrl,
-                                contentDescription = "Imagen de ${uiState.ModeloAvion}",
+                                contentDescription = "Imagen de ${uiState.modeloAvion}",
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(200.dp)
@@ -174,7 +172,7 @@ fun AeronaveDetailsBodyScreen(
                         uiState.imageUri != null -> {
                             AsyncImage(
                                 model = uiState.imageUri,
-                                contentDescription = "Imagen de ${uiState.ModeloAvion}",
+                                contentDescription = "Imagen de ${uiState.modeloAvion}",
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(200.dp)
@@ -204,7 +202,7 @@ fun AeronaveDetailsBodyScreen(
                         ) {
                             CircularProgressIndicator()
                         }
-                    } else if (uiState.AeronaveId != null) {
+                    } else if (uiState.aeronaveId != null) {
                         // Especificaciones Clave
                         Text(
                             text = "Especificaciones Clave",
@@ -216,20 +214,20 @@ fun AeronaveDetailsBodyScreen(
                         Row(modifier = Modifier.fillMaxWidth()) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text("Capacidad", color = Color.Gray)
-                                Text("${uiState.CapacidadPasajeros ?: "0"} Personas", color = Color.Black)
+                                Text("${uiState.capacidadPasajeros} Personas", color = Color.Black)
                                 Spacer(modifier = Modifier.height(12.dp))
 
                                 Text("Tipo", color = Color.Gray)
-                                Text("${uiState.DescripcionCategoria ?: "N/A"}", color = Color.Black)
+                                Text(uiState.descripcionCategoria, color = Color.Black)
                             }
 
                             Column(modifier = Modifier.weight(1f)) {
                                 Text("Peso Máximo", color = Color.Gray)
-                                Text("${uiState.Peso ?: "0.0"} kg", color = Color.Black)
+                                Text("${uiState.peso ?: "0.0"} kg", color = Color.Black)
                                 Spacer(modifier = Modifier.height(12.dp))
 
                                 Text("Rango", color = Color.Gray)
-                                Text("${uiState.Rango ?: "0"} NM", color = Color.Black)
+                                Text("${uiState.rango} NM", color = Color.Black)
                             }
                         }
 
@@ -246,20 +244,20 @@ fun AeronaveDetailsBodyScreen(
                         Row(modifier = Modifier.fillMaxWidth()) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text("Motor", color = Color.Gray)
-                                Text("${uiState.DescripcionMotor ?: "N/A"}", color = Color.Black)
+                                Text(uiState.descripcionMotor, color = Color.Black)
                                 Spacer(modifier = Modifier.height(12.dp))
 
                                 Text("Combustible", color = Color.Gray)
-                                Text("${uiState.CapacidadCombustible ?: "0"} gal", color = Color.Black)
+                                Text("${uiState.capacidadCombustible} gal", color = Color.Black)
                             }
 
                             Column(modifier = Modifier.weight(1f)) {
                                 Text("Velocidad de Crucero", color = Color.Gray)
-                                Text("${uiState.VelocidadMaxima ?: "0"} KTAS", color = Color.Black)
+                                Text("${uiState.velocidadMaxima ?: "0"} KTAS", color = Color.Black)
                                 Spacer(modifier = Modifier.height(12.dp))
 
                                 Text("Altitud Máxima", color = Color.Gray)
-                                Text("${uiState.AltitudMaxima ?: "0"} m", color = Color.Black)
+                                Text("${uiState.altitudMaxima} m", color = Color.Black)
                             }
                         }
 
@@ -275,27 +273,27 @@ fun AeronaveDetailsBodyScreen(
 
                         Column {
                             Text("Modelo", color = Color.Gray)
-                            Text("${uiState.ModeloAvion ?: "N/A"}", color = Color.Black)
+                            Text(uiState.modeloAvion, color = Color.Black)
                             Spacer(modifier = Modifier.height(8.dp))
 
                             Text("Registración", color = Color.Gray)
-                            Text("${uiState.Registracion ?: "N/A"}", color = Color.Black)
+                            Text(uiState.registracion, color = Color.Black)
                             Spacer(modifier = Modifier.height(8.dp))
 
                             Text("Licencia", color = Color.Gray)
-                            Text("${uiState.Licencia ?: "N/A"}", color = Color.Black)
+                            Text(uiState.licencia, color = Color.Black)
                             Spacer(modifier = Modifier.height(8.dp))
 
                             Text("Costo por Hora", color = Color.Gray)
-                            Text("$${uiState.CostoXHora ?: "0.0"}", color = Color.Black)
+                            Text("$${uiState.costoXHora ?: "0.0"}", color = Color.Black)
                             Spacer(modifier = Modifier.height(8.dp))
 
                             Text("Consumo por Hora", color = Color.Gray)
-                            Text("${uiState.ConsumoXHora ?: "0"} L/h", color = Color.Black)
+                            Text("${uiState.consumoXHora} L/h", color = Color.Black)
                             Spacer(modifier = Modifier.height(8.dp))
 
                             Text("Descripción", color = Color.Gray)
-                            Text("${uiState.DescripcionAeronave ?: "N/A"}", color = Color.Black)
+                            Text(uiState.descripcionAeronave, color = Color.Black)
                         }
 
                         Spacer(modifier = Modifier.height(24.dp))
@@ -363,7 +361,7 @@ fun AeronaveDetailsBodyScreen(
         AlertDialog(
             onDismissRequest = { showDeleteDialog.value = false },
             title = { Text("Confirmar eliminación") },
-            text = { Text("¿Estás seguro de que quieres eliminar la aeronave ${uiState.ModeloAvion ?: "N/A"}?") },
+            text = { Text("¿Estás seguro de que quieres eliminar la aeronave ${uiState.modeloAvion}?") },
             confirmButton = {
                 TextButton(
                     onClick = {

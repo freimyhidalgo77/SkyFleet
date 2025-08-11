@@ -27,8 +27,6 @@ class TipoVueloViewModel @Inject constructor(
     private val _uiEvent = Channel<UiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()
 
-    private val _rutaSeleccionadaId = MutableStateFlow<Int?>(null)
-
     init {
         getTipoVuelos()
     }
@@ -42,7 +40,7 @@ class TipoVueloViewModel @Inject constructor(
             is TipoVueloEvent.DescripcionTipoVueloChange -> descripcionTipoVueloChange(event.descripciontipovuelo)
             is TipoVueloEvent.NombreVueloChange -> nombreVueloChange(event.nombrevuelo)
             TipoVueloEvent.New -> nuevo()
-            TipoVueloEvent.postTipoVuelo -> addTipoVuelo()
+            TipoVueloEvent.PostTipoVuelo -> addTipoVuelo()
             TipoVueloEvent.ResetSuccessMessage -> _uiState.update { it.copy(isSuccess = false, successMessage = null) }
             is TipoVueloEvent.GetTipoVuelo -> findTipoVuelo(event.id)
             TipoVueloEvent.Save -> saveTipoVuelo()
@@ -109,13 +107,13 @@ class TipoVueloViewModel @Inject constructor(
         viewModelScope.launch {
             var error = false
 
-            if (_uiState.value.nombreVuelo.isNullOrBlank()) {
+            if (_uiState.value.nombreVuelo.isBlank()) {
                 _uiState.update {
                     it.copy(errorNombreVuelo = "El nombre del vuelo es obligatorio *")
                 }
                 error = true
             }
-            if (_uiState.value.descripcionTipoVuelo.isNullOrBlank()) {
+            if (_uiState.value.descripcionTipoVuelo.isBlank()) {
                 _uiState.update {
                     it.copy(errorDescripcionTipovuelo = "La descripción es obligatoria *")
                 }
@@ -286,6 +284,6 @@ class TipoVueloViewModel @Inject constructor(
 
 fun TipoVueloUiState.toEntity() = TipoVueloDTO(
     tipoVueloId = tipoVueloId,
-    nombreVuelo = nombreVuelo ?: "",
-    descripcionTipoVuelo = descripcionTipoVuelo ?: ""
+    nombreVuelo = nombreVuelo,
+    descripcionTipoVuelo = descripcionTipoVuelo
 )

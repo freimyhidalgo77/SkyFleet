@@ -72,7 +72,7 @@ fun HomeScreen(
     val items = listOf(
         BottomNavItem("Reservas", Icons.Default.Book, Screen.Reserva),
         BottomNavItem("Aronaves", Icons.Default.AirplanemodeActive, Screen.CategoriaAeronaveReservaList),
-        BottomNavItem("Rutas y Viajes", Icons.Default.Map, Screen.Rutas_y_viajes),
+        BottomNavItem("Rutas y Viajes", Icons.Default.Map, Screen.Rutasyviajes),
         BottomNavItem("Perfil", Icons.Default.Person, Screen.Perfil),
     )
 
@@ -212,7 +212,7 @@ fun AnimatedAircraftCarousel(navController: NavController) {
                 onClick = {
                     when (page) {
                         0 -> navController.navigate(Screen.Reserva)
-                        1 -> navController.navigate(Screen.Rutas_y_viajes)
+                        1 -> navController.navigate(Screen.Rutasyviajes)
                         2 -> navController.navigate(Screen.Reserva)
                         3 -> navController.navigate(Screen.CategoriaAeronaveReservaList)
                     }

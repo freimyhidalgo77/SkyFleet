@@ -14,10 +14,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Flight
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -40,25 +42,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import edu.ucne.skyplanerent.R
 import edu.ucne.skyplanerent.data.local.entity.CategoriaAeronaveEntity
 
 @Composable
 fun CategoriaAeronaveListScreen(
     viewModel: CategoriaAeronaveViewModel = hiltViewModel(),
-    goToCategoria: (Int) -> Unit, // Para navegar a detalles
-    createCategoria: () -> Unit, // Para crear nueva categoría (sin ID)
-    onEdit: (Int) -> Unit, // Para editar categoría (con ID)
-    deleteCategoria: ((CategoriaAeronaveEntity) -> Unit)? = null,
+    goToCategoria: (Int) -> Unit,
+    createCategoria: () -> Unit,
+    onEdit: (Int) -> Unit,
     goBack: () -> Unit,
-    goToAdminPanel: () -> Unit, // Modified to accept adminId
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     CategoriaAeronaveListBodyScreen(
@@ -67,29 +65,28 @@ fun CategoriaAeronaveListScreen(
         createCategoria = createCategoria,
         onEdit = onEdit,
         deleteCategoria = { categoria ->
-            viewModel.onEvent(CategoriaAeronaveEvent.CategoriaIdChange(categoria.categoriaId ?: 0))
+            viewModel.onEvent(CategoriaAeronaveEvent.CategoriaIdChange(categoria.categoriaId))
             viewModel.onEvent(CategoriaAeronaveEvent.Delete)
         },
-        goBack = goBack,
-        goToAdminPanel = goToAdminPanel
-        )
+        goBack = goBack
+    )
 }
 
 @Composable
 private fun CategoriaAeronaveRow(
     it: CategoriaAeronaveEntity,
-    goToCategoria: (Int) -> Unit, // Para detalles
-    createCategoria: () -> Unit, // Para crear nueva categoría
-    onEdit: (Int) -> Unit, // Para editar categoría
+    goToCategoria: (Int) -> Unit,
+    createCategoria: () -> Unit,
+    onEdit: (Int) -> Unit,
     deleteCategoria: (CategoriaAeronaveEntity) -> Unit
 ) {
-    val showDeleteDialog = remember { mutableStateOf(false) } // Estado para controlar el diálogo
+    val showDeleteDialog = remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
-            .clickable { goToCategoria(it.categoriaId ?: 0) }, // Navegar a detalles
+            .clickable { goToCategoria(it.categoriaId) },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
@@ -124,14 +121,14 @@ private fun CategoriaAeronaveRow(
                 horizontalArrangement = Arrangement.End,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                IconButton(onClick = { onEdit(it.categoriaId ?: 0) }) { // Botón de edición usa onEdit con categoriaId
+                IconButton(onClick = { onEdit(it.categoriaId) }) {
                     Icon(
                         Icons.Default.Edit,
                         contentDescription = "Editar",
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
-                IconButton(onClick = { showDeleteDialog.value = true }) { // Mostrar diálogo al pulsar eliminar
+                IconButton(onClick = { showDeleteDialog.value = true }) {
                     Icon(
                         Icons.Default.Delete,
                         contentDescription = "Eliminar",
@@ -142,17 +139,16 @@ private fun CategoriaAeronaveRow(
         }
     }
 
-    // Diálogo de confirmación para eliminar
     if (showDeleteDialog.value) {
         AlertDialog(
-            onDismissRequest = { showDeleteDialog.value = false }, // Cerrar diálogo al intentar salir
+            onDismissRequest = { showDeleteDialog.value = false },
             title = { Text("Confirmar eliminación") },
             text = { Text("¿Estás seguro de que quieres eliminar la categoría ${it.descripcionCategoria}?") },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        deleteCategoria(it) // Ejecutar eliminación si se confirma
-                        showDeleteDialog.value = false // Cerrar diálogo
+                        deleteCategoria(it)
+                        showDeleteDialog.value = false
                     }
                 ) {
                     Text("Confirmar")
@@ -160,7 +156,7 @@ private fun CategoriaAeronaveRow(
             },
             dismissButton = {
                 TextButton(
-                    onClick = { showDeleteDialog.value = false } // Cerrar diálogo sin eliminar
+                    onClick = { showDeleteDialog.value = false }
                 ) {
                     Text("Cancelar")
                 }
@@ -174,11 +170,10 @@ private fun CategoriaAeronaveRow(
 fun CategoriaAeronaveListBodyScreen(
     uiState: CategoriaAeronaveUiState,
     goToCategoria: (Int) -> Unit,
-    createCategoria: () -> Unit, // Para crear nueva categoría
-    onEdit: (Int) -> Unit, // Para editar categoría
+    createCategoria: () -> Unit,
+    onEdit: (Int) -> Unit,
     deleteCategoria: (CategoriaAeronaveEntity) -> Unit,
     goBack: () -> Unit,
-    goToAdminPanel: () -> Unit, // Modified to lambda for passing adminId
 ) {
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -192,7 +187,7 @@ fun CategoriaAeronaveListBodyScreen(
                     )
                 },
                 actions = {
-                    IconButton(onClick = { createCategoria() }) { // Crear nueva categoría
+                    IconButton(onClick = { createCategoria() }) {
                         Icon(
                             imageVector = Icons.Default.Add,
                             contentDescription = "Nuevo",
@@ -203,7 +198,7 @@ fun CategoriaAeronaveListBodyScreen(
                 navigationIcon = {
                     IconButton(onClick = goBack) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Volver"
                         )
                     }
@@ -217,10 +212,10 @@ fun CategoriaAeronaveListBodyScreen(
                 NavigationBarItem(
                     icon = {
                         Icon(
-                            painterResource(id = R.drawable.admin),
+                            imageVector = Icons.Default.Dashboard,
                             contentDescription = "Admin Panel",
                             modifier = Modifier.size(24.dp),
-                            tint = if (!false) MaterialTheme.colorScheme.onSurface else Color.Unspecified
+                            tint = MaterialTheme.colorScheme.onSurface
                         )
                     },
                     label = { Text("Admin") },
@@ -230,10 +225,10 @@ fun CategoriaAeronaveListBodyScreen(
                 NavigationBarItem(
                     icon = {
                         Icon(
-                            painterResource(id = R.drawable.aeronave),
+                            imageVector = Icons.Default.Flight,
                             contentDescription = "Aeronave",
                             modifier = Modifier.size(24.dp),
-                            tint = if (true) Color.Blue else MaterialTheme.colorScheme.onSurface
+                            tint = Color.Blue
                         )
                     },
                     label = { Text("Aeronave") },

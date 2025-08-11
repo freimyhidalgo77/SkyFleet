@@ -55,7 +55,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideTipoVieloDb(appDataDb: SkyPlaneRentDB) = appDataDb.tipoVueloDao()
+    fun provideTipoVueloDb(appDataDb: SkyPlaneRentDB) = appDataDb.tipoVueloDao()
 
     @Provides
     @Singleton

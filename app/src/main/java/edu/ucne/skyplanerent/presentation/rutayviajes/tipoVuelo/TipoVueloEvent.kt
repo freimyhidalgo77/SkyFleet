@@ -13,7 +13,7 @@ sealed interface TipoVueloEvent{
     data object Save: TipoVueloEvent
     data object Delete: TipoVueloEvent
     data object New: TipoVueloEvent
-    data object postTipoVuelo: TipoVueloEvent
+    data object PostTipoVuelo: TipoVueloEvent
     data object ResetSuccessMessage: TipoVueloEvent
 
 }

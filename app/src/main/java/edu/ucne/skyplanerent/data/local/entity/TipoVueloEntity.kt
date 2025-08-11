@@ -10,5 +10,5 @@ data class TipoVueloEntity(
     val vueloId:Int? = null,
     val nombreVuelo: String = "",
     val descripcionTipoVuelo:String = "",
-    val isPendingSync: Boolean = false // Nuevo campo
+    val isPendingSync: Boolean = false
 )

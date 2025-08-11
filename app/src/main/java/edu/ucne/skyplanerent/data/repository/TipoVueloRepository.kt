@@ -148,10 +148,6 @@ class TipoVueloRepository @Inject constructor(
         }
     }
 
-    suspend fun cleanInvalidTiposVuelo() {
-        dao.clearInvalidTiposVuelo()
-    }
-
     private fun TipoVueloDTO.toEntity() = TipoVueloEntity(
         vueloId = this.tipoVueloId,
         nombreVuelo = this.nombreVuelo,

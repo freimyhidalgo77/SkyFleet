@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
@@ -55,29 +55,28 @@ import edu.ucne.skyplanerent.presentation.navigation.BottomNavItem
 import edu.ucne.skyplanerent.presentation.navigation.Screen
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TipoAeronaveDetailsScreen (
     aeronaveId: Int?,
-    ViewModel: AeronaveViewModel = hiltViewModel(),
+    viewModel: AeronaveViewModel = hiltViewModel(),
     goBack: () -> Unit,
     onReservar: (Int) -> Unit,
     navController:NavController
 ) {
-    val uiState by ViewModel.uiState.collectAsStateWithLifecycle()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(aeronaveId) {
         aeronaveId?.let {
             if (it > 0) {
-                ViewModel.onEvent(AeronaveEvent.GetAeronave(it))
+                viewModel.onEvent(AeronaveEvent.GetAeronave(it))
             }
         }
     }
 
     LaunchedEffect(Unit) {
-        ViewModel.uiEvent.collect { event ->
+        viewModel.uiEvent.collect { event ->
             when (event) {
                 is UiEvent.NavigateUp -> goBack()
                 is UiEvent.ShowSnackbar -> {
@@ -111,7 +110,6 @@ fun TipoAeronaveDetailsBodyScreen (
     onReservar: (Int) -> Unit,
     navController:NavController
 ) {
-    val refreshing = uiState.isLoading
 
     val items = listOf(
         BottomNavItem("Inicio", Icons.Default.Home, Screen.Home),
@@ -134,7 +132,7 @@ fun TipoAeronaveDetailsBodyScreen (
                 navigationIcon = {
                     IconButton(onClick = goBack) {
                         Icon(
-                            Icons.Default.ArrowBack,
+                            Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Volver",
                             tint = Color.Black
                         )
@@ -188,7 +186,7 @@ fun TipoAeronaveDetailsBodyScreen (
                         uiState.imageUrl != null -> {
                             AsyncImage(
                                 model = uiState.imageUrl,
-                                contentDescription = "Imagen de ${uiState.ModeloAvion}",
+                                contentDescription = "Imagen de ${uiState.modeloAvion}",
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(200.dp)
@@ -201,7 +199,7 @@ fun TipoAeronaveDetailsBodyScreen (
                         uiState.imageUri != null -> {
                             AsyncImage(
                                 model = uiState.imageUri,
-                                contentDescription = "Imagen de ${uiState.ModeloAvion}",
+                                contentDescription = "Imagen de ${uiState.modeloAvion}",
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(200.dp)
@@ -231,7 +229,7 @@ fun TipoAeronaveDetailsBodyScreen (
                         ) {
                             CircularProgressIndicator()
                         }
-                    } else if (uiState.AeronaveId != null) {
+                    } else if (uiState.aeronaveId != null) {
 
                         Text(
                             text = "Especificaciones Clave",
@@ -243,26 +241,25 @@ fun TipoAeronaveDetailsBodyScreen (
                         Row(modifier = Modifier.fillMaxWidth()) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text("Capacidad", color = Color.Gray)
-                                Text("${uiState.CapacidadPasajeros ?: "0"} Personas", color = Color.Black)
+                                Text("${uiState.capacidadPasajeros} Personas", color = Color.Black)
                                 Spacer(modifier = Modifier.height(12.dp))
 
                                 Text("Tipo", color = Color.Gray)
-                                Text("${uiState.DescripcionCategoria ?: "N/A"}", color = Color.Black)
+                                Text(uiState.descripcionCategoria, color = Color.Black)
                             }
 
                             Column(modifier = Modifier.weight(1f)) {
                                 Text("Peso Máximo", color = Color.Gray)
-                                Text("${uiState.Peso ?: "0.0"} kg", color = Color.Black)
+                                Text("${uiState.peso ?: "0.0"} kg", color = Color.Black)
                                 Spacer(modifier = Modifier.height(12.dp))
 
                                 Text("Rango", color = Color.Gray)
-                                Text("${uiState.Rango ?: "0"} NM", color = Color.Black)
+                                Text("${uiState.rango} NM", color = Color.Black)
                             }
                         }
 
                         Spacer(modifier = Modifier.height(24.dp))
 
-                        // Sección: Especificaciones
                         Text(
                             text = "Especificaciones",
                             style = MaterialTheme.typography.titleMedium,
@@ -273,20 +270,20 @@ fun TipoAeronaveDetailsBodyScreen (
                         Row(modifier = Modifier.fillMaxWidth()) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text("Motor", color = Color.Gray)
-                                Text("${uiState.DescripcionMotor ?: "N/A"}", color = Color.Black)
+                                Text(uiState.descripcionMotor, color = Color.Black)
                                 Spacer(modifier = Modifier.height(12.dp))
 
                                 Text("Combustible", color = Color.Gray)
-                                Text("${uiState.CapacidadCombustible ?: "0"} gal", color = Color.Black)
+                                Text("${uiState.capacidadCombustible} gal", color = Color.Black)
                             }
 
                             Column(modifier = Modifier.weight(1f)) {
                                 Text("Velocidad de Crucero", color = Color.Gray)
-                                Text("${uiState.VelocidadMaxima ?: "0"} KTAS", color = Color.Black)
+                                Text("${uiState.velocidadMaxima ?: "0"} KTAS", color = Color.Black)
                                 Spacer(modifier = Modifier.height(12.dp))
 
                                 Text("Rango", color = Color.Gray)
-                                Text("${uiState.Rango ?: "0"} NM", color = Color.Black)
+                                Text("${uiState.rango} NM", color = Color.Black)
                             }
                         }
 
@@ -302,27 +299,27 @@ fun TipoAeronaveDetailsBodyScreen (
 
                         Column {
                             Text("Modelo", color = Color.Gray)
-                            Text("${uiState.ModeloAvion ?: "N/A"}", color = Color.Black)
+                            Text(uiState.modeloAvion, color = Color.Black)
                             Spacer(modifier = Modifier.height(8.dp))
 
                             Text("Registración", color = Color.Gray)
-                            Text("${uiState.Registracion ?: "N/A"}", color = Color.Black)
+                            Text(uiState.registracion, color = Color.Black)
                             Spacer(modifier = Modifier.height(8.dp))
 
                             Text("Licencia", color = Color.Gray)
-                            Text("${uiState.Licencia ?: "N/A"}", color = Color.Black)
+                            Text(uiState.licencia, color = Color.Black)
                             Spacer(modifier = Modifier.height(8.dp))
 
                             Text("Costo por Hora", color = Color.Gray)
-                            Text("$${uiState.CostoXHora ?: "0.0"}", color = Color.Black)
+                            Text("$${uiState.costoXHora ?: "0.0"}", color = Color.Black)
                             Spacer(modifier = Modifier.height(8.dp))
 
                             Text("Consumo por Hora", color = Color.Gray)
-                            Text("${uiState.ConsumoXHora ?: "0"} L/h", color = Color.Black)
+                            Text("${uiState.consumoXHora} L/h", color = Color.Black)
                             Spacer(modifier = Modifier.height(8.dp))
 
                             Text("Descripción", color = Color.Gray)
-                            Text("${uiState.DescripcionAeronave ?: "N/A"}", color = Color.Black)
+                            Text(uiState.descripcionAeronave, color = Color.Black)
                         }
 
                         Spacer(modifier = Modifier.height(24.dp))
@@ -332,7 +329,7 @@ fun TipoAeronaveDetailsBodyScreen (
                             horizontalArrangement = Arrangement.SpaceEvenly
                         ) {
                             Button(
-                                onClick = { onReservar(uiState.AeronaveId) },  // Pasar el ID
+                                onClick = { onReservar(uiState.aeronaveId) },  // Pasar el ID
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = Color(0xFF0A80ED),
                                     contentColor = Color.White

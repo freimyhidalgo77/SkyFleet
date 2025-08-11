@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "Rutas")
 data class RutaEntity(
-    @PrimaryKey val rutaId: Int? = null, // Sin autoGenerate
+    @PrimaryKey val rutaId: Int? = null,
     val origen: String = "",
     val destino: String = "",
     val distancia: Double? = 0.0,

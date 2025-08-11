@@ -43,7 +43,7 @@ sealed interface AeronaveEvent {
     data object Save: AeronaveEvent
     data object Delete: AeronaveEvent
     data object New: AeronaveEvent
-    data object postAeronave: AeronaveEvent
+    data object PostAeronave: AeronaveEvent
     data object ResetSuccessMessage: AeronaveEvent
     data class FilterByCategoria(val categoriaId: Int) : AeronaveEvent // Nuevo evento
     data class ImageUrlChange(val url: String) : AeronaveEvent // Nuevo evento

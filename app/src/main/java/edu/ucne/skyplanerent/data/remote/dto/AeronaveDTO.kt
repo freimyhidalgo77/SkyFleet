@@ -17,6 +17,6 @@ data class AeronaveDTO(
     val capacidadPasajeros:Int = 0,
     val altitudMaxima:Int  = 0,
     val licencia:String,
-    val imagePath: String? // Añadir campo
+    val imagePath: String?
 
 )

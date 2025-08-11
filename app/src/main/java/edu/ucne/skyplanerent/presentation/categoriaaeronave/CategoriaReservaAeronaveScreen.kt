@@ -13,7 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
@@ -59,7 +59,7 @@ fun CategoriaReservaAeronaveScreen (
         uiState = uiState,
         goToCategoria = goToCategoria,
         deleteCategoria = { categoria ->
-            viewModel.onEvent(CategoriaAeronaveEvent.CategoriaIdChange(categoria.categoriaId ?: 0))
+            viewModel.onEvent(CategoriaAeronaveEvent.CategoriaIdChange(categoria.categoriaId))
             viewModel.onEvent(CategoriaAeronaveEvent.Delete)
         },
         goBack = goBack,
@@ -79,7 +79,7 @@ private fun CategoriaAeronaveRow(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
-            .clickable { goToCategoria(it.categoriaId ?: 0) },
+            .clickable { goToCategoria(it.categoriaId) },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
@@ -150,7 +150,7 @@ fun CategoriaReservaAeronaveScreen(
                 navigationIcon = {
                     IconButton(onClick = goBack) {
                         Icon(
-                            imageVector = Icons.Default.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = "Volver"
                         )
                     }
