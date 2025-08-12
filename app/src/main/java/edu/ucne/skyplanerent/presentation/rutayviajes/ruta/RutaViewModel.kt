@@ -330,11 +330,12 @@ class RutaViewModel @Inject constructor(
     private fun saveRuta() {
         viewModelScope.launch {
             try {
-                rutaRepository.saveRuta(_uiState.value.toEntity())
+                val id = _uiState.value.rutaId ?: return@launch // Asegúrate de tener el ID (ajusta 'rutaId' según el nombre real en tu UiState)
+                rutaRepository.update(id, _uiState.value.toEntity())
                 _uiState.update {
                     it.copy(
                         isSuccess = true,
-                        successMessage = "Ruta guardada correctamente",
+                        successMessage = "Ruta actualizada correctamente",
                         errorMessage = null,
                         showDialog = true
                     )
@@ -344,7 +345,7 @@ class RutaViewModel @Inject constructor(
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
-                        errorMessage = "Error al guardar la ruta: ${e.localizedMessage}",
+                        errorMessage = "Error al actualizar la ruta: ${e.localizedMessage}",
                         isSuccess = false
                     )
                 }
