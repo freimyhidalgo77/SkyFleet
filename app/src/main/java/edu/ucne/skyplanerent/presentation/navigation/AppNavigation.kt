@@ -19,6 +19,7 @@ import androidx.navigation.navArgument
 import androidx.navigation.toRoute
 import com.google.firebase.auth.FirebaseAuth
 import edu.ucne.skyplanerent.HomeScreen
+import edu.ucne.skyplanerent.data.local.entity.ReservaEntity
 import edu.ucne.skyplanerent.data.local.entity.RutaEntity
 import edu.ucne.skyplanerent.data.local.entity.TipoVueloEntity
 import edu.ucne.skyplanerent.presentation.admin.AdminPanelScreen
@@ -68,6 +69,7 @@ fun AppNavigation(context: Context) {
     val scope = rememberCoroutineScope()
     val rutaList by remember { mutableStateOf(emptyList<RutaEntity>()) }
     val tipoList by remember { mutableStateOf(emptyList<TipoVueloEntity>()) }
+
 
     val auth = FirebaseAuth.getInstance()
     val navController = rememberNavController()
@@ -376,7 +378,6 @@ fun AppNavigation(context: Context) {
             val parentEntry = remember(backStackEntry) {
                 navController.getBackStackEntry(Screen.Rutasyviajes)
             }
-
             val reservaViewModel: ReservaViewModel = hiltViewModel(parentEntry)
             val args = backStackEntry.toRoute<Screen.PagoReserva>()
             PagoReservaListScreen(

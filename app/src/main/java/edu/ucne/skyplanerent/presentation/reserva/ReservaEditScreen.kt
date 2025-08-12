@@ -196,7 +196,7 @@ fun ReservaEditBodyScreen(
     val aeronave = aeronaveUiState.aeronaves.find { it.aeronaveId == reserva.categoriaId }
 
     val fecha = uiState.fecha
-    val tipoCliente = uiState.tipoCliente
+    val tipoCliente by viewModel.tipoCliente.collectAsState()
     val licencia = uiState.licenciaPiloto
 
     var showRutaDialog by rememberSaveable { mutableStateOf(false) }
@@ -365,16 +365,18 @@ fun ReservaEditBodyScreen(
             Text(formatDateToDMY(fecha.toString()) ?: "No seleccionada", fontSize = 16.sp, color = Color.Gray)
             Spacer(modifier = Modifier.height(8.dp))
 
-            Text("Piloto", fontWeight = FontWeight.Bold)
             Text(
-                when (tipoCliente) {
-                    true -> "Sí"
-                    false -> "No"
-                    else -> "No especificado"
-                },
-                fontSize = 16.sp,
-                color = Color.Gray
+                text = "Piloto?",
+                color = Color.Gray,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.padding(bottom = 4.dp)
             )
+            Text(
+                text = if (tipoCliente) "Sí" else "No",
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
             Spacer(modifier = Modifier.height(8.dp))
 
             Text("Licencia", fontWeight = FontWeight.Bold)

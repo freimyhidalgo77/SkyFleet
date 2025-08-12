@@ -284,16 +284,11 @@ fun ReservaBodyListScreen(
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
                 Text(
-                    text = when (tipoCliente) {
-                        true -> "Sí"
-                        false -> "No"
-                        else -> "No especificado"
-                    },
+                    text = if (tipoCliente) "Sí" else "No",
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
 
-                // Licencia (solo si es piloto)
                 if (tipoCliente == true) {
                     Text(
                         text = "Licencia:",

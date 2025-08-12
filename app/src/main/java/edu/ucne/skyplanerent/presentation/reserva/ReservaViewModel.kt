@@ -7,6 +7,8 @@ import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.ucne.skyplanerent.data.local.entity.ReservaEntity
 import edu.ucne.skyplanerent.data.repository.ReservaRepository
+import edu.ucne.skyplanerent.data.repository.RutaRepository
+import edu.ucne.skyplanerent.data.repository.TipoVueloRepository
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveUiState
 import edu.ucne.skyplanerent.presentation.login.SessionManager
 import edu.ucne.skyplanerent.presentation.rutayviajes.ruta.RutaUiState
@@ -26,8 +28,6 @@ import javax.inject.Inject
 @HiltViewModel
 class ReservaViewModel @Inject constructor(
     private val reservaRepository: ReservaRepository,
-    /*private val tipoRutaRepository: TipoVueloRepository,
-    private val rutaRepository: RutaRepository,*/
     val auth: FirebaseAuth,
     val sessionManager: SessionManager
 
@@ -124,14 +124,13 @@ class ReservaViewModel @Inject constructor(
     }
 
     //Seleccionar tipo cliente
-    private val _tipoCliente = MutableStateFlow<Boolean?>(null)
-    val tipoCliente: StateFlow<Boolean?> = _tipoCliente
+    private val _tipoCliente = MutableStateFlow(false)
+    val tipoCliente: StateFlow<Boolean> = _tipoCliente
 
     fun seleccionarTipoCliente(valor: Boolean) {
         _tipoCliente.value = valor
         actualizarPrecio()
     }
-
     fun seleccionarLicenciaPiloto(licencia: TipoLicencia) {
         _uiState.update { it.copy(licenciaPiloto = licencia) }
     }
@@ -262,6 +261,15 @@ class ReservaViewModel @Inject constructor(
 
 
 
+    fun getReserva(){
+        viewModelScope.launch {
+            reservaRepository.reservaDao.getAll().collect{reserva->
+                _uiState.update {
+                    it.copy(reservas = reserva)
+                }
+            }
+        }
+    }
 
     fun updateReserva() {
         viewModelScope.launch {
@@ -517,7 +525,7 @@ class ReservaViewModel @Inject constructor(
                 if (reserva != null) {
                     // Actualizar todos los estados relacionados
                     _fechaSeleccionada.value = reserva.fecha
-                    _tipoCliente.value = reserva.tipoCliente
+                    _tipoCliente.value = reserva.tipoCliente?:false
                     _precioOriginal = reserva.precioTotal ?: 0.0
                     _precioCalculado = _precioOriginal
                     _camposRelevantesCambiados = false

@@ -53,6 +53,7 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
+import edu.ucne.skyplanerent.data.local.entity.ReservaEntity
 import edu.ucne.skyplanerent.data.local.entity.RutaEntity
 import edu.ucne.skyplanerent.data.local.entity.TipoVueloEntity
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveUiState
@@ -684,9 +685,9 @@ fun FormularioTarjetaCredito(
     goBack: () -> Unit,
     reservaViewModel: ReservaViewModel,
     rutaViewModel: RutaViewModel,
-    tipoVueloViewModel: TipoVueloViewModel
+    tipoVueloViewModel: TipoVueloViewModel,
 
-) {
+    ) {
 
     val context = LocalContext.current
     RequestNotificationPermission()
@@ -765,17 +766,17 @@ fun FormularioTarjetaCredito(
                         origen = rutaSeleccionada?.origen?:"No encontrada",
                         destino = rutaSeleccionada?.destino?:"No encontrada",
                         fecha = fechaVuelo.toString(),
-                        precioTotal = precioTotal
+                        precioTotal = precioTotal,
                     )
                 }
             } else {
                 showReservaNotification(
                     context = context,
                     reservaId = reservaId,
-                    origen = rutaSeleccionada?.origen?:"No enconytrada",
+                    origen = rutaSeleccionada?.origen?:"No encontrada",
                     destino = rutaSeleccionada?.destino?:"No encontrada",
                     fecha = fechaVuelo.toString(),
-                    precioTotal = precioTotal
+                    precioTotal = precioTotal,
                 )
             }
             onConfirmarPago(datosTarjeta)
@@ -1017,7 +1018,7 @@ fun FormularioTransferenciaBancaria(
     goBack: () -> Unit,
     reservaViewModel: ReservaViewModel,
     rutaViewModel: RutaViewModel,
-    tipoVueloViewModel: TipoVueloViewModel
+    tipoVueloViewModel: TipoVueloViewModel,
 
 ) {
 
@@ -1095,7 +1096,8 @@ fun FormularioTransferenciaBancaria(
                     origen = rutaSeleccionada?.origen ?: "No encontrada",
                     destino = rutaSeleccionada?.destino ?: "No encontrada",
                     fecha = fechaVuelo.toString(),
-                    precioTotal = precioTotal
+                    precioTotal = precioTotal,
+
                 )
             }
         } else {

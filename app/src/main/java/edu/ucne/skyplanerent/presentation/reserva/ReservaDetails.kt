@@ -165,7 +165,6 @@ fun ReservaDetailsBodyScreen(
                             goToEdit = goToEdit,
                             goToDelete = goToDelete,
                             fecha = uiState.fecha?.toString(),
-                            tipoCliente = uiState.tipoCliente,
                             licenciaDescripcion = uiState.licenciaPiloto?.descripcion,
                             formularioUiState = formularioUiState
                         )
@@ -188,7 +187,6 @@ fun ReservaDetailsRow(
     goToEdit: (Int) -> Unit,
     goToDelete: (Int) -> Unit,
     fecha: String?,
-    tipoCliente: Boolean?,
     licenciaDescripcion: String?,
     reservaViewModel: ReservaViewModel = hiltViewModel(),
     aeronaveViewModel: AeronaveViewModel = hiltViewModel()
@@ -201,6 +199,8 @@ fun ReservaDetailsRow(
     val idAeronaveSeleccionada by reservaViewModel.tipoAeronaveSeleccionadaId.collectAsState()
     val aeronaveSeleccionada =
         aeronaveUiState.aeronaves.find { it.aeronaveId == idAeronaveSeleccionada }
+
+    val tipoCliente by reservaViewModel.tipoCliente.collectAsState()
 
 
     Column(
@@ -226,12 +226,9 @@ fun ReservaDetailsRow(
         InfoRow("Destino", ruta?.destino ?: "No disponible")
         InfoRow("Pasajeros", reserva.pasajeros.toString())
         InfoRow("Fecha", formatDate(fecha) ?: "No seleccionada")
-        InfoRow("Piloto", when (tipoCliente) {
+        InfoRow("Piloto", if (tipoCliente)   "Sí" else "No")
 
-            true -> "Sí"
-            false -> "No"
-            else -> "No especificado"
-        })
+
         InfoRow("Licencia", licenciaDescripcion ?: "No aplica")
 
         InfoRow("Detalles del cliente", "${formulario?.nombre ?: "Nombre"} ${formulario?.apellido ?: "no encontrado"}")
