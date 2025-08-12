@@ -231,11 +231,6 @@ private fun TipoVueloRow(
                 style = MaterialTheme.typography.titleMedium,
                 color = Color.Black
             )
-            Text(
-                text = it.descripcionTipoVuelo,
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.Gray
-            )
         }
         IconButton(onClick = goToTipoVuelo) {
             Icon(
