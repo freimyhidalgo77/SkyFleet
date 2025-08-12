@@ -8,8 +8,18 @@ import javax.inject.Inject
 class CategoriaAeronaveRepository @Inject constructor(
     private val dao: CategoriaAeronaveDao
 ) {
-    suspend fun saveCategoriaAeronave(categoriaaeronave: CategoriaAeronaveEntity) = dao.saveCategoriaAeronave(categoriaaeronave)
-    suspend fun find(id: Int): CategoriaAeronaveEntity = dao.find(id)
-    suspend fun deleteCategoriaAeronave(categoriaaeronave: CategoriaAeronaveEntity) = dao.deleteCategoriaAeronave(categoriaaeronave)
-    fun getAll(): Flow<List<CategoriaAeronaveEntity>> = dao.getAll()
+    suspend fun saveCategoriaAeronave(categoriaAeronaves: List<CategoriaAeronaveEntity>) =
+        dao.saveCategoriaAeronave(categoriaAeronaves)
+
+    suspend fun saveCategoriaAeronave(categoriaAeronaves: CategoriaAeronaveEntity) =
+        dao.saveCategoriaAeronave(categoriaAeronaves)
+
+    suspend fun find(id: Int): CategoriaAeronaveEntity? = dao.find(id)
+
+    suspend fun deleteCategoriaAeronave(categoriaAeronave: CategoriaAeronaveEntity) =
+        dao.deleteCategoriaAeronave(categoriaAeronave)
+
+    open suspend fun getAll(): Flow<List<CategoriaAeronaveEntity>> = dao.getAll()
+
+    suspend fun getCount(): Int = dao.getCount()
 }
