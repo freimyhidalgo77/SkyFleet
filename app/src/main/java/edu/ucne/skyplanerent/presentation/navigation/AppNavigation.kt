@@ -173,7 +173,7 @@ fun AppNavigation(context: Context) {
                     navController.navigate(Screen.AdminPanel(adminId))
                 },
                 sessionManager = sessionmanager,
-                adminRepository = adminViewModel.adminRepository // Pasa el repositorio desde el ViewModel
+                adminRepository = adminViewModel.adminRepository
             )
         }
 
@@ -304,8 +304,8 @@ fun AppNavigation(context: Context) {
             PreReservaListScreen(
                 preReservaId = args.prereservaId,
                 goBack = {
-                    navController.navigate(Screen.Rutasyviajes)
-                },
+                    navController.popBackStack() },
+
                 goToFormulario = {id->
                     navController.navigate(Screen.Formulario(0,id))
                 },

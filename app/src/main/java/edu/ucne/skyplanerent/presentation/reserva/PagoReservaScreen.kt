@@ -1,5 +1,7 @@
 package edu.ucne.skyplanerent.presentation.reserva
 
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,6 +17,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.CreditCard
+import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -23,6 +26,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
@@ -40,10 +44,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
@@ -557,7 +563,11 @@ fun PagoReservaBodyListScreen(
                             tipoCliente = tipoCliente ?: false,
                             pasajeros = formularioUiState.cantidadPasajeros,
                             formularioId = formularioUiState.formularioId?:0,
-                            goBack = goBack
+                            goBack = goBack,
+                            reservaId = PagoReservaId,
+                            reservaViewModel = reservaViewModel,
+                            rutaViewModel = rutaViewModel,
+                            tipoVueloViewModel = tipoVueloViewModel
                         )
                     }
 
@@ -577,7 +587,11 @@ fun PagoReservaBodyListScreen(
                             formularioId = formularioUiState.formularioId?:0,
                             tipoCliente = tipoCliente ?: false,
                             pasajeros = formularioUiState.cantidadPasajeros,
-                            goBack = goBack
+                            goBack = goBack,
+                            reservaId = PagoReservaId,
+                            reservaViewModel = reservaViewModel,
+                            rutaViewModel = rutaViewModel,
+                            tipoVueloViewModel = tipoVueloViewModel
                         )
                     }
 
@@ -656,6 +670,7 @@ fun PagoReservaBodyListScreen(
 
 @Composable
 fun FormularioTarjetaCredito(
+    reservaId:Int,
     precioTotal: Double,
     viewModel: ReservaViewModel,
     onConfirmarPago: (DatosTarjetaCredito) -> Unit,
@@ -666,9 +681,17 @@ fun FormularioTarjetaCredito(
     formularioId: Int,
     tipoCliente: Boolean,
     pasajeros: Int,
-    goBack: () -> Unit
+    goBack: () -> Unit,
+    reservaViewModel: ReservaViewModel,
+    rutaViewModel: RutaViewModel,
+    tipoVueloViewModel: TipoVueloViewModel
+
 ) {
-    var montoIngresado by remember { mutableStateOf("") }
+
+    val context = LocalContext.current
+    RequestNotificationPermission()
+
+    var montoIngresado by remember { mutableStateOf("%.2f".format(precioTotal)) }
     var numeroTarjeta by remember { mutableStateOf("") }
     var nombreTitular by remember { mutableStateOf("") }
     var fechaExpiracion by remember { mutableStateOf("") }
@@ -678,10 +701,22 @@ fun FormularioTarjetaCredito(
     var mostrarDialogoConfirmacion by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
+    val rutaUiState by rutaViewModel.uiState.collectAsStateWithLifecycle()
+    val tipoVueloUiState by tipoVueloViewModel.uiState.collectAsStateWithLifecycle()
+
+    val idTipoVueloSeleccionado by reservaViewModel.tipoVueloSeleccionadoId.collectAsState()
+    val tipoVueloSeleccionado = tipoVueloUiState.tipovuelo.find { it.tipoVueloId == idTipoVueloSeleccionado }
+
+    val idRutaSeleccionada by reservaViewModel.rutaSeleccionadaId.collectAsState()
+    val rutaSeleccionada = rutaUiState.rutas.find { it.rutaId == idRutaSeleccionada }
+
+    val fechaVuelo by reservaViewModel.fechaSeleccionada.collectAsState()
+
+
     val tiposTarjeta = listOf("Visa", "MasterCard", "American Express", "Discover")
 
     fun realizarPago() {
-        coroutineScope.launch {
+        coroutineScope.launch  {
             // Verificar autenticación antes de guardar
             val userId = viewModel.auth.currentUser?.uid
                 ?: viewModel.sessionManager.getCurrentUserId()
@@ -717,6 +752,32 @@ fun FormularioTarjetaCredito(
                 formularioId = formularioId
             )
 
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                if (ContextCompat.checkSelfPermission(
+                        context,
+                        android.Manifest.permission.POST_NOTIFICATIONS
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
+                    showReservaNotification(
+                        context = context,
+                        reservaId = reservaId,
+                        origen = rutaSeleccionada?.origen?:"No encontrada",
+                        destino = rutaSeleccionada?.destino?:"No encontrada",
+                        fecha = fechaVuelo.toString(),
+                        precioTotal = precioTotal
+                    )
+                }
+            } else {
+                showReservaNotification(
+                    context = context,
+                    reservaId = reservaId,
+                    origen = rutaSeleccionada?.origen?:"No enconytrada",
+                    destino = rutaSeleccionada?.destino?:"No encontrada",
+                    fecha = fechaVuelo.toString(),
+                    precioTotal = precioTotal
+                )
+            }
             onConfirmarPago(datosTarjeta)
             goBack()
         }
@@ -854,7 +915,6 @@ fun FormularioTarjetaCredito(
                 onValueChange = {
                     if (it.isEmpty() || it.matches(Regex("^\\d*\\.?\\d*\$"))) {
                         montoIngresado = it
-                        mostrarErrorMonto = false
                     }
                 },
                 label = { Text("Monto a pagar (RD$)") },
@@ -864,6 +924,11 @@ fun FormularioTarjetaCredito(
                 supportingText = {
                     if (mostrarErrorMonto) {
                         Text("El monto debe ser igual a RD$${"%.2f".format(precioTotal)}", color = Color.Red)
+                    }
+                },
+                trailingIcon = {
+                    IconButton(onClick = { montoIngresado = "%.2f".format(precioTotal) }) {
+                        Icon(Icons.Default.Restore, contentDescription = "Restaurar monto")
                     }
                 }
             )
@@ -921,7 +986,6 @@ fun FormularioTarjetaCredito(
 
 
 
-
 // Función de validación (simplificada)
 private fun validarFormularioTarjeta(
     numeroTarjeta: String,
@@ -939,6 +1003,7 @@ private fun validarFormularioTarjeta(
 
 @Composable
 fun FormularioTransferenciaBancaria(
+    reservaId: Int,
     precioTotal: Double,
     viewModel: ReservaViewModel,
     onConfirmarTransferencia: (DatosTransferencia) -> Unit,
@@ -949,15 +1014,38 @@ fun FormularioTransferenciaBancaria(
     formularioId: Int,
     tipoCliente: Boolean,
     pasajeros: Int,
-    goBack: () -> Unit
+    goBack: () -> Unit,
+    reservaViewModel: ReservaViewModel,
+    rutaViewModel: RutaViewModel,
+    tipoVueloViewModel: TipoVueloViewModel
+
 ) {
-    var montoIngresado by remember { mutableStateOf("") }
+
+    val context = LocalContext.current
+    RequestNotificationPermission()
+
+    // var montoIngresado by remember { mutableStateOf("") }
     var bancoSeleccionado by remember { mutableStateOf("") }
     var numeroCuenta by remember { mutableStateOf("") }
     var nombreTitular by remember { mutableStateOf("") }
     var referencia by remember { mutableStateOf("") }
     var mostrarErrorMonto by remember { mutableStateOf(false) }
     var mostrarDialogoConfirmacion by remember { mutableStateOf(false) }
+
+    var montoIngresado by remember { mutableStateOf("%.2f".format(precioTotal)) }
+
+
+    val rutaUiState by rutaViewModel.uiState.collectAsStateWithLifecycle()
+    val tipoVueloUiState by tipoVueloViewModel.uiState.collectAsStateWithLifecycle()
+
+    val idTipoVueloSeleccionado by reservaViewModel.tipoVueloSeleccionadoId.collectAsState()
+    val tipoVueloSeleccionado = tipoVueloUiState.tipovuelo.find { it.tipoVueloId == idTipoVueloSeleccionado }
+
+    val idRutaSeleccionada by reservaViewModel.rutaSeleccionadaId.collectAsState()
+    val rutaSeleccionada = rutaUiState.rutas.find { it.rutaId == idRutaSeleccionada }
+
+    val fechaVuelo by reservaViewModel.fechaSeleccionada.collectAsState()
+
 
     val bancos = listOf(
         "Banco Popular",
@@ -995,9 +1083,36 @@ fun FormularioTransferenciaBancaria(
             formularioId = formularioId
         )
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    context,
+                    android.Manifest.permission.POST_NOTIFICATIONS
+                ) == PackageManager.PERMISSION_GRANTED
+            ) {
+                showReservaNotification(
+                    context = context,
+                    reservaId = reservaId,
+                    origen = rutaSeleccionada?.origen ?: "No encontrada",
+                    destino = rutaSeleccionada?.destino ?: "No encontrada",
+                    fecha = fechaVuelo.toString(),
+                    precioTotal = precioTotal
+                )
+            }
+        } else {
+            showReservaNotification(
+                context = context,
+                reservaId = reservaId,
+                origen = rutaSeleccionada?.origen ?: "No enconytrada",
+                destino = rutaSeleccionada?.destino ?: "No encontrada",
+                fecha = fechaVuelo.toString(),
+                precioTotal = precioTotal
+            )
+        }
         onConfirmarTransferencia(datosTransferencia)
         goBack()
+
     }
+
 
     if (mostrarDialogoConfirmacion) {
         AlertDialog(
@@ -1114,7 +1229,6 @@ fun FormularioTransferenciaBancaria(
                 onValueChange = {
                     if (it.isEmpty() || it.matches(Regex("^\\d*\\.?\\d*\$"))) {
                         montoIngresado = it
-                        mostrarErrorMonto = false
                     }
                 },
                 label = { Text("Monto a pagar (RD$)") },
@@ -1124,6 +1238,11 @@ fun FormularioTransferenciaBancaria(
                 supportingText = {
                     if (mostrarErrorMonto) {
                         Text("El monto debe ser igual a RD$${"%.2f".format(precioTotal)}", color = Color.Red)
+                    }
+                },
+                trailingIcon = {
+                    IconButton(onClick = { montoIngresado = "%.2f".format(precioTotal) }) {
+                        Icon(Icons.Default.Restore, contentDescription = "Restaurar monto")
                     }
                 }
             )

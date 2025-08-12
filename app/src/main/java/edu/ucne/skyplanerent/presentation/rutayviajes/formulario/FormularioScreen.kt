@@ -81,7 +81,7 @@ fun FormularioScreen (
 
     FormularioBodyScreen(
         uiState = uiState.value,
-        selectedAeronave = selectedAeronave,
+       // selectedAeronave = selectedAeronave,
         onChangeNombre = viewModel::onNombreChange,
         onChangeApellido = viewModel::onApellidoChange,
         onChangeTelefono = viewModel::onTelefonoChange,
@@ -90,8 +90,8 @@ fun FormularioScreen (
         onChangeCiudad = viewModel::onCiudadResidenciaChange,
         onChangePasajero = viewModel::onChangePasajero,
         save = { viewModel.saveAndReturnId { id -> goToPago(id) } },
-        nuevo = viewModel::nuevoFormulario,
-        goBack = goBack,
+       // nuevo = viewModel::nuevoFormulario,
+       // goBack = goBack,
         goToPago = goToPago,
         aeronaveUiState = aeronaveUiState.value,
         capacidadMaxima = capacidadMaxima,
@@ -104,7 +104,7 @@ fun FormularioScreen (
 fun FormularioBodyScreen(
     uiState: FormularioUiState,
     aeronaveUiState: AeronaveUiState,
-    aeronaveViewModel: AeronaveViewModel = hiltViewModel(),
+    //aeronaveViewModel: AeronaveViewModel = hiltViewModel(),
     reservaViewModel: ReservaViewModel = hiltViewModel(),
     viewModel: FormularioViewModel =  hiltViewModel(),
     onChangeNombre:(String)->Unit,
@@ -115,10 +115,9 @@ fun FormularioBodyScreen(
     onChangeCiudad: KFunction1<String, Unit>,
     onChangePasajero: KFunction1<Int, Unit>,
     save:()->Unit,
-    nuevo:()->Unit,
-    goBack: (Int) -> Unit,
+    //goBack: (Int) -> Unit,
     goToPago:(Int)->Unit,
-    selectedAeronave: AeronaveDTO?,
+    //selectedAeronave: AeronaveDTO?,
     capacidadMaxima: Int,
     currentUserEmail: String?
 
@@ -218,7 +217,7 @@ fun FormularioBodyScreen(
             shape = RoundedCornerShape(16.dp)
         )
 
-        Spacer(modifier = Modifier.height(30.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
             value = uiState.pasaporte,

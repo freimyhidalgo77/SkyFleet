@@ -1,13 +1,12 @@
 package edu.ucne.skyplanerent.presentation.reserva
 
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.ucne.skyplanerent.data.local.entity.ReservaEntity
 import edu.ucne.skyplanerent.data.repository.ReservaRepository
-import edu.ucne.skyplanerent.data.repository.RutaRepository
-import edu.ucne.skyplanerent.data.repository.TipoVueloRepository
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveUiState
 import edu.ucne.skyplanerent.presentation.login.SessionManager
 import edu.ucne.skyplanerent.presentation.rutayviajes.ruta.RutaUiState
@@ -27,8 +26,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ReservaViewModel @Inject constructor(
     private val reservaRepository: ReservaRepository,
-    private val tipoRutaRepository: TipoVueloRepository,
-    private val rutaRepository: RutaRepository,
+    /*private val tipoRutaRepository: TipoVueloRepository,
+    private val rutaRepository: RutaRepository,*/
     val auth: FirebaseAuth,
     val sessionManager: SessionManager
 
@@ -87,6 +86,7 @@ class ReservaViewModel @Inject constructor(
             }
         }
     }
+
 
     //Seleccionar ruta de vuelo
     private val _rutaSeleccionadaId = MutableStateFlow<Int?>(null)
@@ -262,15 +262,6 @@ class ReservaViewModel @Inject constructor(
 
 
 
-    fun getReserva(){
-        viewModelScope.launch {
-            reservaRepository.reservaDao.getAll().collect{reserva->
-                _uiState.update {
-                    it.copy(reservas = reserva)
-                }
-            }
-        }
-    }
 
     fun updateReserva() {
         viewModelScope.launch {
