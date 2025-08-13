@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class ReservaRepository @Inject constructor(
-    val reservaDao: ReservaDao
+    private val reservaDao: ReservaDao
 
 ){
     //Mejorando metodo para evaluar si se ha actualizado una reserva o si solo se va a guardar

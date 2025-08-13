@@ -10,20 +10,14 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build
 import android.util.Log
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
-import androidx.hilt.navigation.compose.hiltViewModel
 import edu.ucne.skyplanerent.MainActivity
 import edu.ucne.skyplanerent.R
-import edu.ucne.skyplanerent.presentation.reserva.ReservaViewModel
 
 
-
-@androidx.annotation.RequiresPermission(android.Manifest.permission.POST_NOTIFICATIONS)
+@androidx.annotation.RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
 fun showReservaNotification(
     context: Context,
     reservaId: Int,
@@ -31,7 +25,6 @@ fun showReservaNotification(
     destino: String,
     fecha: String,
     precioTotal: Double,
-    //isEdit: Boolean = false
 
 ) {
 
@@ -57,7 +50,7 @@ fun showReservaNotification(
         notificationManager.createNotificationChannel(channel)
     }
 
-    // 2. Crear Intent para abrir la app al hacer clic
+    // 2. Crear Intent para abrir la app al hacer click
     val intent = Intent(context, MainActivity::class.java).apply {
         flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
     }
@@ -104,7 +97,7 @@ fun showReservaNotification(
 }
 
 
-@androidx.annotation.RequiresPermission(android.Manifest.permission.POST_NOTIFICATIONS)
+@androidx.annotation.RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
 fun showReservaDeletedNotification(
     context: Context,
     reservaId: Int,

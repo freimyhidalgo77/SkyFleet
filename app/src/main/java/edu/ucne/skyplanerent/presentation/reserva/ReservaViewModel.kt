@@ -10,8 +10,6 @@ import edu.ucne.skyplanerent.data.repository.ReservaRepository
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveUiState
 import edu.ucne.skyplanerent.presentation.login.SessionManager
 import edu.ucne.skyplanerent.presentation.rutayviajes.ruta.RutaUiState
-import edu.ucne.skyplanerent.presentation.rutayviajes.tipoVuelo.TipoLicencia
-import edu.ucne.skyplanerent.presentation.rutayviajes.tipoVuelo.TipoVueloUiState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,8 +24,6 @@ import javax.inject.Inject
 @HiltViewModel
 class ReservaViewModel @Inject constructor(
     private val reservaRepository: ReservaRepository,
-    /*private val tipoRutaRepository: TipoVueloRepository,
-    private val rutaRepository: RutaRepository,*/
     val auth: FirebaseAuth,
     val sessionManager: SessionManager
 
@@ -36,15 +32,11 @@ class ReservaViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
-    private val _uiState_ruta = MutableStateFlow(RutaUiState())
-    val rutaUiState = _uiState_ruta.asStateFlow()
+    private val uiStateruta = MutableStateFlow(RutaUiState())
+    private val rutaUiState = uiStateruta.asStateFlow()
 
-    private val _uiState_aeronaves = MutableStateFlow(AeronaveUiState())
-    val aeronaveUiState = _uiState_aeronaves.asStateFlow()
-
-    private val _uiState_tipoVuelo = MutableStateFlow(TipoVueloUiState())
-    val tipoVueloUiState = _uiState_tipoVuelo.asStateFlow()
-
+    private val uiStateaeronaves = MutableStateFlow(AeronaveUiState())
+    private val aeronaveUiState = uiStateaeronaves.asStateFlow()
     private var _precioOriginal: Double = 0.0
     private var _precioCalculado: Double = 0.0
     private var _camposRelevantesCambiados: Boolean = false
@@ -64,7 +56,6 @@ class ReservaViewModel @Inject constructor(
                 // Obtener los datos actualizados
                 val duracionVuelo = rutaUiState.value.rutas.find { it.rutaId == rutaId }?.duracion ?: 0
                 val costoXHora = aeronaveUiState.value.aeronaves.find { it.aeronaveId == categoriaId }?.costoXHora ?: 0.0
-                val pasajeros = _uiState.value.pasajeros ?: 1
 
                 if (duracionVuelo == 0 || costoXHora == 0.0) {
                     return@launch
@@ -105,7 +96,7 @@ class ReservaViewModel @Inject constructor(
         _tipoVueloSeleccionadoId.value = tipoVueloId
         actualizarPrecio()
     }
-    //Seleciconar tipo aeronave
+    //Seleccionar tipo aeronave
     private val _tipoAeronaveSeleccionadaId = MutableStateFlow<Int?>(null)
     val tipoAeronaveSeleccionadaId: StateFlow<Int?> = _tipoAeronaveSeleccionadaId
 
@@ -131,13 +122,6 @@ class ReservaViewModel @Inject constructor(
         _tipoCliente.value = valor
         actualizarPrecio()
     }
-
-    fun seleccionarLicenciaPiloto(licencia: TipoLicencia) {
-        _uiState.update { it.copy(licenciaPiloto = licencia) }
-    }
-
-
-
     fun categoriaIdChange(id: Int) {
         _camposRelevantesCambiados = true
         _uiState.update { it.copy(categoriaId = id) }
@@ -179,19 +163,8 @@ class ReservaViewModel @Inject constructor(
         _uiState.update { it.copy(fecha = fechaConvertida) }
     }
 
-    // En ReservaViewModel
-    fun onPrecioChange(precio: Double) {
-        _uiState.update { it.copy(precioTotal = precio) }
-    }
-
-    fun onEstadoPagoChange(estado: String) {
-        _uiState.update { it.copy(estadoPago = estado) }
-    }
-
-
     //Inicializando el metodo loadUserReserva para cargar el usuario perteneciente a esa reserva
     init{
-        //getReserva()
         loadUserReservas()
     }
 
@@ -233,35 +206,6 @@ class ReservaViewModel @Inject constructor(
             }
         }
     }
-    /*fun seleccionarTipoVuelo(tipoVueloId: Int, tipoVueloDTO: TipoVueloDTO) {
-       _tipoVueloSeleccionadoId.value = tipoVueloId
-       _uiState.update { it.copy(tipoVueloSeleccionado = tipoVueloDTO) }
-   }*/
-
-
-
-    /* fun onEvent(event: ReservaEvent) {
-         when (event) {
-             is ReservaEvent.AeronaveChange -> {
-             }
-             is ReservaEvent.FechaChange -> {
-                 _uiState.update {
-                     it.copy(fecha = event.fecha)
-                 }
-             }
-             is ReservaEvent.PasajeroChange -> {
-                 onChangePasajeros(event.pasajero)
-             }
-             is ReservaEvent.RutaChange -> {
-                 seleccionarRuta(event.rutaId)
-             }
-             ReservaEvent.Delte -> deleteReserva()
-             ReservaEvent.save -> guardarReserva()
-         }
-     }*/
-
-
-
 
     fun updateReserva() {
         viewModelScope.launch {
@@ -291,8 +235,8 @@ class ReservaViewModel @Inject constructor(
                     fecha = uiState.value.fecha ?: reservaSeleccionada.fecha,
                     pasajeros = uiState.value.pasajeros ?: reservaSeleccionada.pasajeros ?: 1,
                     tipoCliente = uiState.value.tipoCliente ?: reservaSeleccionada.tipoCliente,
-                    impuesto = uiState.value.impuesto ?: reservaSeleccionada.impuesto ?: 0.0,
-                    tarifa = uiState.value.tarifa ?: reservaSeleccionada.tarifa ?: 0.0,
+                    impuesto = uiState.value.impuesto,
+                    tarifa = uiState.value.tarifa,
                     precioTotal = precioFinal,
                     formularioId = formularioId,
                     metodoPago = metodoPago,
@@ -315,15 +259,6 @@ class ReservaViewModel @Inject constructor(
             }
         }
     }
-
-    // En ReservaViewModel.kt
-    /* fun actualizarEstadoPago(reservaId: Int, metodoPago: String, comprobante: String? = null) {
-         viewModelScope.launch {
-             reservaRepository.actualizarEstadoPago(reservaId, metodoPago, comprobante)
-             // Actualizar el estado local si es necesario
-             _uiState.update { it.copy(metodoPago = metodoPago, comprobante = comprobante) }
-         }
-     }*/
 
     fun guardarReserva(
         rutaId: Int,
@@ -485,24 +420,6 @@ class ReservaViewModel @Inject constructor(
         }
     }
 
-
-    fun getReservaPorId(id: Int): ReservaEntity? {
-        return uiState.value.reservas.find { it.reservaId == id }
-    }
-
-
-///Aqui quede///
-
-    /*fun nuevaReserva(){
-        _uiState.update {
-            it.copy(
-                reservaId = null,
-
-            )
-        }
-
-    }*/
-
     fun selectReserva(reservaId: Int) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
@@ -518,7 +435,7 @@ class ReservaViewModel @Inject constructor(
                     // Actualizar todos los estados relacionados
                     _fechaSeleccionada.value = reserva.fecha
                     _tipoCliente.value = reserva.tipoCliente
-                    _precioOriginal = reserva.precioTotal ?: 0.0
+                    _precioOriginal = reserva.precioTotal
                     _precioCalculado = _precioOriginal
                     _camposRelevantesCambiados = false
 
@@ -555,48 +472,6 @@ class ReservaViewModel @Inject constructor(
         }
     }
 
-    fun nuevaReserva(){
-        _uiState.update {
-            it.copy(
-                successMessage = null, errorMessage = null
-            )
-        }
-    }
-
-    /*fun onChangeAreonave(aeronaves:String){
-        _uiState.update {
-            it.copy(
-                aeronave = aeronaves
-            )
-        }
-    }*/
-
-    /*fun onChangeFecha(Fecha:String){
-        _uiState.update {
-            it.copy(
-                descripcion = descripcion
-            )
-        }
-    }*/
-
-    /*fun onChangePasajeros(pasajero:Int){
-        _uiState.update {
-            it.copy(
-                pasajeros = pasajero
-            )
-        }
-
-    }*/
-
-    /*fun onChangeRuta(ruta:Int){
-        _uiState.update {
-            it.copy(
-                rutaId = ruta
-            )
-        }
-
-    }*/
-
     fun UiState.toEntity() = ReservaEntity(
         reservaId = reservaId,
         rutaId = rutaId,
@@ -606,8 +481,8 @@ class ReservaViewModel @Inject constructor(
         tipoVueloId = tipoVueloId,
         categoriaId = categoriaId,
         fecha = fecha,
-        impuesto = impuesto?:0.0,
-        tarifa = tarifa?:0.0,
+        impuesto = impuesto,
+        tarifa = tarifa,
         precioTotal = precioTotal,
         tipoCliente = tipoCliente?:false,
         pasajeros = pasajeros,

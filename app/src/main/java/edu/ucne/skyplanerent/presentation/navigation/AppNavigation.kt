@@ -115,7 +115,7 @@ fun AppNavigation(context: Context) {
                 onNavigateToReserva = {
                     navController.navigate(Screen.Reserva)
                 },
-                onNavigateToRutas_Viajes = {
+                onNavigateToRutasViajes = {
                     navController.navigate(Screen.Rutasyviajes)
                 },
                 onNavigateToPeril = {

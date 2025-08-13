@@ -2,15 +2,53 @@ package edu.ucne.skyplanerent.presentation.rutayviajes
 
 import android.app.DatePickerDialog
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,33 +58,32 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import edu.ucne.skyplanerent.data.local.entity.ReservaEntity
-import edu.ucne.skyplanerent.data.remote.dto.RutaDTO
-import edu.ucne.skyplanerent.data.remote.dto.TipoVueloDTO
-import edu.ucne.skyplanerent.presentation.reserva.ReservaViewModel
-import edu.ucne.skyplanerent.presentation.rutayviajes.ruta.RutaUiState
-import edu.ucne.skyplanerent.presentation.rutayviajes.ruta.RutaViewModel
-import edu.ucne.skyplanerent.presentation.rutayviajes.tipoVuelo.TipoVueloViewModel
-import kotlinx.coroutines.CoroutineScope
-import java.text.SimpleDateFormat
-import java.util.*
-import edu.ucne.skyplanerent.data.remote.dto.AeronaveDTO
-import edu.ucne.skyplanerent.presentation.aeronave.AeronaveUiState
-import edu.ucne.skyplanerent.presentation.aeronave.AeronaveViewModel
-import androidx.compose.material.icons.filled.CalendarToday
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.firebase.auth.FirebaseAuth
+import edu.ucne.skyplanerent.data.local.entity.ReservaEntity
+import edu.ucne.skyplanerent.data.remote.dto.AeronaveDTO
+import edu.ucne.skyplanerent.data.remote.dto.RutaDTO
+import edu.ucne.skyplanerent.data.remote.dto.TipoVueloDTO
+import edu.ucne.skyplanerent.presentation.aeronave.AeronaveUiState
+import edu.ucne.skyplanerent.presentation.aeronave.AeronaveViewModel
 import edu.ucne.skyplanerent.presentation.navigation.BottomNavItem
 import edu.ucne.skyplanerent.presentation.navigation.Screen
 import edu.ucne.skyplanerent.presentation.reserva.ReservaEvent
+import edu.ucne.skyplanerent.presentation.reserva.ReservaViewModel
 import edu.ucne.skyplanerent.presentation.reserva.UiState
+import edu.ucne.skyplanerent.presentation.rutayviajes.ruta.RutaUiState
+import edu.ucne.skyplanerent.presentation.rutayviajes.ruta.RutaViewModel
 import edu.ucne.skyplanerent.presentation.rutayviajes.tipoVuelo.TipoLicencia
 import edu.ucne.skyplanerent.presentation.rutayviajes.tipoVuelo.TipoVueloUiState
+import edu.ucne.skyplanerent.presentation.rutayviajes.tipoVuelo.TipoVueloViewModel
 import edu.ucne.skyplanerent.presentation.rutayviajes.tipoVuelo.tipoLicenciaFromDescripcion
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 
 @Composable
@@ -69,11 +106,11 @@ fun Rutas_Viajes_Screen(
     val aeronavesUiState by aeronaveViewModel.uiState.collectAsStateWithLifecycle()
     val reservaUiState by reservaViewModel.uiState.collectAsStateWithLifecycle()
 
-    var selectedTipoVuelo by remember { mutableStateOf<TipoVueloDTO?>(null) }
-    var selectedRuta by remember { mutableStateOf<RutaDTO?>(null) }
-    var selectedAeronave by remember { mutableStateOf<AeronaveDTO?>(null) }
-    var soyPiloto by remember { mutableStateOf<Boolean?>(null) }
-    var licenciaSeleccionada by remember { mutableStateOf<String?>(null) }
+    val selectedTipoVuelo by remember { mutableStateOf<TipoVueloDTO?>(null) }
+    val selectedRuta by remember { mutableStateOf<RutaDTO?>(null) }
+    val selectedAeronave by remember { mutableStateOf<AeronaveDTO?>(null) }
+    val soyPiloto by remember { mutableStateOf<Boolean?>(null) }
+    val licenciaSeleccionada by remember { mutableStateOf<String?>(null) }
 
 
     Vuelos_RutasBodyListScreen(
@@ -85,11 +122,8 @@ fun Rutas_Viajes_Screen(
         onReserva = { fecha, comprobante, metodoPago ->
 
             val currentUser = FirebaseAuth.getInstance().currentUser
-
-            if (currentUser == null) {
-                // Mostrar error o redirigir a login
+                ?: // Mostrar error o redirigir a login
                 return@Vuelos_RutasBodyListScreen
-            }
 
             if (selectedTipoVuelo != null && selectedRuta != null && selectedAeronave != null) {
                 val reserva = ReservaEntity(
@@ -112,7 +146,6 @@ fun Rutas_Viajes_Screen(
                     rutaId = selectedRuta?.rutaId!!,
                     tipoVueloId = selectedTipoVuelo?.tipoVueloId!!,
                     aeronaveId = selectedAeronave?.aeronaveId!!,
-                    //fecha = fecha,
                     tarifaBase = 1000.0,
                     impuesto = 0.0,
                     precioTotal = 0.0,
@@ -122,7 +155,7 @@ fun Rutas_Viajes_Screen(
                     comprobante = comprobante?:"",
                     formularioId = reservaUiState.formularioId?:0
 
-                )//aqui se pasa a reserva en el metodo saveReserva(reserva:ReservaEntity)
+                )
             }
         },
         goBackDetails = goBackDetails,
@@ -165,7 +198,7 @@ fun Vuelos_RutasBodyListScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
 
-    val licencias = TipoLicencia.values().toList()
+    val licencias = TipoLicencia.entries
 
 
     var soyPiloto by remember { mutableStateOf<Boolean?>(null) }
@@ -226,7 +259,7 @@ fun Vuelos_RutasBodyListScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = { goBack() }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Volver atrás")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver atrás")
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -410,7 +443,7 @@ fun Vuelos_RutasBodyListScreen(
                             .clickable {
                                 if (isSelected) {
                                     selectedRuta = null
-                                    reservaViewModel.seleccionarRuta(0)// 0 para indicar no selección
+                                    reservaViewModel.seleccionarRuta(0)
                                     scope.launch {
                                         snackbarHostState.showSnackbar("Se ha cancelado la selección de la ruta")
                                     }
@@ -543,8 +576,6 @@ fun Vuelos_RutasBodyListScreen(
                                         licenciaSeleccionada = licencia
                                         expandedLicencia = false
 
-                                        // reservaViewModel.seleccionarLicenciaPiloto(licencia)
-
                                     }
                                 )
                             }
@@ -595,10 +626,10 @@ fun Vuelos_RutasBodyListScreen(
                 Button(
                     onClick = {
                         //Guarda los datos seleccionados antes de navegar
-                        selectedTipoVuelo?.let { reservaViewModel.seleccionarTipoVuelo(it.tipoVueloId ?: 0,) }
+                        selectedTipoVuelo?.let { reservaViewModel.seleccionarTipoVuelo(it.tipoVueloId ?: 0) }
                         selectedRuta?.let { reservaViewModel.seleccionarRuta(it.rutaId ?: 0) }
 
-                        ReservaEvent.save
+                        ReservaEvent.Save
                         goTopreReserva(0)
                     },
                     enabled = puedeContinuar,

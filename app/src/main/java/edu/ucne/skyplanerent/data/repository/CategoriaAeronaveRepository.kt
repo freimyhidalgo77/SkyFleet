@@ -5,7 +5,7 @@ import edu.ucne.skyplanerent.data.local.entity.CategoriaAeronaveEntity
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class CategoriaAeronaveRepository @Inject constructor(
+open class CategoriaAeronaveRepository @Inject constructor(
     private val dao: CategoriaAeronaveDao
 ) {
     suspend fun saveCategoriaAeronave(categoriaAeronaves: List<CategoriaAeronaveEntity>) =

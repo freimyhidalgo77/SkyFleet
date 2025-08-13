@@ -63,7 +63,7 @@ fun ReservaDeleteScreen(
 
     LaunchedEffect(reservaId) {
         println(" ID recibido: $reservaId")
-        viewModel.selectReserva(reservaId) // Esto actualiza el uiState con la reserva específica si implementaste bien selectReserva
+        viewModel.selectReserva(reservaId) // Esto actualiza el uiState con la reserva específica si implementable bien selectReserva
     }
 
 
@@ -77,11 +77,11 @@ fun ReservaDeleteScreen(
                 .fillMaxSize()
         ) {
 
-            val reserva = uiState.reservaSeleccionada
+            val reserv = uiState.reservaSeleccionada
 
-            if (reserva != null) {
+            if (reserv != null) {
                 ReservaDeleteRow(
-                    reserva = reserva,
+                    reserva = reserv,
                     uiState = uiState,
                     onEliminarClick = { showDialog = true },
                     goBack = goBack,

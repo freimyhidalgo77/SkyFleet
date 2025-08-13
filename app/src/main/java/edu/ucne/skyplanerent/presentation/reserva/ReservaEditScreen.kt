@@ -1,21 +1,49 @@
 package edu.ucne.skyplanerent.presentation.reserva
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,9 +56,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import edu.ucne.skyplanerent.data.remote.dto.AeronaveDTO
-import edu.ucne.skyplanerent.data.remote.dto.RutaDTO
-import edu.ucne.skyplanerent.data.remote.dto.TipoVueloDTO
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveUiState
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveViewModel
 import edu.ucne.skyplanerent.presentation.rutayviajes.formulario.FormularioUiState
@@ -56,7 +81,7 @@ fun formatDateToDMY(dateString: String?): String {
 
         // Formateamos a día/mes/año (sin ceros a la izquierda)
         val outputFormat = SimpleDateFormat("d/M/yyyy", Locale.getDefault())
-        outputFormat.format(date)
+        outputFormat.format(date!!)
     } catch (e: Exception) {
         try {
             // Si falla, intentamos con formato YYYY-MM-DD
@@ -89,16 +114,6 @@ fun ReservaEditScreen(
     }
 
     val aeronaveUiState = aeronaveViewModel.uiState.collectAsStateWithLifecycle()
-
-    // Obtén la aeronave usando el ID proporcionado
-    val selectedAeronave by remember(aeronaveSeleccionadaId) {
-        derivedStateOf {
-            aeronaveSeleccionadaId?.let { id ->
-                aeronaveUiState.value.aeronaves.find { it.aeronaveId == id }
-            }
-        }
-    }
-
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val tipoVueloUiState by tipoVueloViewModel.uiState.collectAsStateWithLifecycle()
     val rutaUiState by rutaViewModel.uiState.collectAsStateWithLifecycle()
@@ -185,12 +200,6 @@ fun ReservaEditBodyScreen(
     val reserva = uiState.reservaSeleccionada ?: return
 
     val formularioState by formularioViewModel.uiState.collectAsStateWithLifecycle()
-
-    // Buscar el formulario asociado a la reserva
-    val formulario = formularioState.formularios.find { it.formularioId == reserva.formularioId }
-
-    //val reserva = uiState.reservaSeleccionada ?: return
-
     val tipoVuelo = tipoVueloUiState.tipovuelo.find { it.tipoVueloId == reserva.tipoVueloId }
     val ruta = rutaUiState.rutas.find { it.rutaId == reserva.rutaId }
     val aeronave = aeronaveUiState.aeronaves.find { it.aeronaveId == reserva.categoriaId }
@@ -200,13 +209,8 @@ fun ReservaEditBodyScreen(
     val licencia = uiState.licenciaPiloto
 
     var showRutaDialog by rememberSaveable { mutableStateOf(false) }
-    val selectedAeronave = aeronaveUiState.aeronaves.find { it.aeronaveId == uiState.categoriaId }
-    val selectedRuta = rutaUiState.rutas.find { it.rutaId == uiState.rutaId }
-    val selectedTipoVuelo = tipoVueloUiState.tipovuelo.find { it.tipoVueloId == uiState.tipoVueloId }
-
     var showConfirmationDialog by remember { mutableStateOf(false) }
 
-    val capacidadMostrar = capacidadMaxima
     val showCapacityAlert = remember { mutableStateOf(false) }
 
 
@@ -214,7 +218,7 @@ fun ReservaEditBodyScreen(
         AlertDialog(
             onDismissRequest = { showCapacityAlert.value = false },
             title = { Text("Capacidad máxima excedida") },
-            text = { Text("Esta aeronave solo soporta $capacidadMostrar pasajeros.") },
+            text = { Text("Esta aeronave solo soporta $capacidadMaxima pasajeros.") },
             confirmButton = {
                 Button(onClick = { showCapacityAlert.value = false }) {
                     Text("Entendido")
@@ -235,7 +239,7 @@ fun ReservaEditBodyScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = { goBack(reservaId) }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Volver atrás")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver atrás")
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -362,7 +366,7 @@ fun ReservaEditBodyScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text("Fecha", fontWeight = FontWeight.Bold)
-            Text(formatDateToDMY(fecha.toString()) ?: "No seleccionada", fontSize = 16.sp, color = Color.Gray)
+            Text(formatDateToDMY(fecha.toString()), fontSize = 16.sp, color = Color.Gray)
             Spacer(modifier = Modifier.height(8.dp))
 
             Text("Piloto", fontWeight = FontWeight.Bold)
@@ -388,7 +392,7 @@ fun ReservaEditBodyScreen(
 
 
             OutlinedTextField(
-                value = formularioState?.nombre ?: "",
+                value = formularioState.nombre,
                 onValueChange = onChangeNombre,
                 label = { Text("Nombre") },
                 modifier = Modifier.fillMaxWidth()
@@ -396,7 +400,7 @@ fun ReservaEditBodyScreen(
 
 
             OutlinedTextField(
-                value = formularioState?.apellido ?: "",
+                value = formularioState.apellido,
                 onValueChange = { formularioViewModel.onApellidoChange(it) },
                 label = { Text("Apellido") },
                 modifier = Modifier.fillMaxWidth()
@@ -404,14 +408,14 @@ fun ReservaEditBodyScreen(
 
 
             OutlinedTextField(
-                value = formularioState?.correo ?: "",
+                value = formularioState.correo,
                 onValueChange = { formularioViewModel.onCorreoChange(it) },
                 label = { Text("Correo electrónico") },
                 modifier = Modifier.fillMaxWidth()
             )
 
             OutlinedTextField(
-                value = formatPhoneNumber(formularioState?.telefono ?: ""),
+                value = formatPhoneNumber(formularioState.telefono),
                 onValueChange = { newValue ->
                     val digitsOnly = newValue.filter { it.isDigit() }
                     val limitedDigits = if (digitsOnly.length > 10) digitsOnly.substring(0, 10) else digitsOnly
@@ -423,7 +427,7 @@ fun ReservaEditBodyScreen(
             )
 
             OutlinedTextField(
-                value = formularioState?.ciudadResidencia ?: "",
+                value = formularioState.ciudadResidencia,
                 onValueChange = { formularioViewModel.onCiudadResidenciaChange(it) },
                 label = { Text("Ciudad de residencia") },
                 modifier = Modifier.fillMaxWidth()
@@ -454,7 +458,7 @@ fun ReservaEditBodyScreen(
                     // Botón de decremento (restar 1)
                     IconButton(
                         onClick = {
-                            if (uiState.pasajeros ?: 0 > 1) {
+                            if ((uiState.pasajeros ?: 0) > 1) {
                                 onChangePasajeros((uiState.pasajeros ?: 0) - 1)
                             }
                         },
@@ -530,174 +534,12 @@ fun ReservaEditBodyScreen(
 
 }
 
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AeronavesDropdown(
-    aeronaves: List<AeronaveDTO>,
-    selectedAeronave: AeronaveDTO?,
-    onAeronaveSelected: (AeronaveDTO) -> Unit,
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = !expanded },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-    ) {
-        OutlinedTextField(
-            value = selectedAeronave?.modeloAvion ?: "Seleccionar aeronave",
-            onValueChange = {}, // read-only
-            readOnly = true,
-            label = { Text("Modelo de Aeronave") },
-            trailingIcon = {
-                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-            },
-            modifier = Modifier
-                .menuAnchor()
-                .fillMaxWidth()
-        )
-
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            if (aeronaves.isEmpty()) {
-                DropdownMenuItem(
-                    text = { Text("No hay aeronaves disponibles") },
-                    onClick = { expanded = false }
-                )
-            } else {
-                aeronaves.forEach { aeronave ->
-                    DropdownMenuItem(
-                        text = { Text(aeronave.modeloAvion) },
-                        onClick = {
-                            onAeronaveSelected(aeronave)
-                            expanded = false
-                        }
-                    )
-                }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun RutaDropdown(
-    rutas: List<RutaDTO>,
-    selectedRuta: RutaDTO?,
-    onRutaSelected: (RutaDTO) -> Unit,
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = !expanded },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-    ) {
-        OutlinedTextField(
-            value = selectedRuta?.let { "${it.origen} → ${it.destino}" } ?: "Seleccionar ruta",
-            onValueChange = {},
-            readOnly = true,
-            label = { Text("Ruta") },
-            trailingIcon = {
-                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-            },
-            modifier = Modifier
-                .menuAnchor()
-                .fillMaxWidth()
-        )
-
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            if (rutas.isEmpty()) {
-                DropdownMenuItem(
-                    text = { Text("No hay rutas disponibles") },
-                    onClick = { expanded = false }
-                )
-            } else {
-                rutas.forEach { ruta ->
-                    DropdownMenuItem(
-                        text = { Text("${ruta.origen} → ${ruta.destino}") },
-                        onClick = {
-                            onRutaSelected(ruta)
-                            expanded = false
-                        }
-                    )
-                }
-            }
-        }
-    }
-}
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TipoVueloDropdown(
-    tipoVuelo: List<TipoVueloDTO>,
-    selectedTipoVuelo: TipoVueloDTO?,
-    onTipoVueloSelected: (TipoVueloDTO) -> Unit,
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = !expanded },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-    ) {
-        OutlinedTextField(
-            value = selectedTipoVuelo?.let { "${it.nombreVuelo}" } ?: "Seleccionar tipo vuelo",
-            onValueChange = {},
-            readOnly = true,
-            label = { Text("Tipo Vuelo") },
-            trailingIcon = {
-                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-            },
-            modifier = Modifier
-                .menuAnchor()
-                .fillMaxWidth()
-        )
-
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            if (tipoVuelo.isEmpty()) {
-                DropdownMenuItem(
-                    text = { Text("No hay tipos de vuelo disponibles") },
-                    onClick = { expanded = false }
-                )
-            } else {
-                tipoVuelo.forEach { tipoVuelo ->
-                    DropdownMenuItem(
-                        text = { Text("${tipoVuelo.nombreVuelo}") },
-                        onClick = {
-                            onTipoVueloSelected(tipoVuelo)
-                            expanded = false
-                        }
-                    )
-                }
-            }
-        }
-    }
-}
-
+@SuppressLint("DefaultLocale")
 @Composable
 fun FechaPickerField(
     selectedDate: String?,
     onDateSelected: (String) -> Unit
 ) {
-    var showDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
     // Configurar la fecha inicial
@@ -745,52 +587,6 @@ fun FechaPickerField(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun PasajerosDropdown(
-    selectedPasajeros: Int,
-    onPasajerosSelected: (Int) -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    ExposedDropdownMenuBox(
-        expanded = expanded,
-        onExpandedChange = { expanded = !expanded },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-    ) {
-        OutlinedTextField(
-            value = selectedPasajeros.toString(),
-            onValueChange = {},
-            readOnly = true,
-            label = { Text("Cantidad de pasajeros") },
-            trailingIcon = {
-                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-            },
-            modifier = Modifier
-                .menuAnchor()
-                .fillMaxWidth()
-        )
-
-        ExposedDropdownMenu(
-            expanded = expanded,
-            onDismissRequest = { expanded = false }
-        ) {
-            (1..10).forEach { count ->
-                DropdownMenuItem(
-                    text = { Text("$count") },
-                    onClick = {
-                        onPasajerosSelected(count)
-                        expanded = false
-                    }
-                )
-            }
-        }
-    }
-}
-
-
 
 @Composable
 fun InfoRow(
@@ -803,25 +599,5 @@ fun InfoRow(
         Text(text = value, fontSize = 16.sp, color = Color.Gray)
         onChange?.invoke() // <- aquí se renderiza el contenido adicional
         Spacer(modifier = Modifier.height(8.dp))
-    }
-}
-
-
-
-
-@Composable
-fun ChangeRow(label: String, onClick: () -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(label, fontSize = 16.sp)
-        OutlinedButton(
-            onClick = onClick,
-            shape = RoundedCornerShape(50)
-        ) {
-            Text("Cambiar")
-        }
     }
 }

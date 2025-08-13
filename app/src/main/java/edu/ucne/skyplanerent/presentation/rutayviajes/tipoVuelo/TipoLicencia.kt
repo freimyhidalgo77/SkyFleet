@@ -15,7 +15,7 @@ enum class TipoLicencia(val descripcion: String) {
 
 
 fun tipoLicenciaFromDescripcion(descripcion: String): TipoLicencia? {
-    return TipoLicencia.values().firstOrNull {
+    return TipoLicencia.entries.firstOrNull {
         it.descripcion.equals(descripcion.trim(), ignoreCase = true)
     }
 }

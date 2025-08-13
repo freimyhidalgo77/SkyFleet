@@ -1,5 +1,6 @@
 package edu.ucne.skyplanerent.presentation.reserva
 
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.compose.foundation.clickable
@@ -13,7 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalance
@@ -46,7 +46,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -54,7 +53,6 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.compose.rememberNavController
 import edu.ucne.skyplanerent.data.local.entity.RutaEntity
 import edu.ucne.skyplanerent.data.local.entity.TipoVueloEntity
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveUiState
@@ -78,10 +76,6 @@ import androidx.compose.ui.text.input.ImeAction
 @Composable
 fun PagoReservaListScreen(
     pagoReservaId:Int,
-    /*TipoVueloviewModel: TipoVueloViewModel = hiltViewModel(),
-    RutaviewModel: RutaViewModel = hiltViewModel(),
-    tipoVueloId:Int,
-    RutaId:Int,*/
     tipoVueloList: List<TipoVueloEntity>,
     rutaList: List<RutaEntity>,
     viewModel: ReservaViewModel,
@@ -109,13 +103,9 @@ fun PagoReservaListScreen(
 
     PagoReservaBodyListScreen(
         uiState = uiState,
-        //scope = scope,
         tipoVueloList = tipoVueloList,
         rutaList = rutaList,
-        /* onCreate = onCreate,
-         onEdit = onEdit,
-         onDelete = onDelete,*/
-        PagoReservaId = pagoReservaId,
+        pagoReservaId = pagoReservaId,
         goBack = goBack,
         rutaUiState = rutaUiState,
         tipoVueloUiState = tipoVueloUiState,
@@ -135,7 +125,7 @@ fun PagoReservaBodyListScreen(
     // scope: CoroutineScope,
     tipoVueloList:List<TipoVueloEntity>,
     rutaList:List<RutaEntity>,
-    PagoReservaId:Int,
+    pagoReservaId:Int,
     rutaUiState: RutaUiState,
     aeronaveUiState:AeronaveUiState,
     tipoVueloUiState: TipoVueloUiState,
@@ -143,8 +133,6 @@ fun PagoReservaBodyListScreen(
     goBack:()->Unit
 
 ) {
-    val navController = rememberNavController()
-
     val idTipoVueloSeleccionado by reservaViewModel.tipoVueloSeleccionadoId.collectAsState()
     val tipoVueloSeleccionado = tipoVueloUiState.tipovuelo.find { it.tipoVueloId == idTipoVueloSeleccionado }
 
@@ -163,10 +151,6 @@ fun PagoReservaBodyListScreen(
     val impuesto = tarifaBase * 0.10
     val precioTotal = tarifaBase + impuesto
 
-    /* val precioTotal by reservaViewModel.uiState.collectAsState().let { state ->
-         derivedStateOf { state.value.precioTotal ?: 0.0 }
-     }*/
-
 
     val tipoCliente by reservaViewModel.tipoCliente.collectAsState()
 
@@ -175,14 +159,6 @@ fun PagoReservaBodyListScreen(
 
 
     var metodoPagoSeleccionado by remember { mutableStateOf<MetodoPago?>(null) }
-
-    /*Calcular
-     val tarifaBase = duracionVuelo * costoXHora
-     val impuesto = tarifaBase * 0.10
-     val precioTotal = tarifaBase + impuesto*/
-
-
-    var datosTransferencia by remember { mutableStateOf<DatosTransferencia?>(null) }
     var mostrarFormularioTransferencia by remember { mutableStateOf(false) }
 
 
@@ -493,29 +469,6 @@ fun PagoReservaBodyListScreen(
                         Text("Tarjeta de crédito")
                     }
                 }
-                /*  // PayPal
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 4.dp)
-                        .clickable { metodoPagoSeleccionado = MetodoPago.PAYPAL },
-                    colors = CardDefaults.cardColors(
-                        containerColor = if (metodoPagoSeleccionado == MetodoPago.PAYPAL)
-                            Color.LightGray else Color.White
-                    )
-                ) {
-                    Row(
-                        modifier = Modifier.padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.paypal), // Asegúrate de tener este icono
-                            contentDescription = "PayPal"
-                        )
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Text("PayPal")
-                    }
-                }*/
 
                 // Transferencia bancaria
                 Card(
@@ -567,7 +520,7 @@ fun PagoReservaBodyListScreen(
                             pasajeros = formularioUiState.cantidadPasajeros,
                             formularioId = formularioUiState.formularioId?:0,
                             goBack = goBack,
-                            reservaId = PagoReservaId,
+                            reservaId = pagoReservaId,
                             reservaViewModel = reservaViewModel,
                             rutaViewModel = rutaViewModel,
                             tipoVueloViewModel = tipoVueloViewModel
@@ -591,7 +544,7 @@ fun PagoReservaBodyListScreen(
                             tipoCliente = tipoCliente ?: false,
                             pasajeros = formularioUiState.cantidadPasajeros,
                             goBack = goBack,
-                            reservaId = PagoReservaId,
+                            reservaId = pagoReservaId,
                             reservaViewModel = reservaViewModel,
                             rutaViewModel = rutaViewModel,
                             tipoVueloViewModel = tipoVueloViewModel
@@ -602,75 +555,13 @@ fun PagoReservaBodyListScreen(
                 }
             }
 
-            /*  item {
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Button(
-                    onClick = {
-                        val rutaId = rutaSeleccionada?.rutaId ?: return@Button
-                        val tipoVueloId = tipoVueloSeleccionado?.tipoVueloId ?: return@Button
-                        val aeronaveId = aeronaveSeleccionada?.aeronaveId ?: return@Button
-                        val tipoCliente = uiState?.tipoCliente ?: return@Button
-                        val pasajero = formularioUiState.cantidadPasajeros
-
-                        // Guardar los datos de transferencia si el método es transferencia bancaria
-                        val comprobante = if (metodoPagoSeleccionado == MetodoPago.TRANSFERENCIA_BANCARIA) {
-                            datosTransferencia?.let {
-                                "Banco: ${it.banco}, Cuenta: ${it.numeroCuenta}, " +
-                                        "Titular: ${it.nombreTitular}, Referencia: ${it.referencia}"
-                            } ?: ""
-                        } else {
-                            ""
-                        }
-
-                        reservaViewModel.guardarReserva(
-                            rutaId = rutaId,
-                            tipoVueloId = tipoVueloId,
-                            aeronaveId = aeronaveId,
-                            tarifaBase = tarifaBase,
-                            impuesto = impuesto,
-                            precioTotal = precioTotal,
-                            tipoCliente = tipoCliente,
-                            pasajero = pasajero,
-                            metodoPago = metodoPagoSeleccionado?.name,
-                            comprobante = comprobante
-                        )
-
-                        goBack()
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF0A80ED),
-                        contentColor = Color.White
-                    ),
-                    enabled = when (metodoPagoSeleccionado) {
-                        MetodoPago.TRANSFERENCIA_BANCARIA -> datosTransferencia != null
-                        else -> true
-                    }
-                ) {
-                    Text("Realizar pago")
-                }
-            }
-        }*/
-            /* Button(
-                    onClick = { goBack() },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFED0A0A),
-                        contentColor = Color.White
-                    )
-                ) {
-                    Text("Cancelar Pago")
-                }*/
-
         }
 
     }
 }
 
 
+@SuppressLint("DefaultLocale")
 @Composable
 fun FormularioTarjetaCredito(
     reservaId:Int,
@@ -705,11 +596,6 @@ fun FormularioTarjetaCredito(
     val coroutineScope = rememberCoroutineScope()
 
     val rutaUiState by rutaViewModel.uiState.collectAsStateWithLifecycle()
-    val tipoVueloUiState by tipoVueloViewModel.uiState.collectAsStateWithLifecycle()
-
-    val idTipoVueloSeleccionado by reservaViewModel.tipoVueloSeleccionadoId.collectAsState()
-    val tipoVueloSeleccionado = tipoVueloUiState.tipovuelo.find { it.tipoVueloId == idTipoVueloSeleccionado }
-
     val idRutaSeleccionada by reservaViewModel.rutaSeleccionadaId.collectAsState()
     val rutaSeleccionada = rutaUiState.rutas.find { it.rutaId == idRutaSeleccionada }
 
@@ -775,7 +661,7 @@ fun FormularioTarjetaCredito(
                 showReservaNotification(
                     context = context,
                     reservaId = reservaId,
-                    origen = rutaSeleccionada?.origen?:"No enconytrada",
+                    origen = rutaSeleccionada?.origen?:"No encontrada",
                     destino = rutaSeleccionada?.destino?:"No encontrada",
                     fecha = fechaVuelo.toString(),
                     precioTotal = precioTotal
@@ -1008,6 +894,7 @@ private fun validarFormularioTarjeta(
 }
 
 
+@SuppressLint("DefaultLocale")
 @Composable
 fun FormularioTransferenciaBancaria(
     reservaId: Int,
@@ -1043,11 +930,6 @@ fun FormularioTransferenciaBancaria(
 
 
     val rutaUiState by rutaViewModel.uiState.collectAsStateWithLifecycle()
-    val tipoVueloUiState by tipoVueloViewModel.uiState.collectAsStateWithLifecycle()
-
-    val idTipoVueloSeleccionado by reservaViewModel.tipoVueloSeleccionadoId.collectAsState()
-    val tipoVueloSeleccionado = tipoVueloUiState.tipovuelo.find { it.tipoVueloId == idTipoVueloSeleccionado }
-
     val idRutaSeleccionada by reservaViewModel.rutaSeleccionadaId.collectAsState()
     val rutaSeleccionada = rutaUiState.rutas.find { it.rutaId == idRutaSeleccionada }
 
@@ -1109,7 +991,7 @@ fun FormularioTransferenciaBancaria(
             showReservaNotification(
                 context = context,
                 reservaId = reservaId,
-                origen = rutaSeleccionada?.origen ?: "No enconytrada",
+                origen = rutaSeleccionada?.origen ?: "No encontrada",
                 destino = rutaSeleccionada?.destino ?: "No encontrada",
                 fecha = fechaVuelo.toString(),
                 precioTotal = precioTotal

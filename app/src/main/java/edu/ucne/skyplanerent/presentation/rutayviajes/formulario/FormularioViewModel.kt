@@ -26,7 +26,6 @@ class FormularioViewModel @Inject constructor(
         when (event) {
             is FormularioEvent.NombreChange -> TODO()
             FormularioEvent.Delete -> TODO()
-            is FormularioEvent.NombreChange -> TODO()
             is FormularioEvent.ApellidoChange -> TODO()
             is FormularioEvent.CorreoChange -> TODO()
             is FormularioEvent.TelefonoChange -> TODO()
@@ -99,36 +98,20 @@ class FormularioViewModel @Inject constructor(
         }
     }
 
-
-    fun nuevoFormulario() {
-        _uiState.update {
-            it.copy(
-                formularioId = null,
-                nombre = "",
-                apellido = "",
-                telefono = "",
-                correo = "",
-                pasaporte = "",
-                ciudadResidencia = "",
-                errorMessage = null
-            )
-        }
-    }
-
     fun selectedFormulario(formularioId: Int) {
         viewModelScope.launch {
             if (formularioId > 0) {
                 val formulario = formularioRepository.findFormulario(formularioId)
                 _uiState.update {
                     it.copy(
-                        formularioId = formulario?.formularioId,
-                        nombre = formulario?.nombre ?: "",
-                        apellido = formulario?.apellido ?: "",
-                        correo = formulario?.correo ?: "",
-                        telefono = formulario?.telefono ?: "",
-                        pasaporte = formulario?.pasaporte ?: "",
-                        ciudadResidencia = formulario?.ciudadResidencia ?: "",
-                        cantidadPasajeros = formulario?.cantidadPasajeros?:0
+                        formularioId = formulario.formularioId,
+                        nombre = formulario.nombre,
+                        apellido = formulario.apellido,
+                        correo = formulario.correo,
+                        telefono = formulario.telefono,
+                        pasaporte = formulario.pasaporte,
+                        ciudadResidencia = formulario.ciudadResidencia,
+                        cantidadPasajeros = formulario.cantidadPasajeros
                     )
                 }
             }
@@ -165,29 +148,13 @@ class FormularioViewModel @Inject constructor(
         }
     }
 
-
-
-
-    fun deleteFormulario() {
-        viewModelScope.launch {
-            formularioRepository.deleteFormulario(_uiState.value.toEntity())
-        }
-
-    }
-
-    fun getFormulario() {
+    private fun getFormulario() {
         viewModelScope.launch {
             formularioRepository.getAll().collect { formulario ->
                 _uiState.update {
                     it.copy(formularios = formulario)
                 }
             }
-        }
-    }
-
-    fun onFormularioChange(formularioId: Int) {
-        _uiState.update {
-            it.copy(formularioId = formularioId)
         }
     }
 
@@ -236,12 +203,12 @@ class FormularioViewModel @Inject constructor(
 
     fun FormularioUiState.toEntity() = FormularioEntity(
         formularioId = formularioId,
-        nombre  = nombre?: "",
-        apellido = apellido ?: "",
-        correo = correo ?: "",
-        telefono = telefono ?: "",
-        pasaporte = pasaporte ?: "",
-        ciudadResidencia = ciudadResidencia ?: "",
-        cantidadPasajeros = cantidadPasajeros?:0
+        nombre  = nombre,
+        apellido = apellido,
+        correo = correo,
+        telefono = telefono,
+        pasaporte = pasaporte,
+        ciudadResidencia = ciudadResidencia,
+        cantidadPasajeros = cantidadPasajeros
     )
 }

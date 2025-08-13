@@ -1,5 +1,6 @@
 package edu.ucne.skyplanerent.presentation.login
 
+import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.content.Context
 import android.widget.DatePicker
@@ -316,7 +317,7 @@ fun RegisterScreen(
                     }
             },
             enabled = correo.isNotBlank() && contrasena.isNotBlank() && nombre.isNotBlank() && apellido.isNotBlank()
-                    && telefono.isNotBlank() && direccion.isNotBlank() && formattedDate != null,
+                    && telefono.isNotBlank() && direccion.isNotBlank(),
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFF0A80ED),
@@ -334,6 +335,7 @@ fun RegisterScreen(
 }
 
 
+@SuppressLint("DiscouragedPrivateApi")
 private fun showSpinnerDatePicker(
     context: Context,
     initialDate: Date,

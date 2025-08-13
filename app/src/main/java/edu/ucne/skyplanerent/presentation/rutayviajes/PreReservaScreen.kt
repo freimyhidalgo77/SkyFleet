@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -68,16 +68,8 @@ fun PreReservaListScreen(
     val tipoVueloUiState by tipoVueloViewModel.uiState.collectAsStateWithLifecycle()
     val aeronaevUiState by aeronaevViewModel.uiState.collectAsStateWithLifecycle()
 
-
-    /*LaunchedEffect(Unit) {
-        if (rutaUiState.rutas.isEmpty()) {
-            rutaViewModel.getRutas()
-        }
-    }*/
-
     ReservaBodyListScreen(
         uiState = uiState,
-        // scope = scope,
         tipoVueloList = tipoVueloList,
         rutaList = rutaList,
         goToFormulario = goToFormulario,
@@ -97,8 +89,6 @@ fun ReservaBodyListScreen(
     preReservaId: Int,
     uiState: UiState,
     reservaViewModel: ReservaViewModel,
-    //tipoVueloViewModel: TipoVueloViewModel = hiltViewModel(),
-    //rutaViewModel: RutaViewModel = hiltViewModel(),
     tipoVueloList: List<TipoVueloEntity>,
     rutaList: List<RutaEntity>,
     goToFormulario: (Int) -> Unit,
@@ -121,7 +111,6 @@ fun ReservaBodyListScreen(
     val fechaVuelo by reservaViewModel.fechaSeleccionada.collectAsState()
     val tipoCliente by reservaViewModel.tipoCliente.collectAsState()
     val reservaUiState by reservaViewModel.uiState.collectAsStateWithLifecycle()
-    val licenciaSeleccionada = reservaUiState.licenciaPiloto
 
 
     val snackbarHostState = remember { SnackbarHostState() }
@@ -140,7 +129,7 @@ fun ReservaBodyListScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = { goBack(preReservaId) }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Volver atrás")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver atrás")
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(

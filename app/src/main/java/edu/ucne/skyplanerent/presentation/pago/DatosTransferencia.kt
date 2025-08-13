@@ -8,12 +8,3 @@ data class DatosTransferencia(
     val referencia: String,
     val monto: Double
 )
-
-
-fun procesarTransferenciaBancaria(datos: DatosTransferencia) {
-    // Aquí iría la lógica para procesar la transferencia
-    // En una implementación real, esto probablemente enviaría los datos al backend
-
-    // Por ahora solo simulamos el procesamiento
-    println("Transferencia procesada: $datos")
-}
