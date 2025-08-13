@@ -560,9 +560,7 @@ fun PagoReservaBodyListScreen(
                     else -> Unit // No hacer nada para otros métodos
                 }
             }
-
         }
-
     }
 }
 
