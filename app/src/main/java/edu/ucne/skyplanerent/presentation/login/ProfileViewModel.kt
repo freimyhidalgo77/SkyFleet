@@ -16,7 +16,7 @@ import javax.inject.Inject
 class ProfileViewModel @Inject constructor(
      val userRepository: UserRepository
 ) : ViewModel() {
-     val _user = MutableStateFlow<UserRegisterAccount?>(null)
+     private val _user = MutableStateFlow<UserRegisterAccount?>(null)
     val user: StateFlow<UserRegisterAccount?> get() = _user
 
     fun loadUser(email: String?) {

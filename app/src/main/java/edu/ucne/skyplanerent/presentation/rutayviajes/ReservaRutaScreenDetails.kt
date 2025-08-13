@@ -1,4 +1,4 @@
-package edu.ucne.skyplanerent.presentation.rutayviajes.ruta
+package edu.ucne.skyplanerent.presentation.rutayviajes
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -27,9 +26,11 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import edu.ucne.skyplanerent.presentation.UiEvent
+import edu.ucne.skyplanerent.presentation.rutayviajes.ruta.RutaEvent
+import edu.ucne.skyplanerent.presentation.rutayviajes.ruta.RutaUiState
+import edu.ucne.skyplanerent.presentation.rutayviajes.ruta.RutaViewModel
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReservaRutaScreenDetails(
     rutaId: Int?,
@@ -77,7 +78,6 @@ fun ReservaRutaScreenDetails(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReservaRutaDetailsBodyScreen(
     uiState: RutaUiState,
@@ -100,7 +100,7 @@ fun ReservaRutaDetailsBodyScreen(
             text = "Detalles de la ruta",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
-            color = Color.Black, // mejor contraste
+            color = Color.Black,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)

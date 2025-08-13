@@ -1,8 +1,5 @@
 package edu.ucne.skyplanerent.presentation.login
 
-import android.content.Context
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -12,10 +9,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -29,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.google.firebase.FirebaseNetworkException
@@ -43,7 +43,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
     onLoginSuccess: (String) -> Unit,
@@ -57,8 +56,7 @@ fun LoginScreen(
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
-
-    val context = LocalContext.current
+    var passwordVisible by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -92,33 +90,49 @@ fun LoginScreen(
             onValueChange = { password = it },
             label = { Text("Contraseña") },
             singleLine = true,
-            visualTransformation = PasswordVisualTransformation(),
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp)
+            shape = RoundedCornerShape(16.dp),
+            trailingIcon = {
+                val image = if (passwordVisible)
+                    painterResource(id = R.drawable.eyeclosed)
+                else
+                    painterResource(id = R.drawable.eyeopen)
+
+                IconButton(
+                    onClick = { passwordVisible = !passwordVisible },
+                    modifier = Modifier.size(24.dp)
+                ) {
+                    Icon(
+                        painter = image,
+                        contentDescription = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña",
+                        modifier = Modifier.size(20.dp),
+                        tint = Color.Gray
+                    )
+                }
+            }
         )
 
         Spacer(modifier = Modifier.height(50.dp))
 
         Button(
             onClick = {
-
+                // Validar formato del correo
                 if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
                     errorMessage = "Por favor ingresa un correo electrónico válido"
                     return@Button
                 }
 
+                // Validar longitud de la contraseña
                 if (password.length < 6) {
                     errorMessage = "La contraseña debe tener al menos 6 caracteres"
                     return@Button
                 }
 
-                if (!isNetworkAvailable(context)) {
-                    errorMessage = "Error de conexión. Por favor conéctate a una red"
-                    return@Button
-                }
-
                 isLoading = true
                 errorMessage = null
+
+                // Intentar verificar si es administrador
                 adminRepository.getAdminByEmail(email, password).onEach { resource ->
                     when (resource) {
                         is Resource.Loading -> isLoading = true
@@ -129,36 +143,31 @@ fun LoginScreen(
                                 goToAdminPanel(admin)
                             } else {
                                 // No es admin, intentar autenticación con Firebase
-                                auth.signInWithEmailAndPassword(email, password)
-                                    .addOnCompleteListener { task ->
-                                        isLoading = false
-                                        if (task.isSuccessful) {
-                                            val user = task.result.user
-                                            if (user != null) {
-                                                sessionManager.saveAuthState(user)
-                                                onLoginSuccess(user.email ?: "")
-                                            }
-                                        } else {
-                                            errorMessage = task.exception?.message ?: "Credenciales inválidas"
-                                        }
-                                    }
+                                performFirebaseAuth(
+                                    auth,
+                                    email,
+                                    password,
+                                    sessionManager,
+                                    onLoginSuccess
+                                ) { error ->
+                                    isLoading = false
+                                    errorMessage = error
+                                }
                             }
                         }
                         is Resource.Error -> {
                             isLoading = false
-                            auth.signInWithEmailAndPassword(email, password)
-                                .addOnCompleteListener { task ->
-                                    isLoading = false
-                                    if (task.isSuccessful) {
-                                        val user = task.result.user
-                                        if (user != null) {
-                                            sessionManager.saveAuthState(user)
-                                            onLoginSuccess(user.email ?: "")
-                                        }
-                                    } else {
-                                        errorMessage = getErrorMessage(task.exception)
-                                    }
-                                }
+                            // Si falla la consulta de admin, intentar autenticación con Firebase
+                            performFirebaseAuth(
+                                auth,
+                                email,
+                                password,
+                                sessionManager,
+                                onLoginSuccess
+                            ) { error ->
+                                isLoading = false
+                                errorMessage = error
+                            }
                         }
                     }
                 }.launchIn(CoroutineScope(Dispatchers.Main))
@@ -198,6 +207,29 @@ fun LoginScreen(
     }
 }
 
+private fun performFirebaseAuth(
+    auth: FirebaseAuth,
+    email: String,
+    password: String,
+    sessionManager: SessionManager,
+    onLoginSuccess: (String) -> Unit,
+    onError: (String) -> Unit
+) {
+    auth.signInWithEmailAndPassword(email, password)
+        .addOnCompleteListener { task ->
+            if (task.isSuccessful) {
+                val user = task.result.user
+                if (user != null) {
+                    sessionManager.saveAuthState(user)
+                    onLoginSuccess(user.email ?: "")
+                } else {
+                    onError("No se pudo obtener la información del usuario")
+                }
+            } else {
+                onError(getErrorMessage(task.exception))
+            }
+        }
+}
 
 fun getErrorMessage(exception: Exception?): String {
     return when {
@@ -212,18 +244,9 @@ fun getErrorMessage(exception: Exception?): String {
                 else -> "Credenciales inválidas"
             }
         }
-        exception is FirebaseNetworkException -> "Sin conexión a internet. Verifica tu red."
+        exception is FirebaseNetworkException -> "Error al autenticar. Verifica tus credenciales e intenta nuevamente."
         exception.message?.contains("network error", ignoreCase = true) == true ->
-            "Problemas de conexión. Verifica tu internet."
+            "Error al autenticar. Verifica tus credenciales e intenta nuevamente."
         else -> "Error al autenticar: ${exception.localizedMessage ?: "Intenta nuevamente"}"
     }
-}
-
-fun isNetworkAvailable(context: Context): Boolean {
-    val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-    val network = connectivityManager.activeNetwork ?: return false
-    val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
-
-    return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
-            capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
 }

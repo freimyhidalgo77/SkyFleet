@@ -531,16 +531,17 @@ class AeronaveViewModel @Inject constructor(
     private fun saveAeronave() {
         viewModelScope.launch {
             try {
+                val id = _uiState.value.aeronaveId ?: return@launch
                 val imagePath = if (_uiState.value.imageUrl != null) {
-                    _uiState.value.imageUrl // Usar URL si está presente
+                    _uiState.value.imageUrl
                 } else {
                     _uiState.value.imageUri?.let { uri -> saveImage(context, uri) }
                 }
-                aeronaveRepository.saveAeronave(_uiState.value.toEntity(imagePath))
+                aeronaveRepository.update(id, _uiState.value.toEntity(imagePath))
                 _uiState.update {
                     it.copy(
                         isSuccess = true,
-                        successMessage = "Aeronave guardada correctamente",
+                        successMessage = "Aeronave actualizada correctamente",
                         errorMessage = null,
                         imageUri = null,
                         imageUrl = null
@@ -551,7 +552,7 @@ class AeronaveViewModel @Inject constructor(
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
-                        errorMessage = "Error al guardar la aeronave: ${e.localizedMessage}",
+                        errorMessage = "Error al actualizar la aeronave: ${e.localizedMessage}",
                         isSuccess = false
                     )
                 }

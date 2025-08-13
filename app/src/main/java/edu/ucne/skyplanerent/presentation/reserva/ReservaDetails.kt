@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -22,7 +22,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -106,10 +105,6 @@ fun ReservaDetailsBodyScreen(
 
     ){
 
-    /* val ruta = uiState.rutaSeleccionada
-     val tipoVuelo = uiState.tipoVueloSeleccionado
-     val aeronave = uiState.aeronaveSeleccionada*/
-
     val reserva = uiState.reservas.find { it.reservaId == reservaId }
 
     val ruta = rutaUiState.rutas.find { it.rutaId == reserva?.rutaId }
@@ -128,7 +123,7 @@ fun ReservaDetailsBodyScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = { goBack(reservaId) }) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Volver atrás")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver atrás")
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -194,13 +189,7 @@ fun ReservaDetailsRow(
     aeronaveViewModel: AeronaveViewModel = hiltViewModel()
 ) {
 
-    val aeronaveUiState by aeronaveViewModel.uiState.collectAsStateWithLifecycle()
-
     val formulario = formularioUiState.formularios.find { it.formularioId == reserva.formularioId }
-
-    val idAeronaveSeleccionada by reservaViewModel.tipoAeronaveSeleccionadaId.collectAsState()
-    val aeronaveSeleccionada =
-        aeronaveUiState.aeronaves.find { it.aeronaveId == idAeronaveSeleccionada }
 
 
     Column(
@@ -225,7 +214,7 @@ fun ReservaDetailsRow(
         InfoRow("Origen", ruta?.origen ?: "No disponible")
         InfoRow("Destino", ruta?.destino ?: "No disponible")
         InfoRow("Pasajeros", reserva.pasajeros.toString())
-        InfoRow("Fecha", formatDate(fecha) ?: "No seleccionada")
+        InfoRow("Fecha", formatDate(fecha))
         InfoRow("Piloto", when (tipoCliente) {
 
             true -> "Sí"
@@ -237,19 +226,19 @@ fun ReservaDetailsRow(
         InfoRow("Detalles del cliente", "${formulario?.nombre ?: "Nombre"} ${formulario?.apellido ?: "no encontrado"}")
 
 
-        InfoRow("Correo", "${formulario?.correo ?: "no encontrado"}")
+        InfoRow("Correo", formulario?.correo ?: "no encontrado")
 
-        InfoRow("Telefono", "${formulario?.telefono ?: "no encontrado"}")
+        InfoRow("Telefono", formulario?.telefono ?: "no encontrado")
 
-        InfoRow("Ciudad", "${formulario?.ciudadResidencia ?: "no encontrado"}")
+        InfoRow("Ciudad", formulario?.ciudadResidencia ?: "no encontrado")
 
-        InfoRow("Pasaporte", "${formulario?.pasaporte ?: "no encontrado"}")
+        InfoRow("Pasaporte", formulario?.pasaporte ?: "no encontrado")
 
         Text("Información de pago", fontWeight = FontWeight.Bold, fontSize = 18.sp)
 
         InfoRow("Método de pago", reserva.metodoPago ?: "No especificado")
 
-        InfoRow("Estado", reserva.estadoPago ?: "COMPLETADO")
+        InfoRow("Estado", reserva.estadoPago)
 
         InfoRow("Monto Pagado:", "RD$${"%.2f".format(reserva.precioTotal)}")
 
@@ -269,12 +258,9 @@ fun ReservaDetailsRow(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Button(
-                //onClick = { goToEdit(reserva.reservaId ?: 0) },
                 onClick = {
                     reserva.reservaId?.let {
                         goToEdit(it)
-                        // O si necesitas ambos:
-                        // goToEdit(reservaId = it, aeronaveSeleccionadaId = reserva.categoriaId)
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
@@ -311,7 +297,7 @@ fun formatDate(dateString: String?): String {
 
         // Luego la formateamos como queremos mostrarla
         val outputFormat = SimpleDateFormat("EEE MMM dd yyyy", Locale.getDefault())
-        outputFormat.format(date)
+        outputFormat.format(date!!)
     } catch (e: Exception) {
         // Si hay algún error al parsear, devolvemos el string original
         dateString

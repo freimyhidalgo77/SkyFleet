@@ -113,6 +113,24 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
+
+
+   //Manejo de Notificaciones
+    implementation("androidx.core:core-ktx:1.12.0")
+    implementation("androidx.core:core:1.12.0")
+
+    // Manejador de permisos (para Android 13+)
+    implementation("com.google.accompanist:accompanist-permissions:0.34.0")
+
+    // Notificaciones compatibles con Compose
+    implementation("androidx.activity:activity-compose:1.8.0")  // Necesario para contextos en Compose
+    implementation("androidx.compose.runtime:runtime-livedata:1.5.4")  // Para observar estados
+
+    // Dependencias opcionales para notificaciones avanzadas:
+    implementation("androidx.work:work-runtime-ktx:2.8.1")  // Para notificaciones programadas
+    implementation("androidx.lifecycle:lifecycle-service:2.6.2")
+
+
     //AndroidX
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

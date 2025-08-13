@@ -45,35 +45,6 @@ class AdminRepository @Inject constructor(
         }
     }
 
-    fun getAdmins(): Flow<Resource<List<AdminDTO>>> = flow {
-        emit(Resource.Loading())
-        try {
-            Log.d("AdminRepository", "Limpiando admins inválidos localmente")
-            dao.clearInvalidAdmins()
-
-            Log.d("AdminRepository", "Obteniendo admins desde la API")
-            val adminsFetched = dataSource.getAdmins()
-            val adminEntities = adminsFetched.map { it.toEntity().copy(isPendingSync = false) }
-            dao.save(adminEntities)
-
-            Log.d("AdminRepository", "Obteniendo admins locales actualizados")
-            val localAdmins = dao.getAll()
-            val adminDtos = localAdmins.map { it.toDto() }
-            emit(Resource.Success(adminDtos))
-        } catch (e: HttpException) {
-            val errorMessage = e.response()?.errorBody()?.string() ?: e.message()
-            Log.e("AdminRepository", "Error HTTP al obtener admins: $errorMessage")
-            val localAdmins = dao.getAll()
-            val adminDtos = localAdmins.map { it.toDto() }
-            emit(Resource.Success(adminDtos))
-        } catch (e: Exception) {
-            Log.e("AdminRepository", "Error al obtener admins: ${e.message}")
-            val localAdmins = dao.getAll()
-            val adminDtos = localAdmins.map { it.toDto() }
-            emit(Resource.Success(adminDtos))
-        }
-    }
-
     fun getAdminByEmail(email: String, password: String): Flow<Resource<List<AdminDTO>>> = flow {
         emit(Resource.Loading())
         try {
@@ -105,10 +76,6 @@ class AdminRepository @Inject constructor(
                 emit(Resource.Success(emptyList()))
             }
         }
-    }
-
-    suspend fun clearInvalidAdmins() {
-        dao.clearInvalidAdmins()
     }
 
     private fun AdminDTO.toEntity() = AdminEntity(

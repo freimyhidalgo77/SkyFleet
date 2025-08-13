@@ -166,11 +166,12 @@ class TipoVueloViewModel @Inject constructor(
     private fun saveTipoVuelo() {
         viewModelScope.launch {
             try {
-                tipoVueloRepository.saveTipoVuelo(_uiState.value.toEntity())
+                val id = _uiState.value.tipoVueloId ?: return@launch // Seguridad
+                tipoVueloRepository.update(id, _uiState.value.toEntity())
                 _uiState.update {
                     it.copy(
                         isSuccess = true,
-                        successMessage = "Tipo de vuelo guardado correctamente",
+                        successMessage = "Tipo de vuelo actualizado correctamente",
                         errorMessage = null
                     )
                 }
@@ -179,7 +180,7 @@ class TipoVueloViewModel @Inject constructor(
             } catch (e: Exception) {
                 _uiState.update {
                     it.copy(
-                        errorMessage = "Error al guardar el tipo de vuelo: ${e.localizedMessage}",
+                        errorMessage = "Error al actualizar el tipo de vuelo: ${e.localizedMessage}",
                         isSuccess = false
                     )
                 }

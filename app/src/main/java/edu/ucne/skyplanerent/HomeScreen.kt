@@ -27,8 +27,6 @@ import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -43,7 +41,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
@@ -58,12 +55,11 @@ import edu.ucne.skyplanerent.presentation.navigation.BottomNavItem
 import edu.ucne.skyplanerent.presentation.navigation.Screen
 import kotlinx.coroutines.delay
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     onLogout: () -> Unit,
     onNavigateToReserva: () -> Unit,
-    onNavigateToRutas_Viajes: () -> Unit,
+    onNavigateToRutasViajes: () -> Unit,
     onNavigateToPeril: () -> Unit,
     navController: NavController,
     userRepository: UserRepository,
@@ -76,7 +72,7 @@ fun HomeScreen(
         BottomNavItem("Perfil", Icons.Default.Person, Screen.Perfil),
     )
 
-    var user = remember { mutableStateOf<UserRegisterAccount?>(null) }
+    val user = remember { mutableStateOf<UserRegisterAccount?>(null) }
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
 
     LaunchedEffect(currentUserEmail) {
@@ -164,8 +160,6 @@ fun HomeScreen(
         }
     }
 }
-
-
 
 @Composable
 fun AnimatedAircraftCarousel(navController: NavController) {
@@ -263,33 +257,6 @@ fun AnimatedAircraftCarousel(navController: NavController) {
                 )
                 if (index != aircraftImages.size - 1) Spacer(modifier = Modifier.width(4.dp))
             }
-        }
-    }
-}
-
-
-@Composable
-fun ActionCard(icon: ImageVector, title: String, onClick: () -> Unit) {
-    Card(
-        onClick = onClick,
-        modifier = Modifier
-            .padding(8.dp)
-            .fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
-        )
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = title,
-                modifier = Modifier.size(48.dp)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = title)
         }
     }
 }

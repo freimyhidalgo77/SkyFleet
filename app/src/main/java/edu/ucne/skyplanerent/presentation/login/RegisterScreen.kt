@@ -1,5 +1,6 @@
 package edu.ucne.skyplanerent.presentation.login
 
+import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.content.Context
 import android.widget.DatePicker
@@ -11,12 +12,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,6 +35,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.ktx.firestore
@@ -62,18 +67,21 @@ fun RegisterScreen(
     var error by remember { mutableStateOf<String?>(null) }
     val scrollState = rememberScrollState()
 
-    val calendar = Calendar.getInstance()
+    //val calendar = Calendar.getInstance()
     val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
-// Fecha como objeto Date
     var selectedDate by remember { mutableStateOf<Date?>(null) }
 
-// Mostrar string formateado para la UI
     val formattedDate = selectedDate?.let { dateFormat.format(it) } ?: "Seleccionar fecha"
 
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
     val context = LocalContext.current
+
+    var confirmarContrasena by remember { mutableStateOf("") }
+    var confirmPasswordVisible by remember { mutableStateOf(false) }
+    var passwordsMatchError by remember { mutableStateOf<String?>(null) }
+    var passwordVisible by remember { mutableStateOf(false) }
 
 
     Column(modifier = Modifier
@@ -125,14 +133,77 @@ fun RegisterScreen(
 
         Spacer(modifier = Modifier.height(25.dp))
 
+
         OutlinedTextField(
             value = contrasena,
             onValueChange = { contrasena = it },
             label = { Text("Contraseña") },
-            visualTransformation = PasswordVisualTransformation(),
+            singleLine = true,
+            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp)
+            shape = RoundedCornerShape(16.dp),
+            trailingIcon = {
+                val image = if (passwordVisible)
+                    painterResource(id = R.drawable.eyeclosed)
+                else
+                    painterResource(id = R.drawable.eyeopen)
+
+                IconButton(
+                    onClick = { passwordVisible = !passwordVisible },
+                    modifier = Modifier.size(24.dp)
+                ) {
+                    Icon(
+                        painter = image,
+                        contentDescription = if (passwordVisible) "Ocultar contraseña" else "Mostrar contraseña",
+                        modifier = Modifier.size(20.dp),
+                        tint = Color.Gray
+                    )
+                }
+            }
         )
+
+        Spacer(modifier = Modifier.height(25.dp))
+
+        OutlinedTextField(
+            value = confirmarContrasena,
+            onValueChange = {
+                confirmarContrasena = it
+                // Validar coincidencia cuando se cambia
+                passwordsMatchError = if (it != contrasena) "Las contraseñas no coinciden" else null
+            },
+            label = { Text("Confirmar Contraseña") },
+            singleLine = true,
+            visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            trailingIcon = {
+                val image = if (confirmPasswordVisible)
+                    painterResource(id = R.drawable.eyeclosed)
+                else
+                    painterResource(id = R.drawable.eyeopen)
+
+                IconButton(
+                    onClick = { confirmPasswordVisible = !confirmPasswordVisible },
+                    modifier = Modifier.size(24.dp))
+                {
+                    Icon(
+                        painter = image,
+                        contentDescription = if (confirmPasswordVisible) "Ocultar contraseña" else "Mostrar contraseña",
+                        modifier = Modifier.size(20.dp),
+                        tint = Color.Gray
+                    )
+                }
+
+            }
+        )
+
+        passwordsMatchError?.let {
+            Text(
+                text = it,
+                color = Color.Red,
+                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+            )
+        }
 
 
         Spacer(modifier = Modifier.height(25.dp))
@@ -196,11 +267,6 @@ fun RegisterScreen(
                     return@Button
                 }
 
-                if (!isNetworkAvailable(context)) {
-                    errorMessage = "Error de conexión. Por favor conéctate a una red"
-                    return@Button
-                }
-
                 auth.createUserWithEmailAndPassword(correo, contrasena)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
@@ -251,7 +317,7 @@ fun RegisterScreen(
                     }
             },
             enabled = correo.isNotBlank() && contrasena.isNotBlank() && nombre.isNotBlank() && apellido.isNotBlank()
-                    && telefono.isNotBlank() && direccion.isNotBlank() && formattedDate != null,
+                    && telefono.isNotBlank() && direccion.isNotBlank(),
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color(0xFF0A80ED),
@@ -269,6 +335,7 @@ fun RegisterScreen(
 }
 
 
+@SuppressLint("DiscouragedPrivateApi")
 private fun showSpinnerDatePicker(
     context: Context,
     initialDate: Date,
@@ -320,10 +387,9 @@ private fun showSpinnerDatePicker(
 }
 
 fun formatPhoneNumber(number: String): String {
-    // Elimina todo lo que no sea dígito
+
     val digits = number.filter { it.isDigit() }
 
-    // Máximo 10 dígitos
     val trimmed = digits.take(10)
 
     return when (trimmed.length) {

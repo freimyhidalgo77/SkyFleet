@@ -11,15 +11,20 @@ import kotlinx.coroutines.flow.Flow
 interface CategoriaAeronaveDao {
 
     @Upsert
-    suspend fun saveCategoriaAeronave(categoriaaeronave: CategoriaAeronaveEntity)
+    suspend fun saveCategoriaAeronave(categoriaAeronaves: List<CategoriaAeronaveEntity>)
+
+    @Upsert
+    suspend fun saveCategoriaAeronave(categoriaAeronaves: CategoriaAeronaveEntity)
 
     @Query("SELECT * FROM categoria_aeronave WHERE categoriaId = :id LIMIT 1")
-    suspend fun find(id: Int): CategoriaAeronaveEntity
+    suspend fun find(id: Int): CategoriaAeronaveEntity?
 
     @Delete
-    suspend fun deleteCategoriaAeronave(categoriaaeronave: CategoriaAeronaveEntity)
+    suspend fun deleteCategoriaAeronave(categoriaAeronave: CategoriaAeronaveEntity)
 
     @Query("SELECT * FROM categoria_aeronave")
     fun getAll(): Flow<List<CategoriaAeronaveEntity>>
 
+    @Query("SELECT COUNT(*) FROM categoria_aeronave")
+    suspend fun getCount(): Int // Nuevo: para verificar si la tabla está vacía
 }

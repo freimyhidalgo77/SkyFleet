@@ -132,7 +132,7 @@ fun AdminPanelScreen(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier.padding(16.dp)
                         ) {
-                            Text(text = "Total de rutas", fontSize = 16.sp)
+                            Text(text = "Total de rutas disponibles", fontSize = 16.sp)
                             Text(
                                 text = uiState.rutas.size.toString(),
                                 fontSize = 24.sp,

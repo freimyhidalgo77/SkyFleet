@@ -29,7 +29,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -44,7 +43,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import edu.ucne.skyplanerent.data.remote.dto.AeronaveDTO
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveUiState
 import edu.ucne.skyplanerent.presentation.aeronave.AeronaveViewModel
 import edu.ucne.skyplanerent.presentation.reserva.ReservaViewModel
@@ -81,7 +79,7 @@ fun FormularioScreen (
 
     FormularioBodyScreen(
         uiState = uiState.value,
-        selectedAeronave = selectedAeronave,
+       // selectedAeronave = selectedAeronave,
         onChangeNombre = viewModel::onNombreChange,
         onChangeApellido = viewModel::onApellidoChange,
         onChangeTelefono = viewModel::onTelefonoChange,
@@ -90,8 +88,8 @@ fun FormularioScreen (
         onChangeCiudad = viewModel::onCiudadResidenciaChange,
         onChangePasajero = viewModel::onChangePasajero,
         save = { viewModel.saveAndReturnId { id -> goToPago(id) } },
-        nuevo = viewModel::nuevoFormulario,
-        goBack = goBack,
+       // nuevo = viewModel::nuevoFormulario,
+       // goBack = goBack,
         goToPago = goToPago,
         aeronaveUiState = aeronaveUiState.value,
         capacidadMaxima = capacidadMaxima,
@@ -104,7 +102,7 @@ fun FormularioScreen (
 fun FormularioBodyScreen(
     uiState: FormularioUiState,
     aeronaveUiState: AeronaveUiState,
-    aeronaveViewModel: AeronaveViewModel = hiltViewModel(),
+    //aeronaveViewModel: AeronaveViewModel = hiltViewModel(),
     reservaViewModel: ReservaViewModel = hiltViewModel(),
     viewModel: FormularioViewModel =  hiltViewModel(),
     onChangeNombre:(String)->Unit,
@@ -115,10 +113,9 @@ fun FormularioBodyScreen(
     onChangeCiudad: KFunction1<String, Unit>,
     onChangePasajero: KFunction1<Int, Unit>,
     save:()->Unit,
-    nuevo:()->Unit,
-    goBack: (Int) -> Unit,
+    //goBack: (Int) -> Unit,
     goToPago:(Int)->Unit,
-    selectedAeronave: AeronaveDTO?,
+    //selectedAeronave: AeronaveDTO?,
     capacidadMaxima: Int,
     currentUserEmail: String?
 
@@ -126,12 +123,6 @@ fun FormularioBodyScreen(
 ) {
 
     val scrollState = rememberScrollState()
-
-    val idAeronaveSeleccionada by reservaViewModel.tipoAeronaveSeleccionadaId.collectAsState()
-    val aeronaveSeleccionada =
-        aeronaveUiState.aeronaves.find { it.aeronaveId == idAeronaveSeleccionada }
-
-    val capacidadMostrar = capacidadMaxima
     val showCapacityAlert = remember { mutableStateOf(false) }
 
     LaunchedEffect(currentUserEmail) {
@@ -143,7 +134,7 @@ fun FormularioBodyScreen(
         AlertDialog(
             onDismissRequest = { showCapacityAlert.value = false },
             title = { Text("Capacidad máxima excedida") },
-            text = { Text("Esta aeronave solo soporta $capacidadMostrar pasajeros.") },
+            text = { Text("Esta aeronave solo soporta $capacidadMaxima pasajeros.") },
             confirmButton = {
                 Button(onClick = { showCapacityAlert.value = false }) {
                     Text("Entendido")
@@ -218,7 +209,7 @@ fun FormularioBodyScreen(
             shape = RoundedCornerShape(16.dp)
         )
 
-        Spacer(modifier = Modifier.height(30.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
             value = uiState.pasaporte,
@@ -291,7 +282,7 @@ fun FormularioBodyScreen(
                 // Botón de incremento (sumar 1)
                 IconButton(
                     onClick = {
-                        if (uiState.cantidadPasajeros < capacidadMostrar) {
+                        if (uiState.cantidadPasajeros < capacidadMaxima) {
                             onChangePasajero(uiState.cantidadPasajeros + 1)
                         } else {
                             showCapacityAlert.value = true
@@ -300,7 +291,7 @@ fun FormularioBodyScreen(
                     modifier = Modifier
                         .size(40.dp)
                         .background(
-                            color = if (uiState.cantidadPasajeros < capacidadMostrar)
+                            color = if (uiState.cantidadPasajeros < capacidadMaxima)
                                 MaterialTheme.colorScheme.primary
                             else
                                 MaterialTheme.colorScheme.errorContainer,
@@ -310,7 +301,7 @@ fun FormularioBodyScreen(
                     Icon(
                         Icons.Default.Add,
                         contentDescription = "Incrementar",
-                        tint = if (uiState.cantidadPasajeros < capacidadMostrar)
+                        tint = if (uiState.cantidadPasajeros < capacidadMaxima)
                             MaterialTheme.colorScheme.onPrimary
                         else
                             MaterialTheme.colorScheme.onErrorContainer
@@ -320,7 +311,7 @@ fun FormularioBodyScreen(
         }
 
         Text(
-            text = "Máximo: $capacidadMostrar pasajeros",
+            text = "Máximo: $capacidadMaxima pasajeros",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
             modifier = Modifier.fillMaxWidth(),

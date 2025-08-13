@@ -18,8 +18,8 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object ApiModule {
-    private const val BASE_URL_SkyFleetApi = "http://skyfleetapi.somee.com/"
-    private const val BASE_URL_SkyFleetAdminApi = "http://skyfleetadminspapi.somee.com/"
+    private const val BASE_URL_SKYFLEETAPI = "http://skyfleetapi.somee.com/"
+    private const val BASE_URL_SKYFLEETADMINAPI = "http://skyfleetadminspapi.somee.com/"
 
     @Provides
     @Singleton
@@ -32,7 +32,7 @@ object ApiModule {
     @Singleton
     fun providesAeronaveManagerApi(moshi: Moshi): AeronavesManagerApi {
         return Retrofit.Builder()
-            .baseUrl(BASE_URL_SkyFleetApi)
+            .baseUrl(BASE_URL_SKYFLEETAPI)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
             .create(AeronavesManagerApi::class.java)
@@ -43,7 +43,7 @@ object ApiModule {
     @Singleton
     fun providesRutaManagerApi(moshi: Moshi): RutaManagerApi {
         return Retrofit.Builder()
-            .baseUrl(BASE_URL_SkyFleetApi)
+            .baseUrl(BASE_URL_SKYFLEETAPI)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
             .create(RutaManagerApi::class.java)
@@ -55,7 +55,7 @@ object ApiModule {
     @Singleton
     fun providesTipoVueloManagerApi(moshi: Moshi): TipoVueloManagerApi {
         return Retrofit.Builder()
-            .baseUrl(BASE_URL_SkyFleetApi)
+            .baseUrl(BASE_URL_SKYFLEETAPI)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
             .create(TipoVueloManagerApi::class.java)
@@ -67,7 +67,7 @@ object ApiModule {
     @Singleton
     fun providesAdminManagerApi(moshi: Moshi): AdminManagerApi {
         return Retrofit.Builder()
-            .baseUrl(BASE_URL_SkyFleetAdminApi)
+            .baseUrl(BASE_URL_SKYFLEETADMINAPI)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()
             .create(AdminManagerApi::class.java)
