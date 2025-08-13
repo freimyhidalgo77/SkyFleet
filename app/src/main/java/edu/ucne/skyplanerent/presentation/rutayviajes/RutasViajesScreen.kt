@@ -21,11 +21,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccessTime
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -119,8 +117,8 @@ fun Rutas_Viajes_Screen(
     val soyPiloto by remember { mutableStateOf<Boolean?>(null) }
     val licenciaSeleccionada by remember { mutableStateOf<String?>(null) }
 
-    var horaSalida by remember { mutableStateOf<String?>(null) }
-    var horaLlegada by remember { mutableStateOf<String?>(null) }
+    val horaSalida by remember { mutableStateOf<String?>(null) }
+    val horaLlegada by remember { mutableStateOf<String?>(null) }
 
     Vuelos_RutasBodyListScreen(
         uiState = rutaUiState,

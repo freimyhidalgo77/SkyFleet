@@ -373,7 +373,6 @@ fun PagoReservaBodyListScreen(
                     text = when (tipoCliente) {
                         true -> "Sí"
                         false -> "No"
-                        else -> "No especificado"
                     },
                     fontSize = 16.sp,
                     color = Color.Gray,
