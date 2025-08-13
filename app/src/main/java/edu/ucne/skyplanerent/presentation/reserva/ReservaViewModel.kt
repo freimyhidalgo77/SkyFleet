@@ -1,6 +1,10 @@
 package edu.ucne.skyplanerent.presentation.reserva
 
 
+import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
@@ -123,6 +127,15 @@ class ReservaViewModel @Inject constructor(
         actualizarPrecio()
     }
 
+    // En tu ReservaViewModel
+    // En tu ReservaViewModel
+    private val _horaSeleccionada = MutableStateFlow<Pair<String, String>?>(null)
+    val horaSeleccionada: StateFlow<Pair<String, String>?> = _horaSeleccionada.asStateFlow()
+
+    fun seleccionarHora(horaSalida: String, horaLlegada: String) {
+        _horaSeleccionada.value = Pair(horaSalida, horaLlegada)
+
+    }
     fun categoriaIdChange(id: Int) {
         _camposRelevantesCambiados = true
         _uiState.update { it.copy(categoriaId = id) }
@@ -219,6 +232,13 @@ class ReservaViewModel @Inject constructor(
                     throw Exception("La reserva no pertenece al usuario")
                 }
 
+                val horasActuales = horaSeleccionada.value ?:
+                reservaSeleccionada.horaSalida?.let { salida ->
+                    reservaSeleccionada.horaLlegada?.let { llegada ->
+                        Pair(salida, llegada)
+                    }
+                }
+
                 // Usar _precioCalculado si hay cambios relevantes, sino _precioOriginal
                 val precioFinal = if (_camposRelevantesCambiados) _precioCalculado else _precioOriginal
 
@@ -241,7 +261,10 @@ class ReservaViewModel @Inject constructor(
                     precioTotal = precioFinal,
                     formularioId = formularioId,
                     metodoPago = metodoPago,
-                    comprobante = comprobante
+                    comprobante = comprobante,
+                    horaSalida = horasActuales?.first ?: "",
+                    horaLlegada = horasActuales?.second ?: ""
+
                 )
 
                 reservaRepository.saveReserva(reservaActualizada)
@@ -272,7 +295,9 @@ class ReservaViewModel @Inject constructor(
         tipoCliente: Boolean?,
         pasajero: Int,
         metodoPago: String?,
-        comprobante: String?
+        comprobante: String?,
+        horaSalida: String,
+        horaLlegada: String
     ) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
@@ -315,7 +340,9 @@ class ReservaViewModel @Inject constructor(
                     pasajeros = pasajero,
                     userId = userId,
                     estadoPago = if (metodoPago != null) "COMPLETADO" else "PENDIENTE",
-                    comprobante = comprobante
+                    comprobante = comprobante,
+                    horaSalida = horaSalida,      // Nuevo campo
+                    horaLlegada = horaLlegada
                 )
 
                 reservaRepository.saveReserva(reserva)
@@ -440,6 +467,11 @@ class ReservaViewModel @Inject constructor(
                     _precioCalculado = _precioOriginal
                     _camposRelevantesCambiados = false
 
+                    if (reserva.horaSalida != null && reserva.horaLlegada != null) {
+                        _horaSeleccionada.value = Pair(reserva.horaSalida, reserva.horaLlegada)
+                    }
+
+
                     _uiState.update {
                         it.copy(
                             reservaSeleccionada = reserva,
@@ -488,7 +520,9 @@ class ReservaViewModel @Inject constructor(
         tipoCliente = tipoCliente?:false,
         pasajeros = pasajeros,
         userId = userId,
-        comprobante = comprobante
+        comprobante = comprobante,
+        horaSalida = horaSalida,
+        horaLlegada = horaLlegada
 
     )
 

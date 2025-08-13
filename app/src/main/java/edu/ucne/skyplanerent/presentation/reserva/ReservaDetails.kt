@@ -189,7 +189,10 @@ fun ReservaDetailsRow(
 ) {
 
     val formulario = formularioUiState.formularios.find { it.formularioId == reserva.formularioId }
+
     val tipoCliente by reservaViewModel.tipoCliente.collectAsState()
+
+    val horaSeleccionada by reservaViewModel.horaSeleccionada.collectAsState()
 
 
     Column(
@@ -215,9 +218,15 @@ fun ReservaDetailsRow(
         InfoRow("Destino", ruta?.destino ?: "No disponible")
         InfoRow("Pasajeros", reserva.pasajeros.toString())
         InfoRow("Fecha", formatDate(fecha))
+
+        InfoRow(
+            "Horario",
+            "${horaSeleccionada?.first ?: "No disponible"} - ${horaSeleccionada?.second ?: "No disponible"}"
+        )
+
         InfoRow("Piloto", if (tipoCliente)   "Sí" else "No")
 
-        InfoRow("Licencia", licenciaDescripcion ?: "No aplica")
+        //InfoRow("Licencia", licenciaDescripcion ?: "No aplica")
 
         InfoRow("Detalles del cliente", "${formulario?.nombre ?: "Nombre"} ${formulario?.apellido ?: "no encontrado"}")
 
@@ -232,14 +241,14 @@ fun ReservaDetailsRow(
 
         Text("Información de pago", fontWeight = FontWeight.Bold, fontSize = 18.sp)
 
-       /* InfoRow(
-            "Método de pago",
-            when (reserva.metodoPago) {
-                "TARJETA_CREDITO" -> "Tarjeta de crédito"
-                "TRANSFERENCIA_BANCARIA" -> "Transferencia bancaria"
-                else -> "No especificado"
-            }
-        )*/
+        /* InfoRow(
+             "Método de pago",
+             when (reserva.metodoPago) {
+                 "TARJETA_CREDITO" -> "Tarjeta de crédito"
+                 "TRANSFERENCIA_BANCARIA" -> "Transferencia bancaria"
+                 else -> "No especificado"
+             }
+         )*/
 
         InfoRow("Estado", reserva.estadoPago)
 

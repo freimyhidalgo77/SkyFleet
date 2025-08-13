@@ -1,6 +1,7 @@
 package edu.ucne.skyplanerent.presentation.rutayviajes
 
 import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,9 +20,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -34,6 +38,7 @@ import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.OutlinedTextField
@@ -87,6 +92,7 @@ import java.util.Date
 import java.util.Locale
 
 
+
 @Composable
 fun Rutas_Viajes_Screen(
     reservaViewModel: ReservaViewModel,
@@ -113,6 +119,8 @@ fun Rutas_Viajes_Screen(
     val soyPiloto by remember { mutableStateOf<Boolean?>(null) }
     val licenciaSeleccionada by remember { mutableStateOf<String?>(null) }
 
+    var horaSalida by remember { mutableStateOf<String?>(null) }
+    var horaLlegada by remember { mutableStateOf<String?>(null) }
 
     Vuelos_RutasBodyListScreen(
         uiState = rutaUiState,
@@ -140,7 +148,9 @@ fun Rutas_Viajes_Screen(
                     licenciaPiloto = licenciaSeleccionada,
                     userId = currentUser.uid,
                     comprobante = comprobante,
-                    metodoPago = metodoPago?:""
+                    metodoPago = metodoPago?:"",
+                    horaSalida = horaSalida,
+                    horaLlegada = horaLlegada
 
                 )
                 reservaViewModel.guardarReserva(
@@ -154,9 +164,11 @@ fun Rutas_Viajes_Screen(
                     pasajero = 0,
                     metodoPago = metodoPago?:"",
                     comprobante = comprobante?:"",
-                    formularioId = reservaUiState.formularioId?:0
+                    formularioId = reservaUiState.formularioId?:0,
+                    horaSalida =  reservaUiState.horaSalida ?: "",
+                    horaLlegada = reservaUiState.horaLlegada ?: "",
 
-                )
+                    )
             }
         },
         goBackDetails = goBackDetails,
@@ -181,6 +193,7 @@ fun Vuelos_RutasBodyListScreen(
     scope: CoroutineScope,
     rutaViewModel: RutaViewModel = hiltViewModel(),
     tipoVueloViewModel: TipoVueloViewModel = hiltViewModel(),
+    aeronaveViewModel: AeronaveViewModel = hiltViewModel(),
     reservaViewModel: ReservaViewModel,
     onReserva: (Date, String?, String?) -> Unit,
     goBackDetails: (Int) -> Unit,
@@ -200,7 +213,6 @@ fun Vuelos_RutasBodyListScreen(
 
 
     val licencias = TipoLicencia.entries
-
 
 
     var soyPiloto by remember { mutableStateOf(false) }
@@ -251,6 +263,12 @@ fun Vuelos_RutasBodyListScreen(
 
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
 
+    // var horaSeleccionada by remember { mutableStateOf<String?>(null) }
+    //val horaSeleccionada by reservaViewModel.horaSeleccionada.collectAsState()
+    // var horaSeleccionada by remember { mutableStateOf<Pair<String, String>?>(null) }
+// In your screen composable
+
+    val horaSeleccionada by reservaViewModel.horaSeleccionada.collectAsState()
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -505,6 +523,60 @@ fun Vuelos_RutasBodyListScreen(
                 )
             }
 
+            // Reemplaza el bloque de código del item que contiene los selectores de hora con este:
+            item {
+                var horaSalida by remember { mutableStateOf<String?>(null) }
+                var horaLlegada by remember { mutableStateOf<String?>(null) }
+                val duracionVuelo = selectedRuta?.duracion ?: 0
+
+                Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                    Text(
+                        text = "Horario del vuelo",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+
+                    HoraSelector(
+                        label = "Hora de salida",
+                        horaSeleccionada = horaSalida,
+                        onHoraSeleccionada = { hora ->
+                            horaSalida = hora
+                            // Calcular hora de llegada automáticamente
+                            horaLlegada = if (duracionVuelo > 0) {
+                                calcularHoraLlegada(hora, duracionVuelo)
+                            } else {
+                                null
+                            }
+                            // Actualizar en el ViewModel
+                            horaLlegada?.let { llegada ->
+                                reservaViewModel.seleccionarHora(hora, llegada)
+                            }
+                        },
+                        enabled = selectedRuta != null,
+                        hint = if (selectedRuta == null) "Selecciona una ruta primero" else "Seleccionar hora"
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    HoraSelector(
+                        label = "Hora de llegada (calculada)",
+                        horaSeleccionada = horaLlegada,
+                        onHoraSeleccionada = { /* No permitir edición directa */ },
+                        enabled = false // Hora de llegada es de solo lectura
+                    )
+
+                    if (selectedRuta != null && horaSalida != null && horaLlegada != null) {
+                        Text(
+                            text = "Duración del vuelo: ${duracionVuelo} minutos",
+                            fontSize = 14.sp,
+                            color = Color.Gray,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
+                }
+            }
+
             item {
                 Text(
                     text = "Tipo de cliente",
@@ -622,7 +694,7 @@ fun Vuelos_RutasBodyListScreen(
             }
 
             item {
-                val puedeContinuar = selectedAeronave != null &&
+                val puedeContinuar = selectedAeronave != null && horaSeleccionada != null &&
                         fechaSeleccionada != null &&
                         (soyPiloto != true || licenciaSeleccionada != null) && selectedRuta != null && selectedTipoVuelo != null
                 Spacer(modifier = Modifier.height(16.dp))
@@ -749,4 +821,73 @@ fun FechaSelector(
             .padding(horizontal = 16.dp)
             .clickable { datePickerDialog.show() }
     )
+}
+
+
+@Composable
+fun HoraSelector(
+    label: String,
+    horaSeleccionada: String?,
+    onHoraSeleccionada: (String) -> Unit,
+    enabled: Boolean = true,
+    hint: String = "Seleccionar hora"
+) {
+    val contexto = LocalContext.current
+    val calendar = Calendar.getInstance()
+    val horaActual = calendar.get(Calendar.HOUR_OF_DAY)
+    val minutoActual = calendar.get(Calendar.MINUTE)
+
+    val timePickerDialog = TimePickerDialog(
+        contexto,
+        { _, hora, minuto ->
+            val horaFormateada = String.format("%02d:%02d", hora, minuto)
+            onHoraSeleccionada(horaFormateada)
+        },
+        horaActual,
+        minutoActual,
+        true // Formato 24 horas
+    )
+
+    OutlinedTextField(
+        value = horaSeleccionada ?: hint,
+        onValueChange = {},
+        readOnly = true,
+        label = { Text(label) },
+        trailingIcon = {
+            IconButton(
+                onClick = { timePickerDialog.show() },
+                enabled = enabled
+            ) {
+                Icon(
+                    Icons.Default.AccessTime,
+                    contentDescription = "Seleccionar hora",
+                    tint = if (enabled) MaterialTheme.colorScheme.primary else Color.Gray
+                )
+            }
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .clickable(
+                enabled = enabled,
+                onClick = { timePickerDialog.show() }
+            ),
+        enabled = enabled
+    )
+}
+
+
+fun calcularHoraLlegada(horaSalida: String, duracionMinutos: Int): String {
+    val formato = SimpleDateFormat("HH:mm", Locale.getDefault())
+    val calendar = Calendar.getInstance()
+
+    // Parsear hora de salida
+    val horaMinuto = horaSalida.split(":")
+    calendar.set(Calendar.HOUR_OF_DAY, horaMinuto[0].toInt())
+    calendar.set(Calendar.MINUTE, horaMinuto[1].toInt())
+
+    // Sumar la duración
+    calendar.add(Calendar.MINUTE, duracionMinutos)
+
+    return formato.format(calendar.time)
 }

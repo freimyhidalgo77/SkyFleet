@@ -161,7 +161,7 @@ fun PagoReservaBodyListScreen(
     var metodoPagoSeleccionado by remember { mutableStateOf<MetodoPago?>(null) }
     var mostrarFormularioTransferencia by remember { mutableStateOf(false) }
 
-
+    val horaSeleccionada by reservaViewModel.horaSeleccionada.collectAsState()
 
 
     Scaffold(
@@ -270,20 +270,23 @@ fun PagoReservaBodyListScreen(
 
                 Spacer(modifier = Modifier.height(12.dp))
 
-                // Hora
-               /* Text(
+
+                Text(
                     text = "Tiempo",
                     color = Color.Gray,
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
-                Text(
-                    text = "10:00 AM - 12:00 PM", // Esto debería venir de tus datos
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
 
-                Spacer(modifier = Modifier.height(12.dp))*/
+                horaSeleccionada?.let { (salida, llegada) ->
+                    Column {
+                        Text("Hora de salida: $salida")
+                        Text("Hora de llegada: $llegada")
+                    }
+                }
+
+
+                Spacer(modifier = Modifier.height(12.dp))
 
                 // Duración
                 Text(
@@ -523,7 +526,9 @@ fun PagoReservaBodyListScreen(
                             reservaId = pagoReservaId,
                             reservaViewModel = reservaViewModel,
                             rutaViewModel = rutaViewModel,
-                            tipoVueloViewModel = tipoVueloViewModel
+                            tipoVueloViewModel = tipoVueloViewModel,
+                            horaSalida = horaSeleccionada?.first ?: "",
+                            horaLlegada = horaSeleccionada?.second ?:""
                         )
                     }
 
@@ -547,7 +552,9 @@ fun PagoReservaBodyListScreen(
                             reservaId = pagoReservaId,
                             reservaViewModel = reservaViewModel,
                             rutaViewModel = rutaViewModel,
-                            tipoVueloViewModel = tipoVueloViewModel
+                            tipoVueloViewModel = tipoVueloViewModel,
+                            horaSalida = horaSeleccionada?.first ?: "",
+                            horaLlegada = horaSeleccionada?.second ?:""
                         )
                     }
 
@@ -578,7 +585,9 @@ fun FormularioTarjetaCredito(
     goBack: () -> Unit,
     reservaViewModel: ReservaViewModel,
     rutaViewModel: RutaViewModel,
-    tipoVueloViewModel: TipoVueloViewModel
+    tipoVueloViewModel: TipoVueloViewModel,
+    horaSalida:String,
+    horaLlegada:String
 
 ) {
 
@@ -638,7 +647,9 @@ fun FormularioTarjetaCredito(
                 pasajero = pasajeros,
                 metodoPago = "TARJETA_CREDITO",
                 comprobante = comprobante,
-                formularioId = formularioId
+                formularioId = formularioId,
+                horaSalida = horaSalida,
+                horaLlegada = horaLlegada
             )
 
 
@@ -911,7 +922,9 @@ fun FormularioTransferenciaBancaria(
     goBack: () -> Unit,
     reservaViewModel: ReservaViewModel,
     rutaViewModel: RutaViewModel,
-    tipoVueloViewModel: TipoVueloViewModel
+    tipoVueloViewModel: TipoVueloViewModel,
+    horaSalida: String,
+    horaLlegada: String
 
 ) {
 
@@ -969,7 +982,9 @@ fun FormularioTransferenciaBancaria(
             pasajero = pasajeros,
             metodoPago = "TRANSFERENCIA_BANCARIA",
             comprobante = comprobante,
-            formularioId = formularioId
+            formularioId = formularioId,
+            horaSalida = horaSalida,
+            horaLlegada = horaLlegada
         )
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
