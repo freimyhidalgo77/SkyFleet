@@ -271,7 +271,7 @@ fun PagoReservaBodyListScreen(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 // Hora
-                Text(
+               /* Text(
                     text = "Tiempo",
                     color = Color.Gray,
                     fontWeight = FontWeight.Medium,
@@ -283,7 +283,7 @@ fun PagoReservaBodyListScreen(
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(12.dp))*/
 
                 // Duración
                 Text(

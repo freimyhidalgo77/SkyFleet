@@ -115,13 +115,14 @@ class ReservaViewModel @Inject constructor(
     }
 
     //Seleccionar tipo cliente
-    private val _tipoCliente = MutableStateFlow<Boolean?>(null)
-    val tipoCliente: StateFlow<Boolean?> = _tipoCliente
+    private val _tipoCliente = MutableStateFlow(false)
+    val tipoCliente: StateFlow<Boolean> = _tipoCliente
 
     fun seleccionarTipoCliente(valor: Boolean) {
         _tipoCliente.value = valor
         actualizarPrecio()
     }
+
     fun categoriaIdChange(id: Int) {
         _camposRelevantesCambiados = true
         _uiState.update { it.copy(categoriaId = id) }
@@ -434,7 +435,7 @@ class ReservaViewModel @Inject constructor(
                 if (reserva != null) {
                     // Actualizar todos los estados relacionados
                     _fechaSeleccionada.value = reserva.fecha
-                    _tipoCliente.value = reserva.tipoCliente
+                    _tipoCliente.value = reserva.tipoCliente?:false
                     _precioOriginal = reserva.precioTotal
                     _precioCalculado = _precioOriginal
                     _camposRelevantesCambiados = false

@@ -44,6 +44,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -201,8 +202,14 @@ fun Vuelos_RutasBodyListScreen(
     val licencias = TipoLicencia.entries
 
 
-    var soyPiloto by remember { mutableStateOf<Boolean?>(null) }
-    soyPiloto = reservaUiState.tipoCliente
+
+    var soyPiloto by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        reservaViewModel.tipoCliente.collect { valor ->
+            soyPiloto = valor
+        }
+    }
 
     var licenciaSeleccionada by remember { mutableStateOf<TipoLicencia?>(null) }
 
@@ -506,7 +513,6 @@ fun Vuelos_RutasBodyListScreen(
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
                 )
 
-                var seleccionUsuario by remember { mutableStateOf<Boolean?>(null) }
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -515,13 +521,12 @@ fun Vuelos_RutasBodyListScreen(
                 ) {
                     Button(
                         onClick = {
-                            seleccionUsuario = true
                             soyPiloto = true
                             mostrarLicencias = true
                             reservaViewModel.seleccionarTipoCliente(true)
                         },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = if (seleccionUsuario == true) Color(0xFF64B5F6) else Color.LightGray
+                            containerColor = if (soyPiloto) Color(0xFF64B5F6) else Color.LightGray
                         )
                     ) {
                         Text("Soy piloto")
@@ -529,21 +534,19 @@ fun Vuelos_RutasBodyListScreen(
 
                     Button(
                         onClick = {
-                            seleccionUsuario = false
                             soyPiloto = false
                             mostrarLicencias = false
                             licenciaSeleccionada = null
                             reservaViewModel.seleccionarTipoCliente(false)
                         },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = if (seleccionUsuario == false) Color(0xFF64B5F6) else Color.LightGray
+                            containerColor = if (!soyPiloto) Color(0xFF64B5F6) else Color.LightGray
                         )
                     ) {
                         Text("Necesito un piloto")
                     }
                 }
             }
-
 
             if (mostrarLicencias) {
                 item {

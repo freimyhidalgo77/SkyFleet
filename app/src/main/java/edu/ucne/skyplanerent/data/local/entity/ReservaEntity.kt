@@ -22,7 +22,7 @@ data class ReservaEntity(
     val licenciaPiloto:String? = null,
     val userId: String,
     val metodoPago: String? = null,
-    val estadoPago: String = "PENDIENTE",
+    val estadoPago: String = "COMPLETADO",
     val comprobante: String?
 
 )
