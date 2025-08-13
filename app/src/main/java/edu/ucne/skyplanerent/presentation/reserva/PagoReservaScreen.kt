@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBalance
@@ -45,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -71,6 +73,7 @@ import edu.ucne.skyplanerent.presentation.rutayviajes.tipoVuelo.TipoVueloViewMod
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
+import androidx.compose.ui.text.input.ImeAction
 
 @Composable
 fun PagoReservaListScreen(
@@ -913,21 +916,25 @@ fun FormularioTarjetaCredito(
             OutlinedTextField(
                 value = montoIngresado,
                 onValueChange = {
-                    if (it.isEmpty() || it.matches(Regex("^\\d*\\.?\\d*\$"))) {
+                    // Permitir números decimales con hasta 2 decimales
+                    if (it.isEmpty() || it.matches(Regex("^\\d*\\.?\\d{0,2}\$"))) {
                         montoIngresado = it
                     }
                 },
                 label = { Text("Monto a pagar (RD$)") },
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Decimal, // Cambiado a Decimal para permitir punto
+                    imeAction = ImeAction.Done
+                ),
                 isError = mostrarErrorMonto,
                 supportingText = {
                     if (mostrarErrorMonto) {
-                        Text("El monto debe ser igual a RD$${"%.2f".format(precioTotal)}", color = Color.Red)
+                        Text("El monto debe ser igual a RD$${String.format("%.2f", precioTotal)}", color = Color.Red)
                     }
                 },
                 trailingIcon = {
-                    IconButton(onClick = { montoIngresado = "%.2f".format(precioTotal) }) {
+                    IconButton(onClick = { montoIngresado = String.format("%.2f", precioTotal) }) {
                         Icon(Icons.Default.Restore, contentDescription = "Restaurar monto")
                     }
                 }
@@ -1227,21 +1234,25 @@ fun FormularioTransferenciaBancaria(
             OutlinedTextField(
                 value = montoIngresado,
                 onValueChange = {
-                    if (it.isEmpty() || it.matches(Regex("^\\d*\\.?\\d*\$"))) {
+                    // Permitir números decimales con hasta 2 decimales
+                    if (it.isEmpty() || it.matches(Regex("^\\d*\\.?\\d{0,2}\$"))) {
                         montoIngresado = it
                     }
                 },
                 label = { Text("Monto a pagar (RD$)") },
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Decimal, // Cambiar a Decimal para permitir punto
+                    imeAction = ImeAction.Done
+                ),
                 isError = mostrarErrorMonto,
                 supportingText = {
                     if (mostrarErrorMonto) {
-                        Text("El monto debe ser igual a RD$${"%.2f".format(precioTotal)}", color = Color.Red)
+                        Text("El monto debe ser igual a RD$${String.format("%.2f", precioTotal)}", color = Color.Red)
                     }
                 },
                 trailingIcon = {
-                    IconButton(onClick = { montoIngresado = "%.2f".format(precioTotal) }) {
+                    IconButton(onClick = { montoIngresado = String.format("%.2f", precioTotal) }) {
                         Icon(Icons.Default.Restore, contentDescription = "Restaurar monto")
                     }
                 }
