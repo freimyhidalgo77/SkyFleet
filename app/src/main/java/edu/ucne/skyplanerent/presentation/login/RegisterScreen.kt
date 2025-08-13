@@ -266,11 +266,6 @@ fun RegisterScreen(
                     return@Button
                 }
 
-                if (!isNetworkAvailable(context)) {
-                    errorMessage = "Error de conexión. Por favor conéctate a una red"
-                    return@Button
-                }
-
                 auth.createUserWithEmailAndPassword(correo, contrasena)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
