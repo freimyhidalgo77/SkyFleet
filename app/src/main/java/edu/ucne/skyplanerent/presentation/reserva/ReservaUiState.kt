@@ -38,4 +38,7 @@ data class UiState (
     val reservas: List<ReservaEntity> = emptyList(),
     val userId:String = "",
     val isLoading: Boolean = false,
+
+    val horaSalida: String? = "",
+    val horaLlegada: String? = ""
 )

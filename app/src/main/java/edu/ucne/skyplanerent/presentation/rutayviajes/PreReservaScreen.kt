@@ -25,6 +25,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -112,6 +113,7 @@ fun ReservaBodyListScreen(
     val tipoCliente by reservaViewModel.tipoCliente.collectAsState()
     val reservaUiState by reservaViewModel.uiState.collectAsStateWithLifecycle()
 
+    val horaSeleccionada by reservaViewModel.horaSeleccionada.collectAsState()
 
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -242,11 +244,19 @@ fun ReservaBodyListScreen(
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.padding(bottom = 4.dp)
                 )
-                Text(
-                    text = "10:00 AM - 12:00 PM", // Esto debería venir en los datos
+
+                horaSeleccionada?.let { (salida, llegada) ->
+                    Column {
+                        Text("Hora de salida: $salida")
+                        Text("Hora de llegada: $llegada")
+                    }
+                }
+
+                /*Text(
+                    text = horaSeleccionada.toString() ?: "Hora no seleccionada",
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.padding(bottom = 8.dp)
-                )
+                )*/
 
                 Spacer(modifier = Modifier.height(12.dp))
 
@@ -283,7 +293,7 @@ fun ReservaBodyListScreen(
                 )
 
                 // Licencia (solo si es piloto)
-                if (tipoCliente == true) {
+               /* if (tipoCliente == true) {
                     Text(
                         text = "Licencia:",
                         color = Color.Gray,
@@ -295,7 +305,7 @@ fun ReservaBodyListScreen(
                         fontWeight = FontWeight.Medium,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
-                }
+                }*/
             }
 
             item {

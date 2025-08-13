@@ -39,6 +39,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -205,7 +206,7 @@ fun ReservaEditBodyScreen(
     val aeronave = aeronaveUiState.aeronaves.find { it.aeronaveId == reserva.categoriaId }
 
     val fecha = uiState.fecha
-    val tipoCliente = uiState.tipoCliente
+    val tipoCliente by viewModel.tipoCliente.collectAsState()
     val licencia = uiState.licenciaPiloto
 
     var showRutaDialog by rememberSaveable { mutableStateOf(false) }
@@ -369,16 +370,18 @@ fun ReservaEditBodyScreen(
             Text(formatDateToDMY(fecha.toString()), fontSize = 16.sp, color = Color.Gray)
             Spacer(modifier = Modifier.height(8.dp))
 
-            Text("Piloto", fontWeight = FontWeight.Bold)
             Text(
-                when (tipoCliente) {
-                    true -> "Sí"
-                    false -> "No"
-                    else -> "No especificado"
-                },
-                fontSize = 16.sp,
-                color = Color.Gray
+                text = "Piloto?",
+                color = Color.Gray,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.padding(bottom = 4.dp)
             )
+            Text(
+                text = if (tipoCliente) "Sí" else "No",
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
             Spacer(modifier = Modifier.height(8.dp))
 
             Text("Licencia", fontWeight = FontWeight.Bold)
