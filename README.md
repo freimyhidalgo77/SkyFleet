@@ -11,10 +11,10 @@ User:
 
 puedes registrar tu propio usuario
 
-Admin:
+Admins:
 
-👤: frailyngarciagarcia@gmail.com
-🔑: 27unqogT2
+👤: Frailyn Garcia
+👤: Freimy Hidalgo
 
 Descripción de la Aplicación
 📝 Funcionalidades Principales
